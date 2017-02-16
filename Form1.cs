@@ -69,7 +69,7 @@ namespace LogoDetector
 
                   BeginInvoke((Action)(() =>
                   {
-                      if (info.HasLogo)
+                      //if (info.HasLogo)
                           listView1.Items.Add(lvi);
                       Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items)";
                   }));
@@ -150,7 +150,7 @@ namespace LogoDetector
 
         public static bool IsCloseColor(Color color1, Color color2)
         {
-            return Math.Abs(color1.R - color2.R) < 20 && Math.Abs(color1.G - color2.G) < 20 && Math.Abs(color1.B - color2.B) < 20;
+            return Math.Abs(color1.R - color2.R) < 10 && Math.Abs(color1.G - color2.G) < 10 && Math.Abs(color1.B - color2.B) < 10;
         }
         /// <summary>
         /// Resize the image
@@ -203,7 +203,7 @@ namespace LogoDetector
                     if (x2 < bitmap.Width && x2 >= 0 && y2 < bitmap.Height && y2 >= 0)
                     {
                         var p2 = new Point(x2, y2);
-                        if (!path.Contains(p2) && bitmap[x2, y2] == pixelColor)
+                        if (!path.Contains(p2) &&bitmap[x2, y2]==pixelColor)
                         {
                             q.Enqueue(p2);
                             path.Add(p2);
@@ -261,30 +261,56 @@ namespace LogoDetector
 
         public static bool HasLogo(Bitmap bitmap)
         {
-            var pixels = new BitmapPixels(bitmap);
-            var closedPaths = BitmapProcess.FindClosedPaths(pixels, 30);
 
+          
+            var pixels = new BitmapPixels(bitmap);
+            var closedPaths = BitmapProcess.FindClosedPaths(pixels, 45);
+            closedPaths = closedPaths.FindAll(c => c.Count < 70);
+            foreach (var item in closedPaths)
+                MarkPath(bitmap, item, Color.Black);
+            for (int i = 0; i < bitmap.Width; i++)
+            {
+                for (int j = 0; j < bitmap.Height; j++)
+                {
+                    if (!pixels[i, j]) continue;
+                    bitmap.SetPixel(i,j,Color.White);
+                }
+            }
+            
+            // bitmap.Save("c:\\d\\logo.png");
             var repeated = BitmapProcess.CalculateTheRepeatedPathsCount(closedPaths.ConvertAll(c => c.Count), 15);
             if (repeated.Count == 0 || repeated[0] < 3)
                 return false;
 
             var distances = closedPaths.ConvertAll(c => CalcEdgesQatars(c));
-            var sameDistance = new List<int>();
-
-            foreach (var item1 in distances)
+            var sameDistanceAndColor = new List<int>();
+            for (int i = 0; i < distances.Count; i++)
             {
+                var item1 = distances[i];
+                var p1 = closedPaths[i][0];
                 var counter = 0;
-                foreach (var item2 in distances)
+                for (int j = 0; j < distances.Count; j++)
                 {
+                    var item2= distances[j];
+                    var p2 = closedPaths[j][0];
                     var c1 = item2[0] < 20 && item2[1] < 20 && Math.Abs(item2[0] - item2[1]) < 10;
-                    var c2 = Math.Abs(item1[0] - item2[0]) < 5 || Math.Abs(item1[0] - item2[1]) < 5;
-                    var c3 = Math.Abs(item1[1] - item2[0]) < 5 || Math.Abs(item1[1] - item2[1]) < 5;
-                    if (c1 && c2 && c3) counter++;
+                    var c2 = Math.Abs(item1[0] - item2[0]) < 4 || Math.Abs(item1[0] - item2[1]) < 4;
+                    var c3 = Math.Abs(item1[1] - item2[0]) < 4 || Math.Abs(item1[1] - item2[1]) < 4;
+                    var c4 = true;// Math.Abs((item1[1] + item1[0]) - (item2[1] + item2[0])) <= 3;
+                    var c5 = true;// IsCloseColor(pixels.Colors[p1.X, p1.Y], pixels.Colors[p2.X, p2.Y]);
+                    if (c1 && c2 && c3 && c4 && c5) counter++;
                 }
-                sameDistance.Add(counter);
+                sameDistanceAndColor.Add(counter);
             }
-            sameDistance.Sort();
-            return sameDistance.Last() >= 3;
+            var dic = new Dictionary<int, int>();
+            foreach (var item in sameDistanceAndColor)
+            {
+                if (item < 3) continue;
+                if(!dic.ContainsKey(item)) dic[item] = 0;
+                dic[item]++;
+            }
+            var isLogo = dic.Values.Any(c=>c>=3);
+            return isLogo;
         }
         /// <summary>
         /// Mark the path
@@ -326,7 +352,11 @@ namespace LogoDetector
         /// <summary>
         /// If Color is backgroun then True
         /// </summary>
-        public bool[,] Colors { get; private set; }
+        public bool[,] IsBackground { get; private set; }
+        /// <summary>
+        /// Store the colors of image
+        /// </summary>
+        public Color[,] Colors { get; private set; }
         /// <summary>
         /// The pixels other than background
         /// </summary>
@@ -337,15 +367,16 @@ namespace LogoDetector
         {
             this.Width = bitmap.Width;
             this.Height = bitmap.Height;
-            Colors = new bool[Width, Height];
+            IsBackground = new bool[Width, Height];
+            Colors = new Color[Width, Height];
             NotbackgroundPixels = new List<Point>();
             caclulate(bitmap);
         }
 
         public bool this[int X, int Y]
         {
-            get { return Colors[X, Y]; }
-            set { Colors[X, Y] = value; }
+            get { return IsBackground[X, Y]; }
+            set { IsBackground[X, Y] = value; }
         }
 
 
@@ -366,8 +397,9 @@ namespace LogoDetector
                 for (int j = bitmap.Height - 1; j >= 0; j--)
                 {
                     var color = bitmap.GetPixel(i, j);
-                    Colors[i, j] = backgroundColors.Exists(c => BitmapProcess.IsCloseColor(c, color));
-                    if (!Colors[i, j])
+                    Colors[i, j] = color;
+                    IsBackground[i, j] = backgroundColors.Exists(c => BitmapProcess.IsCloseColor(c, color));
+                    if (!IsBackground[i, j])
                         NotbackgroundPixels.Add(new Point(i, j));
                 }
             }
@@ -421,8 +453,7 @@ namespace LogoDetector
             info.ImagePath = imgPath;
             Bitmap bitmap = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            //  bitmap = BitmapProcess.ReSizeImage(bitmap, 60, 60); // crop the right button image
-
+            
              
               bitmap = BitmapProcess.GetLastWidthHeight(bitmap, 70, 70); // crop the right button image
            // var pixles = new BitmapPixels(bitmap);// BitmapProcess.MarkImage(bitmap);
