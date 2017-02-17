@@ -253,7 +253,7 @@ namespace LogoDetector
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
 
-            bitmap = bitmap.Crop(70, 70);// crop the right button image
+            bitmap = bitmap.Crop(60, 60);// crop the right button image
            // var pixles = new BitmapPixels(bitmap);// BitmapProcess.MarkImage(bitmap);
            // var closedPaths = BitmapProcess.FindClosedPaths(pixles , 50);
            // var repeated = BitmapProcess.CalculateTheRepeatedPathsCount(closedPaths.ConvertAll(c => c.Count), 15);
