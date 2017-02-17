@@ -179,15 +179,23 @@ namespace LogoDetector
                      });
                     return sameColor.Count >= 3;
                 });
+                //Filter connected shapes
+                closedPaths = closedPaths.FindAll(area1 => {
+                   return area1.IsConnectedPath();
+                });
+                ////Filter the shapes that close to each other
+                //closedPaths = closedPaths.FindAll(area1 => {
+                //    return area1.IsConnectedPath();
+                //});
 
                 foreach (var item in closedPaths)
                     pixels.ChangeColor(item, Color.Red);
-                return closedPaths.Count >= 3;
+                return closedPaths.Count >= 3&& closedPaths.Count<10;
             }
             finally
             {
                 pixels.UnlockBits();
-                bitmap.Save("c:\\d\\logo.png");
+                //bitmap.Save("c:\\d\\logo.png");
             }
         }
 

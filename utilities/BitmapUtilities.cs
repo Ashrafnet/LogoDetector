@@ -39,7 +39,7 @@ namespace LogoDetector
         /// </summary>
         public static bool IsSimilarTo(this Color c1, Color c2,byte Threshold=10)
         {
-            Threshold = 25;
+            Threshold = 26;
            // return (Math.Abs(c1.R - c2.R) + Math.Abs(c1.G - c2.G)+ Math.Abs(c1.B - c2.B) )<= Threshold;
             int grayScale1 = (int)((c1.R * 0.3) + (c1.G * 0.59) + (c1.B * 0.11));
             int grayScale2 = (int)((c2.R * 0.3) + (c2.G * 0.59) + (c2.B * 0.11));
@@ -182,7 +182,44 @@ namespace LogoDetector
             var d2 = DistanceTo(p3, p4);
             return new double[] { d1, d2 };
         }
+        /// <summary>
+        /// Checks if all points are connected
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <returns></returns>
+        public static bool IsConnectedPath(this List<Point> Path, int Threshold=2)
+        {
+             return true;
+            Threshold = 0;
+             var p1 = (from p in Path orderby p.X ascending select p).First();
+            var p2 = (from p in Path orderby p.X descending select p).First();
+            var p3 = (from p in Path orderby p.Y ascending select p).First();
+            var p4 = (from p in Path orderby p.Y descending select p).First();
 
+            return Path.IsConnectedPoints(p1, p2, Threshold) &&
+                   Path.IsConnectedPoints(p3, p4, Threshold);
+        }
+        /// <summary>
+        /// Checks if all points are connected
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsConnectedPoints(this List<Point> Path, Point p1, Point p2, int Threshold)
+        {
+            if (p1.X > p2.X)
+                return IsConnectedPoints(Path, p2, p1, Threshold);
+            if (p2.X == p1.X)
+                return true;
+            var distance = p2.X-p1.X;
+            double slope = 1.0 * (p2.Y - p1.Y) / (p2.X - p1.X);
+            var counter1 = 0;
+            for (int x = p1.X; x <= p2.X; x++)
+            {
+                var y = slope * (x - p1.X) + p1.Y;
+                if (Path.Contains(new Point(x, (int)y)))
+                    counter1++;
+            }
+            return (distance - counter1) < Threshold;
+        }
         /// <summary>
         /// Mark the path
         /// </summary>
