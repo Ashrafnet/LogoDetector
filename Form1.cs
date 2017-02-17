@@ -124,8 +124,8 @@ namespace LogoDetector
                    // var target = source.Crop(60, 60);
                     pictureBox1.Image = source;
                    // pictureBox2.Image = target;
-                   // ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
-                    pictureBox2.Image = info.ProcessedImage;
+                    ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
+                    pictureBox2.Image = info1.ProcessedImage;
                 }
 
             }
@@ -259,7 +259,7 @@ namespace LogoDetector
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
 
-            bitmap = bitmap.Crop(60, 60);// crop the right button image
+            bitmap = bitmap.Crop(50, 50);// crop the right button image
            // var pixles = new BitmapPixels(bitmap);// BitmapProcess.MarkImage(bitmap);
            // var closedPaths = BitmapProcess.FindClosedPaths(pixles , 50);
            // var repeated = BitmapProcess.CalculateTheRepeatedPathsCount(closedPaths.ConvertAll(c => c.Count), 15);

@@ -85,7 +85,7 @@ namespace LogoDetector
             var y = Math.Max(0, bitmap.Height - Height);
             Width = Math.Min(Width, bitmap.Width);
             Height = Math.Min(Height, bitmap.Height);
-            return bitmap.Clone(new Rectangle(x, y, Width, Height), bitmap.PixelFormat);
+            return bitmap.Clone(new Rectangle(x, y, Width-10, Height-10), bitmap.PixelFormat);
 
         }
 
