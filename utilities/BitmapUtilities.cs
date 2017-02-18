@@ -40,10 +40,15 @@ namespace LogoDetector
         public static bool IsSimilarTo(this Color c1, Color c2,byte Threshold=10)
         {
             Threshold = 25;
-           // return (Math.Abs(c1.R - c2.R) + Math.Abs(c1.G - c2.G)+ Math.Abs(c1.B - c2.B) )<= Threshold;
+            // return (Math.Abs(c1.R - c2.R) + Math.Abs(c1.G - c2.G)+ Math.Abs(c1.B - c2.B) )<= Threshold;
+
             int grayScale1 = (int)((c1.R * 0.3) + (c1.G * 0.59) + (c1.B * 0.11));
             int grayScale2 = (int)((c2.R * 0.3) + (c2.G * 0.59) + (c2.B * 0.11));
-            return Math.Abs(grayScale1-grayScale2)<=Threshold;
+            return Math.Abs(grayScale1 - grayScale2) <= Threshold;
+
+            //int scale1 = (int)(c1.R + c1.G  + c1.B);
+            //int scale2 = (int)(c2.R+ c2.G + c2.B);
+            //return Math.Abs(scale1 - scale2) <= Threshold;
         }
         /// <summary>
         /// Gets the average colors of this points
@@ -85,7 +90,7 @@ namespace LogoDetector
             var y = Math.Max(0, bitmap.Height - Height);
             Width = Math.Min(Width, bitmap.Width);
             Height = Math.Min(Height, bitmap.Height);
-            return bitmap.Clone(new Rectangle(x, y, Width-10, Height-10), bitmap.PixelFormat);
+            return bitmap.Clone(new Rectangle(x, y, Width-2, Height-2), bitmap.PixelFormat);
 
         }
 
@@ -161,7 +166,6 @@ namespace LogoDetector
                     if (i == j) continue;
                     var intersect = paths[i].Intersect(paths[j]);
                     if (intersect.Count() == 0) continue;
-                    paths[i]=paths[i].Union(intersect).ToList();
                     paths[j] = new List<Point>();
                 }
             }
@@ -273,7 +277,7 @@ namespace LogoDetector
         /// <summary>
         /// Find the index of the closest shape to this shape
         /// </summary>
-        public static List<Point> FindClosestShape(this List<List<Point>> AllShapes, List<Point> TargetShape)
+        public static List<Point> FindShape(this List<List<Point>> AllShapes, List<Point> TargetShape,bool CloseOrFar)
         {
             var minDistances = new Dictionary<List<Point>, double>();
             foreach (var item in AllShapes)
@@ -282,7 +286,7 @@ namespace LogoDetector
                 minDistances[item] = GetDistanceBetween(TargetShape, item);
             }
             if (minDistances.Count == 0) return null;
-            var misDistance = minDistances.Values.Min();
+            var misDistance = CloseOrFar? minDistances.Values.Min() : minDistances.Values.Max();
             var closestShape = minDistances.Where(c => c.Value == misDistance).Select(c => c.Key).First();
             return closestShape ;
         }
