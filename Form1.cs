@@ -21,13 +21,13 @@ namespace LogoDetector
         public Form1()
         {
             InitializeComponent();
-            var bitmap = (Bitmap)Bitmap.FromFile(@"C:\d\ken\Watermark Detection\Photos\7017579.jpg");
-            bitmap = bitmap.Crop(65, 65);
-            var data = new LockBitmap(bitmap);
-            data.LockBits();
-            var paths = data.FindClosedAreas(30, 150);
-            data.UnlockBits();
-            bitmap.Save(@"d:\\logo.png");
+            //var bitmap = (Bitmap)Bitmap.FromFile(@"C:\d\ken\Watermark Detection\Photos\7017579.jpg");
+            //bitmap = bitmap.Crop(65, 65);
+            //var data = new LockBitmap(bitmap);
+            //data.LockBits();
+            //var paths = data.FindClosedAreas(30, 150);
+            //data.UnlockBits();
+            //bitmap.Save(@"d:\\logo.png");
         }
 
         private void button1_Click(object sender, EventArgs e)
