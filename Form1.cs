@@ -18,6 +18,7 @@ namespace LogoDetector
 {
     public partial class Form1 : Form
     {
+        List<ImageLogoInfo> processedImages = new List<ImageLogoInfo>();
         public Form1()
         {
             InitializeComponent();
@@ -33,6 +34,7 @@ namespace LogoDetector
         private void button1_Click(object sender, EventArgs e)
         {
             listView1.Items.Clear();
+            processedImages.Clear();
             listView1.SuspendLayout();
             string folderPath = textBox1.Text;
             double  total_process_time = 0;
@@ -62,6 +64,7 @@ namespace LogoDetector
                       lvi.SubItems.Add(info.ProcessingTime + " ms");
                       total_process_time += info.ProcessingTime;
                       lvi.Tag = info;
+                      processedImages.Add(info);
                       _cnt++;
                       if (info.HasLogo)
                           _cnt_true++;
@@ -82,7 +85,7 @@ namespace LogoDetector
 
                   BeginInvoke((Action)(() =>
                   {
-                      //if (info.HasLogo)
+                      if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo))
                           listView1.Items.Add(lvi);
                       Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true +  " False=" + _cnt_false + ")";
                   }));
@@ -128,16 +131,45 @@ namespace LogoDetector
                 else
                 {
                     var source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(info.ImagePath)));
-                    var target = source.Crop(60, 60);
+                   // var target = source.Crop(60, 60);
                     pictureBox1.Image = source;
-                    pictureBox2.Image = target;
-                    ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
-                    pictureBox2.Image = info1.ProcessedImage;
+                 //   pictureBox2.Image = target;
+                   // ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
+                    pictureBox2.Image = info.ProcessedImage;
                 }
 
             }
         }
- 
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                listView1.SuspendLayout();
+                listView1.Items.Clear();
+                Cursor = Cursors.WaitCursor;
+                for (int i = 0; i < processedImages.Count; i++)
+                {
+                    var info = processedImages[i];
+                    if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo))
+                    {
+                      var  lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
+
+                        lvi.SubItems.Add(info.HasLogo ? "Yes" : "No");
+                        lvi.SubItems.Add(info.ProcessingTime + " ms");
+                        lvi.Tag = info;
+                        listView1.Items.Add(lvi);
+                    }
+                }
+            }
+            catch { }
+            finally
+            {
+                listView1.ResumeLayout();
+
+                Cursor = Cursors.Default ;
+            }
+        }
     }
 
 
