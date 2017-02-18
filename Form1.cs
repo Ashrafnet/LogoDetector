@@ -21,6 +21,13 @@ namespace LogoDetector
         public Form1()
         {
             InitializeComponent();
+            var bitmap = (Bitmap)Bitmap.FromFile(@"C:\d\ken\Watermark Detection\Photos\7017579.jpg");
+            bitmap = bitmap.Crop(65, 65);
+            var data = new LockBitmap(bitmap);
+            data.LockBits();
+            var paths = data.FindClosedAreas(30, 150);
+            data.UnlockBits();
+            bitmap.Save(@"d:\\logo.png");
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -163,11 +170,8 @@ namespace LogoDetector
             try
             {
                 var minShapes = 4;
-                //var ddd= pixels.GetConnectedPixels(48, 48);
-                // pixels.ChangeColor(ddd, Color.Blue);
-                // return true;
                 //Filter the shapes similar to logo
-                var closedPaths = pixels.FindClosedAreas(40);
+                var closedPaths = pixels.FindClosedAreas(40,150);
                 closedPaths = closedPaths.FindAll(area =>
                 {
                     var l = area.CalcEdgesQatars();
@@ -175,18 +179,6 @@ namespace LogoDetector
                         return false;
                     return true;
                 });
-                ////Filter the shapes that has a similar colors
-                //closedPaths = closedPaths.FindAll(area1 =>
-                //{
-                //    var color1 = pixels.AverageColor(area1);
-                //    var sameColor = closedPaths.FindAll(area2 =>
-                //     {
-                //         var color2 = pixels.AverageColor(area2);
-                //         return color1.IsSimilarTo(color2);
-                //     });
-                //    return sameColor.Count >= minShapes;
-                //});
-                
                 if (closedPaths.Count >= minShapes)
                     closedPaths = closedPaths.FindAll(c1 => closedPaths.Count(c2 => Math.Abs(c1.Count - c2.Count) < 40) >= minShapes);
                 if (closedPaths.Count >= minShapes)
@@ -211,25 +203,25 @@ namespace LogoDetector
                         closestShapesDic[item] = closestShape;
                     }
                     
-                    var farDistances = farShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value)).ToList();
+                    var farDistances = farShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value,false)).ToList();
                     var averageFarDistance = farDistances.Average();
                     var minFarDistance = farDistances.Min();
                     var maxFarDistance = farDistances.Max();
 
-                    var closestDistances = closestShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value)).ToList();
+                    var closestDistances = closestShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value,true)).ToList();
                     var averageClosestDistance = closestDistances.Average();
                     var minClosestDistance = closestDistances.Min();
                     var maxClosestDistance = closestDistances.Max();
 
                     var validShapes = farShapesDic.Where(c =>
                     {
-                        var d1 = (int)c.Key.GetDistanceBetween(c.Value);
-                        if (Math.Abs(averageFarDistance-d1)>7||d1>30||d1<7)
+                        var d1 = (int)c.Key.GetDistanceBetween(c.Value,false);
+                        if (Math.Abs(averageFarDistance-d1)>7||d1>50||d1<15)
                             return false;
                         if (d1-minFarDistance > 10|| maxFarDistance-d1 > 10)
                             return false;
 
-                        d1 = (int)c.Key.GetDistanceBetween(closestShapesDic[c.Key]);
+                        d1 = (int)c.Key.GetDistanceBetween(closestShapesDic[c.Key],true);
                         if (Math.Abs(averageClosestDistance - d1) > 7 || d1 > 15 || d1 <= 0)
                             return false;
                         if (d1 - minClosestDistance > 10 || maxClosestDistance - d1 > 10)

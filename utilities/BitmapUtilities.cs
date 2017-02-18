@@ -97,11 +97,11 @@ namespace LogoDetector
         /// <summary>
         /// Finds all areas with this color
         /// </summary>
-        public static List<Point> GetConnectedPixels(this LockBitmap bitmap, int X, int Y)
+        public static List<Point> GetConnectedPixels(this LockBitmap bitmap, int X, int Y,Predicate<Point> NavigateToThisPoint)
         {
-            List<Point> path = new List<Point>();
+            var path = new Dictionary<Point,int>();
             Queue q = new Queue();
-            path.Add(new Point(X, Y));
+            path[new Point(X, Y)]=0;
             q.Enqueue(new Point(X, Y));
             var pixelColor = bitmap[X, Y];
             while (q.Count > 0)
@@ -131,45 +131,37 @@ namespace LogoDetector
                     if (x2 < bitmap.Width && x2 >= 0 && y2 < bitmap.Height && y2 >= 0)
                     {
                         var p2 = new Point(x2, y2);
-                        if (!path.Contains(p2) && bitmap[x2, y2].IsSimilarTo(pixelColor))
+                        if (!path.ContainsKey(p2) && bitmap[x2, y2].IsSimilarTo(pixelColor)&&(NavigateToThisPoint==null|| NavigateToThisPoint(p2)))
                         {
                             q.Enqueue(p2);
-                            path.Add(p2);
+                            path[p2]=0;
                         }
                     }
 
                 }
             }
-            return path;
+            return path.Keys.ToList();
         }
         /// <summary>
         /// Finds all closed paths with the same color
         /// </summary>
         /// <param name="bitmap"></param>
         /// <returns></returns>
-        public static List<List<Point>> FindClosedAreas(this LockBitmap bitmap, int PathPixelCount)
+        public static List<List<Point>> FindClosedAreas(this LockBitmap bitmap, int MinPixelsCount, int MaxPixelsCount)
         {
             var paths = new List<List<Point>>();
+            var added = new Dictionary<Point, int>();
             var pixels = bitmap.Points.ToList();
             
             while (pixels.Count > 0)
             {
-
-                var path = GetConnectedPixels(bitmap, pixels[0].X, pixels[0].Y);
+                var path = GetConnectedPixels(bitmap, pixels[0].X, pixels[0].Y,p=>!added.ContainsKey(p));
+                foreach (var item in path)
+                    added[item] = 0;
                 paths.Add(path);
                 pixels = pixels.Except(path).ToList();
             }
-            for (int i = 0; i < paths.Count; i++)
-            {
-                for (int j = 0; j < paths.Count; j++)
-                {
-                    if (i == j) continue;
-                    var intersect = paths[i].Intersect(paths[j]);
-                    if (intersect.Count() == 0) continue;
-                    paths[j] = new List<Point>();
-                }
-            }
-            paths.RemoveAll(c=>c.Count< PathPixelCount);
+            paths.RemoveAll(c=>c.Count< MinPixelsCount||c.Count> MaxPixelsCount);
             return paths;
         }
         /// <summary>
@@ -236,7 +228,7 @@ namespace LogoDetector
             return (distance - counter1) < Threshold;
         }
 
-        public static double GetDistanceBetween(this List<Point> Shape1, List<Point> Shape2)
+        public static double GetDistanceBetween(this List<Point> Shape1, List<Point> Shape2, bool CloseOrFar)
         {
             var min_x1 = (from p in Shape1 orderby p.X ascending select p).First();
             var max_x1 = (from p in Shape1 orderby p.X descending select p).First();
@@ -271,7 +263,7 @@ namespace LogoDetector
             distances.Add(max_y1.DistanceTo(max_y2));
 
 
-            return distances.Min();
+            return CloseOrFar? distances.Min(): distances.Max();
         }
 
         /// <summary>
@@ -283,7 +275,7 @@ namespace LogoDetector
             foreach (var item in AllShapes)
             {
                 if (item == TargetShape) continue;
-                minDistances[item] = GetDistanceBetween(TargetShape, item);
+                minDistances[item] = GetDistanceBetween(TargetShape, item, CloseOrFar);
             }
             if (minDistances.Count == 0) return null;
             var misDistance = CloseOrFar? minDistances.Values.Min() : minDistances.Values.Max();
