@@ -29,7 +29,7 @@ namespace LogoDetector
             listView1.SuspendLayout();
             string folderPath = textBox1.Text;
             double  total_process_time = 0;
-            long _cnt = 0;
+            long _cnt = 0, _cnt_true = 0, _cnt_false = 0;
             var s = System.Diagnostics.Stopwatch.StartNew();
             try
             {
@@ -56,6 +56,12 @@ namespace LogoDetector
                       total_process_time += info.ProcessingTime;
                       lvi.Tag = info;
                       _cnt++;
+                      if (info.HasLogo)
+                          _cnt_true++;
+                      else
+                          _cnt_false++;
+                    
+
                   }
                   else
                   {
@@ -71,7 +77,7 @@ namespace LogoDetector
                   {
                       //if (info.HasLogo)
                           listView1.Items.Add(lvi);
-                      Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items)";
+                      Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true +  " False=" + _cnt_false + ")";
                   }));
                 
 
@@ -82,7 +88,7 @@ namespace LogoDetector
         BeginInvoke((Action)(() =>
         {
             s.Stop();
-            Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items)";
+            Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
             listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listView1.ResumeLayout();
         }))
@@ -115,11 +121,11 @@ namespace LogoDetector
                 else
                 {
                     var source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(info.ImagePath)));
-                    var target = source.Crop(60, 60);
+                   // var target = source.Crop(60, 60);
                     pictureBox1.Image = source;
                     pictureBox2.Image = target;
-                    //ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
-                    //pictureBox2.Image = info1.ProcessedImage;
+                    ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
+                    pictureBox2.Image = info1.ProcessedImage;
                 }
 
             }
@@ -291,7 +297,7 @@ namespace LogoDetector
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
 
-            bitmap = bitmap.Crop(63, 63);// crop the right button image
+            bitmap = bitmap.Crop(60, 60);// crop the right button image
            // var pixles = new BitmapPixels(bitmap);// BitmapProcess.MarkImage(bitmap);
            // var closedPaths = BitmapProcess.FindClosedPaths(pixles , 50);
            // var repeated = BitmapProcess.CalculateTheRepeatedPathsCount(closedPaths.ConvertAll(c => c.Count), 15);
