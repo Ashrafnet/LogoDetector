@@ -224,4 +224,7 @@
         BgAB8AEAAQ8B8AEAAQ8GAAH8AQABPwH8AQABHwYAAf4BAAF/Af8BAAF/BgAG/wYACw==
 </value>
   </data>
+  <metadata name="timer1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>267, 17</value>
+  </metadata>
 </root>
