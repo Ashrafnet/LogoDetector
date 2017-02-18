@@ -124,8 +124,8 @@ namespace LogoDetector
                     var target = source.Crop(60, 60);
                     pictureBox1.Image = source;
                     pictureBox2.Image = target;
-                   // ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
-                    //pictureBox2.Image = info1.ProcessedImage;
+                    ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
+                    pictureBox2.Image = info1.ProcessedImage;
                 }
 
             }
@@ -162,7 +162,7 @@ namespace LogoDetector
             pixels.LockBits();
             try
             {
-                var minShapes = 5;
+                var minShapes = 4;
                 //var ddd= pixels.GetConnectedPixels(48, 48);
                 // pixels.ChangeColor(ddd, Color.Blue);
                 // return true;
@@ -224,7 +224,7 @@ namespace LogoDetector
                     var validShapes = farShapesDic.Where(c =>
                     {
                         var d1 = (int)c.Key.GetDistanceBetween(c.Value);
-                        if (Math.Abs(averageFarDistance-d1)>7||d1>30||d1<10)
+                        if (Math.Abs(averageFarDistance-d1)>7||d1>30||d1<7)
                             return false;
                         if (d1-minFarDistance > 10|| maxFarDistance-d1 > 10)
                             return false;
@@ -235,7 +235,7 @@ namespace LogoDetector
                         if (d1 - minClosestDistance > 10 || maxClosestDistance - d1 > 10)
                             return false;
                         return true;
-                    });
+                    }).ToList();
                     closedPaths = validShapes.Select(c => c.Key).ToList();
                    
                     foreach (var item in closedPaths)
