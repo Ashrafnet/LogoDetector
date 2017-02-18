@@ -118,8 +118,8 @@ namespace LogoDetector
                     var target = source.Crop(60, 60);
                     pictureBox1.Image = source;
                     pictureBox2.Image = target;
-                    ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
-                    pictureBox2.Image = info1.ProcessedImage;
+                    //ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
+                    //pictureBox2.Image = info1.ProcessedImage;
                 }
 
             }
@@ -156,11 +156,12 @@ namespace LogoDetector
             pixels.LockBits();
             try
             {
+                var minShapes = 5;
                 //var ddd= pixels.GetConnectedPixels(48, 48);
                 // pixels.ChangeColor(ddd, Color.Blue);
                 // return true;
                 //Filter the shapes similar to logo
-                var closedPaths = pixels.FindClosedAreas(30);
+                var closedPaths = pixels.FindClosedAreas(40);
                 closedPaths = closedPaths.FindAll(area =>
                 {
                     var l = area.CalcEdgesQatars();
@@ -168,29 +169,66 @@ namespace LogoDetector
                         return false;
                     return true;
                 });
-                //Filter the shapes that has a similar colors
-                closedPaths = closedPaths.FindAll(area1 =>
-                {
-                    var color1 = pixels.AverageColor(area1);
-                    var sameColor = closedPaths.FindAll(area2 =>
-                     {
-                         var color2 = pixels.AverageColor(area2);
-                         return color1.IsSimilarTo(color2);
-                     });
-                    return sameColor.Count >= 3;
-                });
-                //Filter connected shapes
-                closedPaths = closedPaths.FindAll(area1 => {
-                   return area1.IsConnectedPath();
-                });
-                ////Filter the shapes that close to each other
-                //closedPaths = closedPaths.FindAll(area1 => {
-                //    return area1.IsConnectedPath();
+                ////Filter the shapes that has a similar colors
+                //closedPaths = closedPaths.FindAll(area1 =>
+                //{
+                //    var color1 = pixels.AverageColor(area1);
+                //    var sameColor = closedPaths.FindAll(area2 =>
+                //     {
+                //         var color2 = pixels.AverageColor(area2);
+                //         return color1.IsSimilarTo(color2);
+                //     });
+                //    return sameColor.Count >= minShapes;
                 //});
-
-                foreach (var item in closedPaths)
-                    pixels.ChangeColor(item, Color.Red);
-                return closedPaths.Count >= 3&& closedPaths.Count<10;
+                
+                if (closedPaths.Count >= minShapes)
+                    closedPaths = closedPaths.FindAll(c1 => closedPaths.Count(c2 => Math.Abs(c1.Count - c2.Count) < 20) >= minShapes);
+                if (closedPaths.Count >= minShapes)
+                {
+                    var dic = new Dictionary<List<Point>, List<Point>>();
+                    var clone = closedPaths.ToList();
+                    foreach (var item in closedPaths)
+                    {
+                        var alreadyAdded = dic.Where(c => c.Value == item).Select(c => c.Key).FirstOrDefault();
+                        if (alreadyAdded != null) clone.Remove(alreadyAdded);
+                        var closestShape = clone.FindClosestShape(item);
+                        if (alreadyAdded != null) clone.Add(alreadyAdded);
+                        if (closestShape == null) continue;
+                        dic[item] = closestShape;
+                    }
+                    var distances = dic.Select(c => c.Key.GetDistanceBetween(c.Value)).ToList();
+                    var distanceToNext = new Dictionary<List<Point>, double>();
+                    foreach (var item in dic)
+                    {
+                        if (!dic.ContainsKey(item.Value)) continue;
+                        var next = dic[item.Value];
+                        distanceToNext[item.Key] = item.Key.GetDistanceBetween(next);
+                    }
+                    var validShapes = dic.Where(c =>
+                    {
+                        var d1 = (int)c.Key.GetDistanceBetween(c.Value);
+                        if (d1 <= 0 || d1 >= 8) return false;
+                        var d2 = distanceToNext[c.Key];
+                        if (d2 <= 10 || d2 >= 15) return false;
+                        return true;
+                    });
+                    closedPaths = validShapes.Select(c => c.Key).Union(validShapes.Select(c => c.Value)).ToList();
+                    //var next_next = new List<List<Point>>();
+                    //next_next.Add(closedPaths[0]);
+                    //while (next_next.Count != closedPaths.Count)
+                    //{
+                    //    var next = dic[next_next.Last()];
+                    //    next_next.Add(next);
+                    //}
+                    //var colors = new Color[] { Color.Red, Color.Gray, Color.Blue, Color.Gold, Color.Brown, Color.Black };
+                    //for (int i = 0; i < next_next.Count ; i++)
+                    //{
+                    //    pixels.ChangeColor(next_next[i], colors[i % colors.Length]);
+                    //}
+                    foreach (var item in closedPaths)
+                        pixels.ChangeColor(item, Color.Red);
+                }
+                return closedPaths.Count >= minShapes && closedPaths.Count<10;
             }
             finally
             {
@@ -253,7 +291,7 @@ namespace LogoDetector
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
 
-            bitmap = bitmap.Crop(60, 60);// crop the right button image
+            bitmap = bitmap.Crop(63, 63);// crop the right button image
            // var pixles = new BitmapPixels(bitmap);// BitmapProcess.MarkImage(bitmap);
            // var closedPaths = BitmapProcess.FindClosedPaths(pixles , 50);
            // var repeated = BitmapProcess.CalculateTheRepeatedPathsCount(closedPaths.ConvertAll(c => c.Count), 15);

@@ -39,7 +39,7 @@ namespace LogoDetector
         /// </summary>
         public static bool IsSimilarTo(this Color c1, Color c2,byte Threshold=10)
         {
-            Threshold = 26;
+            Threshold = 25;
            // return (Math.Abs(c1.R - c2.R) + Math.Abs(c1.G - c2.G)+ Math.Abs(c1.B - c2.B) )<= Threshold;
             int grayScale1 = (int)((c1.R * 0.3) + (c1.G * 0.59) + (c1.B * 0.11));
             int grayScale2 = (int)((c2.R * 0.3) + (c2.G * 0.59) + (c2.B * 0.11));
@@ -151,10 +151,21 @@ namespace LogoDetector
             {
 
                 var path = GetConnectedPixels(bitmap, pixels[0].X, pixels[0].Y);
-                if (path.Count >= PathPixelCount)
-                    paths.Add(path);
+                paths.Add(path);
                 pixels = pixels.Except(path).ToList();
             }
+            for (int i = 0; i < paths.Count; i++)
+            {
+                for (int j = 0; j < paths.Count; j++)
+                {
+                    if (i == j) continue;
+                    var intersect = paths[i].Intersect(paths[j]);
+                    if (intersect.Count() == 0) continue;
+                    paths[i]=paths[i].Union(intersect).ToList();
+                    paths[j] = new List<Point>();
+                }
+            }
+            paths.RemoveAll(c=>c.Count< PathPixelCount);
             return paths;
         }
         /// <summary>
@@ -220,6 +231,63 @@ namespace LogoDetector
             }
             return (distance - counter1) < Threshold;
         }
+
+        public static double GetDistanceBetween(this List<Point> Shape1, List<Point> Shape2)
+        {
+            var min_x1 = (from p in Shape1 orderby p.X ascending select p).First();
+            var max_x1 = (from p in Shape1 orderby p.X descending select p).First();
+            var min_y1 = (from p in Shape1 orderby p.Y ascending select p).First();
+            var max_y1 = (from p in Shape1 orderby p.Y descending select p).First();
+
+            var distances = new List<double>();
+
+            var min_x2 = (from p in Shape2 orderby p.X ascending select p).First();
+            var max_x2 = (from p in Shape2 orderby p.X descending select p).First();
+            var min_y2 = (from p in Shape2 orderby p.Y ascending select p).First();
+            var max_y2 = (from p in Shape2 orderby p.Y descending select p).First();
+
+            distances.Add(min_x1.DistanceTo(min_x2));
+            distances.Add(min_x1.DistanceTo(max_x2));
+            distances.Add(min_x1.DistanceTo(min_y2));
+            distances.Add(min_x1.DistanceTo(max_y2));
+
+            distances.Add(max_x1.DistanceTo(min_x2));
+            distances.Add(max_x1.DistanceTo(max_x2));
+            distances.Add(max_x1.DistanceTo(min_y2));
+            distances.Add(max_x1.DistanceTo(max_y2));
+
+            distances.Add(min_y1.DistanceTo(min_x2));
+            distances.Add(min_y1.DistanceTo(max_x2));
+            distances.Add(min_y1.DistanceTo(min_y2));
+            distances.Add(min_y1.DistanceTo(max_y2));
+
+            distances.Add(max_y1.DistanceTo(min_x2));
+            distances.Add(max_y1.DistanceTo(max_x2));
+            distances.Add(max_y1.DistanceTo(min_y2));
+            distances.Add(max_y1.DistanceTo(max_y2));
+
+
+            return distances.Min();
+        }
+
+        /// <summary>
+        /// Find the index of the closest shape to this shape
+        /// </summary>
+        public static List<Point> FindClosestShape(this List<List<Point>> AllShapes, List<Point> TargetShape)
+        {
+            var minDistances = new Dictionary<List<Point>, double>();
+            foreach (var item in AllShapes)
+            {
+                if (item == TargetShape) continue;
+                minDistances[item] = GetDistanceBetween(TargetShape, item);
+            }
+            if (minDistances.Count == 0) return null;
+            var misDistance = minDistances.Values.Min();
+            var closestShape = minDistances.Where(c => c.Value == misDistance).Select(c => c.Key).First();
+            return closestShape ;
+        }
+
+
         /// <summary>
         /// Mark the path
         /// </summary>
