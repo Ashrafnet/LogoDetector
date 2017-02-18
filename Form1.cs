@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -29,15 +30,18 @@ namespace LogoDetector
             //data.UnlockBits();
             //bitmap.Save(@"d:\\logo.png");
         }
-
+        List<ListViewItem> newListviewItems = new List<ListViewItem>();
+        Stopwatch stopwatch;
+        double total_process_time = 0;
+        long _cnt = 0, _cnt_true = 0, _cnt_false = 0;
         private void button1_Click(object sender, EventArgs e)
         {
             listView1.Items.Clear();
-            listView1.SuspendLayout();
+            newListviewItems.Clear();
             string folderPath = textBox1.Text;
-            double  total_process_time = 0;
-            long _cnt = 0, _cnt_true = 0, _cnt_false = 0;
-            var s = System.Diagnostics.Stopwatch.StartNew();
+             total_process_time = 0;
+            _cnt = _cnt_true = _cnt_false = 0;
+            stopwatch = Stopwatch.StartNew();
             try
             {
                 var imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif","*.WMF", "*.EMF" };
@@ -79,13 +83,9 @@ namespace LogoDetector
                       lvi.ForeColor = Color.White;
 
                   }
-
-                  BeginInvoke((Action)(() =>
-                  {
-                      //if (info.HasLogo)
-                          listView1.Items.Add(lvi);
-                      Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true +  " False=" + _cnt_false + ")";
-                  }));
+                  lock (newListviewItems)
+                      newListviewItems.Add(lvi);
+                
                 
 
               }
@@ -94,10 +94,8 @@ namespace LogoDetector
                 task.ContinueWith((t) =>
         BeginInvoke((Action)(() =>
         {
-            s.Stop();
-            Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
-            listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            listView1.ResumeLayout();
+            stopwatch.Stop();
+            Text = stopwatch.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
         }))
 );
 
@@ -137,7 +135,20 @@ namespace LogoDetector
 
             }
         }
- 
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            lock (newListviewItems)
+            {
+                if (stopwatch == null || newListviewItems.Count == 0) return;
+                var items = newListviewItems.ToArray();
+                newListviewItems.Clear();
+                //if (info.HasLogo)
+                listView1.Items.AddRange(items);
+                Text = stopwatch.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
+
+            }
+        }
     }
 
 
