@@ -170,6 +170,14 @@ namespace LogoDetector
                 Cursor = Cursors.Default ;
             }
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+#if DEBUG
+#else
+            textBox1.Text = "";
+#endif
+        }
     }
 
 
