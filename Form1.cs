@@ -135,7 +135,7 @@ namespace LogoDetector
                     // var target = source.Crop(60, 60);
                     pictureBox1.Image = source;
                     //   pictureBox2.Image = target;
-                    ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
+                    //ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
                     pictureBox2.Image = info.ProcessedImage;
                 }
 
