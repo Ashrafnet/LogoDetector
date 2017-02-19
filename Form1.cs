@@ -37,12 +37,12 @@ namespace LogoDetector
             processedImages.Clear();
             listView1.SuspendLayout();
             string folderPath = textBox1.Text;
-            double  total_process_time = 0;
+            double total_process_time = 0;
             long _cnt = 0, _cnt_true = 0, _cnt_false = 0;
             var s = System.Diagnostics.Stopwatch.StartNew();
             try
             {
-                var imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif","*.WMF", "*.EMF" };
+                var imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF" };
                 // foreach (var item in MyDirectory.GetFiles(textBox1.Text, imgExts, SearchOption.AllDirectories))
 
                 Task task = Task.Factory.StartNew(delegate
@@ -56,12 +56,13 @@ namespace LogoDetector
 
 
 
-                       info = ImageLogoInfo.ProccessImage(item);
-                      
+                      info = ImageLogoInfo.ProccessImage(item);
+
                       lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
 
                       lvi.SubItems.Add(info.HasLogo ? "Yes" : "No");
                       lvi.SubItems.Add(info.ProcessingTime + " ms");
+                      lvi.SubItems.Add(info.HasLogo ? info.Confidence+" %":"");
                       total_process_time += info.ProcessingTime;
                       lvi.Tag = info;
                       processedImages.Add(info);
@@ -70,7 +71,7 @@ namespace LogoDetector
                           _cnt_true++;
                       else
                           _cnt_false++;
-                    
+
 
                   }
                   else
@@ -87,9 +88,9 @@ namespace LogoDetector
                   {
                       if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo))
                           listView1.Items.Add(lvi);
-                      Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true +  " False=" + _cnt_false + ")";
+                      Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
                   }));
-                
+
 
               }
                  );
@@ -108,11 +109,11 @@ namespace LogoDetector
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message,"error", MessageBoxButtons.OK, MessageBoxIcon.Error );
+                MessageBox.Show(ex.Message, "error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
-                
+
             }
 
         }
@@ -121,7 +122,7 @@ namespace LogoDetector
         {
             if (listView1.SelectedItems.Count == 1)
             {
-                
+
                 var info = (ImageLogoInfo)listView1.SelectedItems[0].Tag;
                 if (info == null)
                 {
@@ -131,10 +132,10 @@ namespace LogoDetector
                 else
                 {
                     var source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(info.ImagePath)));
-                   // var target = source.Crop(60, 60);
+                    // var target = source.Crop(60, 60);
                     pictureBox1.Image = source;
-                 //   pictureBox2.Image = target;
-                   // ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
+                    //   pictureBox2.Image = target;
+                    ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
                     pictureBox2.Image = info.ProcessedImage;
                 }
 
@@ -153,10 +154,11 @@ namespace LogoDetector
                     var info = processedImages[i];
                     if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo))
                     {
-                      var  lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
+                        var lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
 
                         lvi.SubItems.Add(info.HasLogo ? "Yes" : "No");
                         lvi.SubItems.Add(info.ProcessingTime + " ms");
+                        lvi.SubItems.Add(info.HasLogo ? info.Confidence + " %":"");
                         lvi.Tag = info;
                         listView1.Items.Add(lvi);
                     }
@@ -167,8 +169,26 @@ namespace LogoDetector
             {
                 listView1.ResumeLayout();
 
-                Cursor = Cursors.Default ;
+                Cursor = Cursors.Default;
             }
+        }
+
+        private void buttonExport_Click(object sender, EventArgs e)
+        {try
+            {
+                var matches = sender == buttonExportMatches;
+                if (DialogResult.OK != saveFileDialog1.ShowDialog(this))
+                    return;
+                StringBuilder txt = new StringBuilder();
+                txt.AppendLine("Name,Has Logo,Confidence");
+                foreach (var item in processedImages)
+                {
+                    if (matches != item.HasLogo) continue;
+                    txt.AppendLine(item.ImageName + "," + item.HasLogo + "," + item.Confidence);
+                }
+                File.WriteAllText(saveFileDialog1.FileName, txt.ToString());
+            }
+            catch(Exception ex) { MessageBox.Show(ex.Message); }
         }
     }
 
@@ -195,15 +215,15 @@ namespace LogoDetector
 
     public static class BitmapProcess
     {
-        public static bool HasLogo(Bitmap bitmap)
+        public static int HasLogo(Bitmap bitmap, int minShapes)
         {
             var pixels = new LockBitmap(bitmap);
             pixels.LockBits();
             try
             {
-                var minShapes = 4;
                 //Filter the shapes similar to logo
-                var closedPaths = pixels.FindClosedAreas(40,150);
+                var closedPaths = pixels.FindClosedAreas(40, 150);
+                var shapesFopund = closedPaths.Count;
                 closedPaths = closedPaths.FindAll(area =>
                 {
                     var l = area.CalcEdgesQatars();
@@ -222,38 +242,38 @@ namespace LogoDetector
                     {
                         var alreadyAdded = farShapesDic.Where(c => c.Value == item).Select(c => c.Key).FirstOrDefault();
                         if (alreadyAdded != null) clone.Remove(alreadyAdded);
-                        var farShape = clone.FindShape(item,false);
+                        var farShape = clone.FindShape(item, false);
                         if (alreadyAdded != null) clone.Add(alreadyAdded);
                         if (farShape == null) continue;
                         farShapesDic[item] = farShape;
 
                         alreadyAdded = closestShapesDic.Where(c => c.Value == item).Select(c => c.Key).FirstOrDefault();
                         if (alreadyAdded != null) clone.Remove(alreadyAdded);
-                        var closestShape = clone.FindShape(item,true);
+                        var closestShape = clone.FindShape(item, true);
                         if (alreadyAdded != null) clone.Add(alreadyAdded);
                         if (closestShape == null) continue;
                         closestShapesDic[item] = closestShape;
                     }
-                    
-                    var farDistances = farShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value,false)).ToList();
+
+                    var farDistances = farShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value, false)).ToList();
                     var averageFarDistance = farDistances.Average();
                     var minFarDistance = farDistances.Min();
                     var maxFarDistance = farDistances.Max();
 
-                    var closestDistances = closestShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value,true)).ToList();
+                    var closestDistances = closestShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value, true)).ToList();
                     var averageClosestDistance = closestDistances.Average();
                     var minClosestDistance = closestDistances.Min();
                     var maxClosestDistance = closestDistances.Max();
 
                     var validShapes = farShapesDic.Where(c =>
                     {
-                        var d1 = (int)c.Key.GetDistanceBetween(c.Value,false);
-                        if (Math.Abs(averageFarDistance-d1)>7||d1>50||d1<15)
+                        var d1 = (int)c.Key.GetDistanceBetween(c.Value, false);
+                        if (Math.Abs(averageFarDistance - d1) > 7 || d1 > 50 || d1 < 15)
                             return false;
-                        if (d1-minFarDistance > 10|| maxFarDistance-d1 > 10)
+                        if (d1 - minFarDistance > 10 || maxFarDistance - d1 > 10)
                             return false;
 
-                        d1 = (int)c.Key.GetDistanceBetween(closestShapesDic[c.Key],true);
+                        d1 = (int)c.Key.GetDistanceBetween(closestShapesDic[c.Key], true);
                         if (Math.Abs(averageClosestDistance - d1) > 7 || d1 > 15 || d1 <= 0)
                             return false;
                         if (d1 - minClosestDistance > 10 || maxClosestDistance - d1 > 10)
@@ -261,11 +281,13 @@ namespace LogoDetector
                         return true;
                     }).ToList();
                     closedPaths = validShapes.Select(c => c.Key).ToList();
-                   
+
                     foreach (var item in closedPaths)
                         pixels.ChangeColor(item, Color.Red);
                 }
-                return closedPaths.Count >= minShapes && closedPaths.Count<10;
+                if (closedPaths.Count < minShapes)
+                    return 0;
+                return 100 - Math.Abs(shapesFopund - closedPaths.Count) * 10 - Math.Abs(closedPaths.Count - minShapes) * 10;
             }
             finally
             {
@@ -309,7 +331,9 @@ namespace LogoDetector
     {
         public long ProcessingTime { get; set; }
         public string ImagePath { get; set; }
-        public string ImageName { get
+        public string ImageName
+        {
+            get
             {
                 if (string.IsNullOrWhiteSpace(ImagePath))
                     return null;
@@ -317,24 +341,34 @@ namespace LogoDetector
                     return Path.GetFileName(ImagePath);
             }
         }
-        public bool  HasLogo { get; set; }
+        public bool HasLogo { get; set; }
+        public int Confidence { get; set; }
         public Bitmap ProcessedImage { get; set; }
 
         public static ImageLogoInfo ProccessImage(string imgPath)
         {
             ImageLogoInfo info = new ImageLogoInfo();
             info.ImagePath = imgPath;
-            Bitmap bitmap = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
+            Bitmap source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
+            // crop the right button image
+            var croppedImage = source.Crop(65, 65);
+            // var pixles = new BitmapPixels(bitmap);// BitmapProcess.MarkImage(bitmap);
+            // var closedPaths = BitmapProcess.FindClosedPaths(pixles , 50);
+            // var repeated = BitmapProcess.CalculateTheRepeatedPathsCount(closedPaths.ConvertAll(c => c.Count), 15);
+            var firstCheck = BitmapProcess.HasLogo(croppedImage, 4);
+            info.HasLogo = firstCheck > 50;
+            if (info.HasLogo)
+            {
+                var secondCheck = BitmapProcess.HasLogo(source.Crop(65, 65), 5);
+                if (secondCheck < firstCheck)
+                    info.Confidence = firstCheck - 20;
+                else info.Confidence = secondCheck;
+            }
 
-            bitmap = bitmap.Crop(65, 65);// crop the right button image
-           // var pixles = new BitmapPixels(bitmap);// BitmapProcess.MarkImage(bitmap);
-           // var closedPaths = BitmapProcess.FindClosedPaths(pixles , 50);
-           // var repeated = BitmapProcess.CalculateTheRepeatedPathsCount(closedPaths.ConvertAll(c => c.Count), 15);
-            info.HasLogo= BitmapProcess.HasLogo(bitmap);
-            info.ProcessedImage = bitmap;
-           // info.HasLogo = repeated.Count > 0 && repeated[0] >= 3;
+            info.ProcessedImage = croppedImage;
+            // info.HasLogo = repeated.Count > 0 && repeated[0] >= 3;
             sw.Stop();
             info.ProcessingTime = sw.ElapsedMilliseconds;
 
