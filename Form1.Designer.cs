@@ -42,7 +42,6 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.buttonNonMatches = new System.Windows.Forms.Button();
             this.buttonExportMatches = new System.Windows.Forms.Button();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
@@ -162,7 +161,6 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.buttonNonMatches);
             this.splitContainer1.Panel1.Controls.Add(this.buttonExportMatches);
             this.splitContainer1.Panel1.Controls.Add(this.checkBox2);
             this.splitContainer1.Panel1.Controls.Add(this.checkBox1);
@@ -175,23 +173,17 @@
             this.splitContainer1.SplitterDistance = 304;
             this.splitContainer1.TabIndex = 6;
             // 
-            // buttonNonMatches
-            // 
-            this.buttonNonMatches.Location = new System.Drawing.Point(188, 29);
-            this.buttonNonMatches.Name = "buttonNonMatches";
-            this.buttonNonMatches.Size = new System.Drawing.Size(113, 23);
-            this.buttonNonMatches.TabIndex = 8;
-            this.buttonNonMatches.Text = "Export Non-matches";
-            this.buttonNonMatches.UseVisualStyleBackColor = true;
-            this.buttonNonMatches.Click += new System.EventHandler(this.buttonExport_Click);
-            // 
             // buttonExportMatches
             // 
-            this.buttonExportMatches.Location = new System.Drawing.Point(188, 3);
+            this.buttonExportMatches.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
+            this.buttonExportMatches.ForeColor = System.Drawing.Color.Green;
+            this.buttonExportMatches.Image = global::LogoDetector.Properties.Resources._1487537573_document_excel_csv;
+            this.buttonExportMatches.Location = new System.Drawing.Point(188, 26);
             this.buttonExportMatches.Name = "buttonExportMatches";
-            this.buttonExportMatches.Size = new System.Drawing.Size(113, 23);
+            this.buttonExportMatches.Size = new System.Drawing.Size(113, 24);
             this.buttonExportMatches.TabIndex = 7;
-            this.buttonExportMatches.Text = "Export Matches";
+            this.buttonExportMatches.Text = "Export to csv..";
+            this.buttonExportMatches.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.buttonExportMatches.UseVisualStyleBackColor = true;
             this.buttonExportMatches.Click += new System.EventHandler(this.buttonExport_Click);
             // 
@@ -248,6 +240,11 @@
             this.pictureBox2.TabIndex = 5;
             this.pictureBox2.TabStop = false;
             // 
+            // saveFileDialog1
+            // 
+            this.saveFileDialog1.DefaultExt = "csv";
+            this.saveFileDialog1.Filter = "CSV Files |*.csv";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -294,7 +291,6 @@
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.ColumnHeader columnHeader4;
-        private System.Windows.Forms.Button buttonNonMatches;
         private System.Windows.Forms.Button buttonExportMatches;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
     }

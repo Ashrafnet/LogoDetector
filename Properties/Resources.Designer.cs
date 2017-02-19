@@ -59,5 +59,15 @@ namespace LogoDetector.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap _1487537573_document_excel_csv {
+            get {
+                object obj = ResourceManager.GetObject("1487537573_document-excel-csv", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
