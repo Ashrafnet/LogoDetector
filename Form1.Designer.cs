@@ -39,12 +39,16 @@
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.buttonNonMatches = new System.Windows.Forms.Button();
+            this.buttonExportMatches = new System.Windows.Forms.Button();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -98,7 +102,7 @@
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(397, 212);
+            this.pictureBox1.Size = new System.Drawing.Size(353, 212);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 4;
             this.pictureBox1.TabStop = false;
@@ -111,12 +115,13 @@
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
-            this.columnHeader3});
+            this.columnHeader3,
+            this.columnHeader4});
             this.listView1.FullRowSelect = true;
             this.listView1.LargeImageList = this.imageList1;
-            this.listView1.Location = new System.Drawing.Point(0, 49);
+            this.listView1.Location = new System.Drawing.Point(0, 56);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(260, 254);
+            this.listView1.Size = new System.Drawing.Size(304, 247);
             this.listView1.SmallImageList = this.imageList1;
             this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
@@ -136,6 +141,10 @@
             // 
             this.columnHeader3.Text = "Process Time";
             // 
+            // columnHeader4
+            // 
+            this.columnHeader4.Text = "Confidence";
+            // 
             // imageList1
             // 
             this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
@@ -153,6 +162,8 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.buttonNonMatches);
+            this.splitContainer1.Panel1.Controls.Add(this.buttonExportMatches);
             this.splitContainer1.Panel1.Controls.Add(this.checkBox2);
             this.splitContainer1.Panel1.Controls.Add(this.checkBox1);
             this.splitContainer1.Panel1.Controls.Add(this.listView1);
@@ -161,8 +172,28 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(661, 303);
-            this.splitContainer1.SplitterDistance = 260;
+            this.splitContainer1.SplitterDistance = 304;
             this.splitContainer1.TabIndex = 6;
+            // 
+            // buttonNonMatches
+            // 
+            this.buttonNonMatches.Location = new System.Drawing.Point(188, 29);
+            this.buttonNonMatches.Name = "buttonNonMatches";
+            this.buttonNonMatches.Size = new System.Drawing.Size(113, 23);
+            this.buttonNonMatches.TabIndex = 8;
+            this.buttonNonMatches.Text = "Export Non-matches";
+            this.buttonNonMatches.UseVisualStyleBackColor = true;
+            this.buttonNonMatches.Click += new System.EventHandler(this.buttonExport_Click);
+            // 
+            // buttonExportMatches
+            // 
+            this.buttonExportMatches.Location = new System.Drawing.Point(188, 3);
+            this.buttonExportMatches.Name = "buttonExportMatches";
+            this.buttonExportMatches.Size = new System.Drawing.Size(113, 23);
+            this.buttonExportMatches.TabIndex = 7;
+            this.buttonExportMatches.Text = "Export Matches";
+            this.buttonExportMatches.UseVisualStyleBackColor = true;
+            this.buttonExportMatches.Click += new System.EventHandler(this.buttonExport_Click);
             // 
             // checkBox2
             // 
@@ -204,7 +235,7 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.pictureBox2);
-            this.splitContainer2.Size = new System.Drawing.Size(397, 303);
+            this.splitContainer2.Size = new System.Drawing.Size(353, 303);
             this.splitContainer2.SplitterDistance = 212;
             this.splitContainer2.TabIndex = 5;
             // 
@@ -213,7 +244,7 @@
             this.pictureBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox2.Location = new System.Drawing.Point(0, 0);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(397, 87);
+            this.pictureBox2.Size = new System.Drawing.Size(353, 87);
             this.pictureBox2.TabIndex = 5;
             this.pictureBox2.TabStop = false;
             // 
@@ -262,6 +293,10 @@
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.ColumnHeader columnHeader4;
+        private System.Windows.Forms.Button buttonNonMatches;
+        private System.Windows.Forms.Button buttonExportMatches;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
     }
 }
 
