@@ -75,69 +75,76 @@ namespace LogoDetector
             return b1;
         }
 
-        public static Bitmap ProposedEdgeDetection(Bitmap b, int _proposedThresoldValue = 90)
+        public static Bitmap ProposedEdgeDetection(Bitmap source, int _proposedThresoldValue = 90)
         {
-            int n, m;
-            n = b.Height;
-            m = b.Width;
-            int total = 0;
-            Bitmap B1 = new Bitmap(m, n);
-
-            for (int i = 0; i < m; i++)
-                for (int j = 0; j < n; j++)
+            var sourceData = new LockBitmap(source);
+            var target = new Bitmap(source.Width, source.Height);
+            var targetData = new LockBitmap(target);
+            sourceData.LockBits();
+            targetData.LockBits();
+            try
+            {
+                int total = 0;
+                Color color1, color2;
+                for (int i = 0; i < sourceData.Width; i++)
                 {
-                    B1.SetPixel(i, j, Color.White);
+                    for (int j = 0; j < sourceData.Height; j++)
+                        targetData.SetPixel(i, j, Color.White);
                 }
-            Color color1, color2;
-            for (int i = 1; i < m - 1; i++)
-                for (int j = 1; j < n - 1; j++)
-                {
+                for (int i = 1; i < sourceData.Width - 1; i++)
+                    for (int j = 1; j < sourceData.Height - 1; j++)
+                    {
 
-                    color1 = b.GetPixel(i, j);
-                    color2 = b.GetPixel(i + 1, j + 1);
-                    total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                    if (total > _proposedThresoldValue)
-                    { B1.SetPixel(i, j, Color.Black); continue; }
+                        color1 = sourceData.GetPixel(i, j);
+                        color2 = sourceData.GetPixel(i + 1, j + 1);
+                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
+                        if (total > _proposedThresoldValue)
+                        { targetData.SetPixel(i, j, Color.Black); continue; }
 
-                    color2 = b.GetPixel(i, j + 1);
-                    total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                    if (total > _proposedThresoldValue)
-                    { B1.SetPixel(i, j, Color.Black); continue; }
+                        color2 = sourceData.GetPixel(i, j + 1);
+                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
+                        if (total > _proposedThresoldValue)
+                        { targetData.SetPixel(i, j, Color.Black); continue; }
 
-                    color2 = b.GetPixel(i + 1, j);
-                    total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                    if (total > _proposedThresoldValue)
-                    { B1.SetPixel(i, j, Color.Black); continue; }
+                        color2 = sourceData.GetPixel(i + 1, j);
+                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
+                        if (total > _proposedThresoldValue)
+                        { targetData.SetPixel(i, j, Color.Black); continue; }
 
-                    color2 = b.GetPixel(i - 1, j - 1);
-                    total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                    if (total > _proposedThresoldValue)
-                    { B1.SetPixel(i, j, Color.Black); continue; }
+                        color2 = sourceData.GetPixel(i - 1, j - 1);
+                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
+                        if (total > _proposedThresoldValue)
+                        { targetData.SetPixel(i, j, Color.Black); continue; }
 
 
-                    color2 = b.GetPixel(i, j - 1);
-                    total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                    if (total > _proposedThresoldValue)
-                    { B1.SetPixel(i, j, Color.Black); continue; }
+                        color2 = sourceData.GetPixel(i, j - 1);
+                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
+                        if (total > _proposedThresoldValue)
+                        { targetData.SetPixel(i, j, Color.Black); continue; }
 
-                    color2 = b.GetPixel(i - 1, j);
-                    total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                    if (total > _proposedThresoldValue)
-                    { B1.SetPixel(i, j, Color.Black); continue; }
+                        color2 = sourceData.GetPixel(i - 1, j);
+                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
+                        if (total > _proposedThresoldValue)
+                        { targetData.SetPixel(i, j, Color.Black); continue; }
 
-                    color2 = b.GetPixel(i - 1, j + 1);
-                    total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                    if (total > _proposedThresoldValue)
-                    { B1.SetPixel(i, j, Color.Black); continue; }
+                        color2 = sourceData.GetPixel(i - 1, j + 1);
+                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
+                        if (total > _proposedThresoldValue)
+                        { targetData.SetPixel(i, j, Color.Black); continue; }
 
-                    color2 = b.GetPixel(i + 1, j - 1);
-                    total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                    if (total > _proposedThresoldValue)
-                    { B1.SetPixel(i, j, Color.Black); continue; }
+                        color2 = sourceData.GetPixel(i + 1, j - 1);
+                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
+                        if (total > _proposedThresoldValue)
+                        { targetData.SetPixel(i, j, Color.Black); continue; }
 
-                }
-
-            return B1;
+                    }
+                return target;
+            }
+            finally
+            {
+                sourceData.UnlockBits();
+                targetData.UnlockBits();
+            }
         }
 
 
