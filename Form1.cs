@@ -265,52 +265,53 @@ namespace LogoDetector
                     closedPaths = closedPaths.FindAll(c1 => closedPaths.Count(c2 => Math.Abs(c1.Count - c2.Count) < 40) >= minShapes);
                 if (closedPaths.Count >= minShapes)
                 {
-                    var farShapesDic = new Dictionary<List<Point>, List<Point>>();
-                    var closestShapesDic = new Dictionary<List<Point>, List<Point>>();
-                    var clone = closedPaths.ToList();
-                    foreach (var item in closedPaths)
-                    {
-                        var alreadyAdded = farShapesDic.Where(c => c.Value == item).Select(c => c.Key).FirstOrDefault();
-                        if (alreadyAdded != null) clone.Remove(alreadyAdded);
-                        var farShape = clone.FindShape(item, false);
-                        if (alreadyAdded != null) clone.Add(alreadyAdded);
-                        if (farShape == null) continue;
-                        farShapesDic[item] = farShape;
+                    closedPaths=closedPaths.FindShapesOfSameDistance(2);
+                    //var farShapesDic = new Dictionary<List<Point>, List<Point>>();
+                    //var closestShapesDic = new Dictionary<List<Point>, List<Point>>();
+                    //var clone = closedPaths.ToList();
+                    //foreach (var item in closedPaths)
+                    //{
+                    //    var alreadyAdded = farShapesDic.Where(c => c.Value == item).Select(c => c.Key).FirstOrDefault();
+                    //    if (alreadyAdded != null) clone.Remove(alreadyAdded);
+                    //    var farShape = clone.FindShape(item, false);
+                    //    if (alreadyAdded != null) clone.Add(alreadyAdded);
+                    //    if (farShape == null) continue;
+                    //    farShapesDic[item] = farShape;
 
-                        alreadyAdded = closestShapesDic.Where(c => c.Value == item).Select(c => c.Key).FirstOrDefault();
-                        if (alreadyAdded != null) clone.Remove(alreadyAdded);
-                        var closestShape = clone.FindShape(item, true);
-                        if (alreadyAdded != null) clone.Add(alreadyAdded);
-                        if (closestShape == null) continue;
-                        closestShapesDic[item] = closestShape;
-                    }
+                    //    alreadyAdded = closestShapesDic.Where(c => c.Value == item).Select(c => c.Key).FirstOrDefault();
+                    //    if (alreadyAdded != null) clone.Remove(alreadyAdded);
+                    //    var closestShape = clone.FindShape(item, true);
+                    //    if (alreadyAdded != null) clone.Add(alreadyAdded);
+                    //    if (closestShape == null) continue;
+                    //    closestShapesDic[item] = closestShape;
+                    //}
 
-                    var farDistances = farShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value, false)).ToList();
-                    var averageFarDistance = farDistances.Average();
-                    var minFarDistance = farDistances.Min();
-                    var maxFarDistance = farDistances.Max();
+                    //var farDistances = farShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value, false)).ToList();
+                    //var averageFarDistance = farDistances.Average();
+                    //var minFarDistance = farDistances.Min();
+                    //var maxFarDistance = farDistances.Max();
 
-                    var closestDistances = closestShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value, true)).ToList();
-                    var averageClosestDistance = closestDistances.Average();
-                    var minClosestDistance = closestDistances.Min();
-                    var maxClosestDistance = closestDistances.Max();
+                    //var closestDistances = closestShapesDic.Select(c => c.Key.GetDistanceBetween(c.Value, true)).ToList();
+                    //var averageClosestDistance = closestDistances.Average();
+                    //var minClosestDistance = closestDistances.Min();
+                    //var maxClosestDistance = closestDistances.Max();
 
-                    var validShapes = farShapesDic.Where(c =>
-                    {
-                        var d1 = (int)c.Key.GetDistanceBetween(c.Value, false);
-                        if (Math.Abs(averageFarDistance - d1) > 7 || d1 > 50 || d1 < 15)
-                            return false;
-                        if (d1 - minFarDistance > 10 || maxFarDistance - d1 > 10)
-                            return false;
+                    //var validShapes = farShapesDic.Where(c =>
+                    //{
+                    //    var d1 = (int)c.Key.GetDistanceBetween(c.Value, false);
+                    //    if (Math.Abs(averageFarDistance - d1) > 7 || d1 > 50 || d1 < 15)
+                    //        return false;
+                    //    if (d1 - minFarDistance > 10 || maxFarDistance - d1 > 10)
+                    //        return false;
 
-                        d1 = (int)c.Key.GetDistanceBetween(closestShapesDic[c.Key], true);
-                        if (Math.Abs(averageClosestDistance - d1) > 7 || d1 > 15 || d1 <= 0)
-                            return false;
-                        if (d1 - minClosestDistance > 10 || maxClosestDistance - d1 > 10)
-                            return false;
-                        return true;
-                    }).ToList();
-                    closedPaths = validShapes.Select(c => c.Key).ToList();
+                    //    d1 = (int)c.Key.GetDistanceBetween(closestShapesDic[c.Key], true);
+                    //    if (Math.Abs(averageClosestDistance - d1) > 7 || d1 > 15 || d1 <= 0)
+                    //        return false;
+                    //    if (d1 - minClosestDistance > 10 || maxClosestDistance - d1 > 10)
+                    //        return false;
+                    //    return true;
+                    //}).ToList();
+                    //closedPaths = validShapes.Select(c => c.Key).ToList();
 
                     foreach (var item in closedPaths)
                         pixels.ChangeColor(item, Color.Red);
@@ -384,10 +385,10 @@ namespace LogoDetector
 
             // crop the right button image
             var croppedImage = source.Crop(65, 65);
-            // var pixles = new BitmapPixels(bitmap);// BitmapProcess.MarkImage(bitmap);
-            // var closedPaths = BitmapProcess.FindClosedPaths(pixles , 50);
-            // var repeated = BitmapProcess.CalculateTheRepeatedPathsCount(closedPaths.ConvertAll(c => c.Count), 15);
             var firstCheck = BitmapProcess.HasLogo(croppedImage, 4);
+            if (firstCheck < 50)
+                firstCheck = BitmapProcess.HasLogo(croppedImage= EdgeDetector.ProposedEdgeDetection(croppedImage), 4);
+
             info.HasLogo = firstCheck > 50;
             if (info.HasLogo)
             {
@@ -398,7 +399,6 @@ namespace LogoDetector
             }
 
             info.ProcessedImage = croppedImage;
-            // info.HasLogo = repeated.Count > 0 && repeated[0] >= 3;
             sw.Stop();
             info.ProcessingTime = sw.ElapsedMilliseconds;
 

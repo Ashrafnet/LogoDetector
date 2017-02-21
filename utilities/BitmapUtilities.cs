@@ -40,6 +40,8 @@ namespace LogoDetector
         public static bool IsSimilarTo(this Color c1, Color c2,byte Threshold=10)
         {
             Threshold = 25;
+            if (c1.A != c2.A)
+                return false;
             // return (Math.Abs(c1.R - c2.R) + Math.Abs(c1.G - c2.G)+ Math.Abs(c1.B - c2.B) )<= Threshold;
 
             int grayScale1 = (int)((c1.R * 0.3) + (c1.G * 0.59) + (c1.B * 0.11));
@@ -281,6 +283,35 @@ namespace LogoDetector
             var misDistance = CloseOrFar? minDistances.Values.Min() : minDistances.Values.Max();
             var closestShape = minDistances.Where(c => c.Value == misDistance).Select(c => c.Key).First();
             return closestShape ;
+        }
+
+
+        /// <summary>
+        /// Find all shapes that has the same distance between each other
+        /// </summary>
+        public static List<List<Point>> FindShapesOfSameDistance(this List<List<Point>> AllShapes, int MinShapes)
+        {
+            var farDistances = new Dictionary<List<Point>, List<List<Point>>>();
+            foreach (var item1 in AllShapes)
+            {
+                double farDistance = AllShapes.Max(c => GetDistanceBetween(item1, c, false));
+                var farCounter = new List<List<Point>>();
+                foreach (var item2 in AllShapes)
+                {
+                    if (item1 == item2) continue;
+                    var d1 = GetDistanceBetween(item1,item2,false);
+                    if (d1 < 50 && d1 > 15 && farDistance - d1 <= 7)
+                        farCounter.Add(item2);
+                }
+                farDistances[item1] = farCounter;
+            }
+            var removeFromList = farDistances.Where(c => c.Value.Count < MinShapes).Select(c=>c.Key);
+            foreach (var item in farDistances)
+            {
+                foreach (var rem in removeFromList)
+                    item.Value.Remove(rem);
+            }
+            return farDistances.Where(c=>c.Value.Count>= MinShapes).Select(c=>c.Key).ToList() ;
         }
 
 
