@@ -387,8 +387,10 @@ namespace LogoDetector
             var croppedImage = source.Crop(65, 65);
             var firstCheck = BitmapProcess.HasLogo(croppedImage, 4);
             if (firstCheck < 50)
-                firstCheck = BitmapProcess.HasLogo(croppedImage= EdgeDetector.ProposedEdgeDetection(croppedImage), 4);
-
+            {
+                croppedImage=source.Crop(65, 65);
+                firstCheck = BitmapProcess.HasLogo(croppedImage = EdgeDetector.ProposedEdgeDetection(croppedImage), 4);
+            }
             info.HasLogo = firstCheck > 50;
             if (info.HasLogo)
             {
