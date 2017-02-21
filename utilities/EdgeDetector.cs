@@ -94,7 +94,6 @@ namespace LogoDetector
                 for (int i = 1; i < sourceData.Width - 1; i++)
                     for (int j = 1; j < sourceData.Height - 1; j++)
                     {
-
                         color1 = sourceData.GetPixel(i, j);
                         color2 = sourceData.GetPixel(i + 1, j + 1);
                         total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
