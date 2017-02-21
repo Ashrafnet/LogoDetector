@@ -164,7 +164,7 @@ namespace LogoDetector
                     // var target = source.Crop(60, 60);
                     pictureBox1.Image = source;
                     //   pictureBox2.Image = target;
-                    //ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
+                   // ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
                     pictureBox2.Image = info.ProcessedImage;
                 }
 
@@ -252,7 +252,7 @@ namespace LogoDetector
             try
             {
                 //Filter the shapes similar to logo
-                var closedPaths = pixels.FindClosedAreas(40, 150);
+                var closedPaths = pixels.FindClosedAreas(30, 150);
                 var shapesFopund = closedPaths.Count;
                 closedPaths = closedPaths.FindAll(area =>
                 {
