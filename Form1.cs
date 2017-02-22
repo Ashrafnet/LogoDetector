@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Devcorp.Controls.Design;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -24,9 +25,7 @@ namespace LogoDetector
         public Form1()
         {
             InitializeComponent();
-             TokenCanceller = new CancellationTokenSource();
-
-
+            TokenCanceller = new CancellationTokenSource();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -165,8 +164,9 @@ namespace LogoDetector
                     // var target = source.Crop(60, 60);
                     pictureBox1.Image = source;
                     //   pictureBox2.Image = target;
-                   // ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
-                    pictureBox2.Image = info.ProcessedImage;
+                     ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
+                     pictureBox2.Image = info1.ProcessedImage;
+                   // pictureBox2.Image = BitmapConverters.CMYKEdgeDetection(source.Crop(65, 65));
                 }
 
             }
@@ -262,7 +262,10 @@ namespace LogoDetector
                 {
                     closedPaths=closedPaths.FindShapesInCirclesBorder(minShapes);
                     foreach (var item in closedPaths)
+                    {
+                      // var cmykColors= item.ConvertAll(c => ColorSpaceHelper.RGBtoCMYK(sourceData[c.X, c.Y]));
                         targetData.ChangeColor(item, Color.Red);
+                    }
                 }
                 var conf = closedPaths.Count < minShapes ? 0 : 100 - Math.Abs(closedPaths.Count - 5) * 20;
                 return new KeyValuePair<Bitmap, int>(target, conf);
@@ -339,12 +342,13 @@ namespace LogoDetector
                 var firstCheck = BitmapProcess.HasLogo(croppedImage, 4);
                 if (firstCheck.Value < 50)
                 {
-                    firstCheck = BitmapProcess.HasLogo(EdgeDetector.ProposedEdgeDetection(croppedImage), 4);
+                    firstCheck = BitmapProcess.HasLogo(BitmapConverters.ProposedEdgeDetection(croppedImage), 4);
                 }
                 if (firstCheck.Value < 50)
                 {
-                    firstCheck = BitmapProcess.HasLogo(EdgeDetector.Sobel(croppedImage), 4);
+                    firstCheck = BitmapProcess.HasLogo(BitmapConverters.Sobel(croppedImage), 4);
                 }
+               
                 info.HasLogo = firstCheck.Value > 50;
                 info.Confidence = firstCheck.Value;
                 info.ProcessedImage = firstCheck.Key;

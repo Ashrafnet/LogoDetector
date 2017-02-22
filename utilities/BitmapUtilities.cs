@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Devcorp.Controls.Design;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -42,11 +43,18 @@ namespace LogoDetector
             Threshold = 25;
             if (c1.A != c2.A)
                 return false;
-            // return (Math.Abs(c1.R - c2.R) + Math.Abs(c1.G - c2.G)+ Math.Abs(c1.B - c2.B) )<= Threshold;
+
+            //var color1 = ColorSpaceHelper.RGBtoCMYK(c1);
+            //var color2 = ColorSpaceHelper.RGBtoCMYK(c2);
+            //var total = Math.Abs(color2.Cyan - color1.Cyan) + Math.Abs(color2.Magenta - color1.Magenta) + Math.Abs(color2.Yellow - color1.Yellow) + Math.Abs(color2.Black - color1.Black);
+            //return total <= 0.05;
 
             int grayScale1 = (int)((c1.R * 0.3) + (c1.G * 0.59) + (c1.B * 0.11));
             int grayScale2 = (int)((c2.R * 0.3) + (c2.G * 0.59) + (c2.B * 0.11));
             return Math.Abs(grayScale1 - grayScale2) <= Threshold;
+
+
+            // return (Math.Abs(c1.R - c2.R) + Math.Abs(c1.G - c2.G)+ Math.Abs(c1.B - c2.B) )<= Threshold;
 
             //int scale1 = (int)(c1.R + c1.G  + c1.B);
             //int scale2 = (int)(c2.R+ c2.G + c2.B);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Devcorp.Controls.Design;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LogoDetector
 {
-    public static class EdgeDetector
+    public static class BitmapConverters
     {
 
         public static Bitmap Sobel(Bitmap source)
@@ -34,9 +35,7 @@ namespace LogoDetector
                     }
 
                     if (new_x * new_x + new_y * new_y > 128 * 128)
-                        b1.SetPixel(j, i, Color.Black);
-                    else
-                        b1.SetPixel(j, i, Color.White);
+                        b1.SetPixel(j, i, Color.Blue);
                 }
             }
             return b1;
@@ -67,14 +66,21 @@ namespace LogoDetector
                         }
                     }
                     if (new_x * new_x + new_y * new_y > 128 * 100)
-                        b1.SetPixel(j, i, Color.Black);
-                    else
-                        b1.SetPixel(j, i, Color.White);
+                        b1.SetPixel(j, i, Color.Blue);
                 }
             }
             return b1;
         }
-
+        private static Point[] matrix = new Point[] {
+            new Point(1,1),
+            new Point(0,1),
+            new Point(1,0),
+            new Point(-1,-1),
+            new Point(0,-1),
+            new Point(-1,0),
+            new Point(-1,1),
+            new Point(1,-1)
+        };
         public static Bitmap ProposedEdgeDetection(Bitmap source, int _proposedThresoldValue = 90)
         {
             var sourceData = new LockBitmap(source);
@@ -86,56 +92,22 @@ namespace LogoDetector
             {
                 int total = 0;
                 Color color1, color2;
-                for (int i = 0; i < sourceData.Width; i++)
-                {
-                    for (int j = 0; j < sourceData.Height; j++)
-                        targetData.SetPixel(i, j, Color.White);
-                }
+                //for (int i = 0; i < sourceData.Width; i++)
+                //{
+                //    for (int j = 0; j < sourceData.Height; j++)
+                //        targetData.SetPixel(i, j, Color.White);
+                //}
                 for (int i = 1; i < sourceData.Width - 1; i++)
                     for (int j = 1; j < sourceData.Height - 1; j++)
                     {
                         color1 = sourceData.GetPixel(i, j);
-                        color2 = sourceData.GetPixel(i + 1, j + 1);
-                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                        if (total > _proposedThresoldValue)
-                        { targetData.SetPixel(i, j, Color.Black); continue; }
-
-                        color2 = sourceData.GetPixel(i, j + 1);
-                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                        if (total > _proposedThresoldValue)
-                        { targetData.SetPixel(i, j, Color.Black); continue; }
-
-                        color2 = sourceData.GetPixel(i + 1, j);
-                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                        if (total > _proposedThresoldValue)
-                        { targetData.SetPixel(i, j, Color.Black); continue; }
-
-                        color2 = sourceData.GetPixel(i - 1, j - 1);
-                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                        if (total > _proposedThresoldValue)
-                        { targetData.SetPixel(i, j, Color.Black); continue; }
-
-
-                        color2 = sourceData.GetPixel(i, j - 1);
-                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                        if (total > _proposedThresoldValue)
-                        { targetData.SetPixel(i, j, Color.Black); continue; }
-
-                        color2 = sourceData.GetPixel(i - 1, j);
-                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                        if (total > _proposedThresoldValue)
-                        { targetData.SetPixel(i, j, Color.Black); continue; }
-
-                        color2 = sourceData.GetPixel(i - 1, j + 1);
-                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                        if (total > _proposedThresoldValue)
-                        { targetData.SetPixel(i, j, Color.Black); continue; }
-
-                        color2 = sourceData.GetPixel(i + 1, j - 1);
-                        total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
-                        if (total > _proposedThresoldValue)
-                        { targetData.SetPixel(i, j, Color.Black); continue; }
-
+                        matrix.Any(m=> {
+                            color2 = sourceData.GetPixel(i + m.X, j + m.Y);
+                            total = Math.Abs(color2.B - color1.B) + Math.Abs(color2.R - color1.R) + Math.Abs(color2.G - color1.G);
+                            if (total > _proposedThresoldValue)
+                                targetData.SetPixel(i, j, Color.Blue);
+                            return total > _proposedThresoldValue;
+                        });
                     }
                 return target;
             }
@@ -145,7 +117,6 @@ namespace LogoDetector
                 targetData.UnlockBits();
             }
         }
-
 
         public static Bitmap Compare(Bitmap b1,Bitmap b2)
         {
@@ -167,7 +138,6 @@ namespace LogoDetector
             }
             return result;
         }
-
     }
 
 
