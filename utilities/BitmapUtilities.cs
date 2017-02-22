@@ -86,14 +86,20 @@ namespace LogoDetector
         /// <summary>
         /// Resize the image
         /// </summary>
-        public static Bitmap Crop(this Bitmap bitmap, int Width, int Height)
+        public static Bitmap Crop(this Bitmap bitmap, int Width, int Height, float scale = 1)
         {
             var x = Math.Max(0, bitmap.Width - Width);
             var y = Math.Max(0, bitmap.Height - Height);
             Width = Math.Min(Width, bitmap.Width);
             Height = Math.Min(Height, bitmap.Height);
-            return bitmap.Clone(new Rectangle(x, y, Width-2, Height-2), bitmap.PixelFormat);
-
+            var newBitmap = bitmap.Clone(new Rectangle(x, y, Width, Height), PixelFormat.Format24bppRgb);
+            if (scale != 1)
+            {
+                newBitmap = new Bitmap(newBitmap, new Size((int)(Width * scale), (int)(Height * scale)));
+                newBitmap = Crop(newBitmap,Width,Height);
+               // newBitmap.Save("d:\\dsdsad.png");
+            }
+            return newBitmap;
         }
 
         /// <summary>
@@ -154,7 +160,7 @@ namespace LogoDetector
             var paths = new List<List<Point>>();
             var added = new Dictionary<Point, int>();
             var pixels = bitmap.Points.ToList();
-            
+
             while (pixels.Count > 0)
             {
                 var path = GetConnectedPixels(bitmap, pixels[0].X, pixels[0].Y,p=>!added.ContainsKey(p));
@@ -163,7 +169,8 @@ namespace LogoDetector
                 paths.Add(path);
                 pixels = pixels.Except(path).ToList();
             }
-            paths.RemoveAll(c=>c.Count< MinPixelsCount||c.Count> MaxPixelsCount);
+            paths.RemoveAll(c => c.Count < MinPixelsCount || c.Count > MaxPixelsCount);
+         //   paths.Sort((c1, c2) => c2.Count.CompareTo(c1.Count));
             return paths;
         }
         /// <summary>
@@ -174,104 +181,84 @@ namespace LogoDetector
         {
             return Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
         }
-        /// <summary>
-        /// Finds the distance between edges
-        /// </summary>
-        /// <param name="bitmap"></param>
-        /// <returns></returns>
-        public static double[] CalcEdgesQatars(this List<Point> Path)
-        {
-            var p1 = (from p in Path orderby p.X ascending select p).First();
-            var p2 = (from p in Path orderby p.X descending select p).First();
-            var p3 = (from p in Path orderby p.Y ascending select p).First();
-            var p4 = (from p in Path orderby p.Y descending select p).First();
 
-            var distances = new List<double>();
-            var d1 = DistanceTo(p1, p2);
-            var d2 = DistanceTo(p3, p4);
-            return new double[] { d1, d2 };
-        }
         /// <summary>
-        /// Checks if all points are connected
-        /// </summary>
-        /// <param name="bitmap"></param>
-        /// <returns></returns>
-        public static bool IsConnectedPath(this List<Point> Path, int Threshold=2)
-        {
-             return true;
-            Threshold = 0;
-             var p1 = (from p in Path orderby p.X ascending select p).First();
-            var p2 = (from p in Path orderby p.X descending select p).First();
-            var p3 = (from p in Path orderby p.Y ascending select p).First();
-            var p4 = (from p in Path orderby p.Y descending select p).First();
-
-            return Path.IsConnectedPoints(p1, p2, Threshold) &&
-                   Path.IsConnectedPoints(p3, p4, Threshold);
-        }
-        /// <summary>
-        /// Checks if all points are connected
+        /// Finds the edges
         /// </summary>
         /// <returns></returns>
-        public static bool IsConnectedPoints(this List<Point> Path, Point p1, Point p2, int Threshold)
+        public static ShapeEdge CalcEdges(this List<Point> Path)
         {
-            if (p1.X > p2.X)
-                return IsConnectedPoints(Path, p2, p1, Threshold);
-            if (p2.X == p1.X)
-                return true;
-            var distance = p2.X-p1.X;
-            double slope = 1.0 * (p2.Y - p1.Y) / (p2.X - p1.X);
-            var counter1 = 0;
-            for (int x = p1.X; x <= p2.X; x++)
-            {
-                var y = slope * (x - p1.X) + p1.Y;
-                if (Path.Contains(new Point(x, (int)y)))
-                    counter1++;
-            }
-            return (distance - counter1) < Threshold;
+            var min_x1 = (from p in Path orderby p.X ascending select p).First();
+            var max_x1 = (from p in Path orderby p.X descending select p).First();
+            var min_y1 = (from p in Path orderby p.Y ascending select p).First();
+            var max_y1 = (from p in Path orderby p.Y descending select p).First();
+
+            var left_top = new Point(min_x1.X,min_y1.Y);
+            var left_bottom = new Point(min_x1.X, max_y1.Y);
+            var right_top = new Point(max_x1.X, min_y1.Y);
+            var right_bottom = new Point(max_x1.X, max_y1.Y);
+
+            return new ShapeEdge(left_top,left_bottom,right_top,right_bottom);
         }
 
-        public static double GetDistanceBetween(this List<Point> Shape1, List<Point> Shape2, bool CloseOrFar)
+        /// <summary>
+        /// Gets the start and end point
+        /// </summary>
+        /// <returns></returns>
+        public static Point[] GetPointsBetween(this IEnumerable<Point> Shape1, IEnumerable<Point> Shape2, bool CloseOrFar)
         {
             var min_x1 = (from p in Shape1 orderby p.X ascending select p).First();
             var max_x1 = (from p in Shape1 orderby p.X descending select p).First();
             var min_y1 = (from p in Shape1 orderby p.Y ascending select p).First();
             var max_y1 = (from p in Shape1 orderby p.Y descending select p).First();
 
-            var distances = new List<double>();
-
             var min_x2 = (from p in Shape2 orderby p.X ascending select p).First();
             var max_x2 = (from p in Shape2 orderby p.X descending select p).First();
             var min_y2 = (from p in Shape2 orderby p.Y ascending select p).First();
             var max_y2 = (from p in Shape2 orderby p.Y descending select p).First();
 
-            distances.Add(min_x1.DistanceTo(min_x2));
-            distances.Add(min_x1.DistanceTo(max_x2));
-            distances.Add(min_x1.DistanceTo(min_y2));
-            distances.Add(min_x1.DistanceTo(max_y2));
+            var pointsList = new List<Point[]>();
+            pointsList.Add(new Point[] { min_x1, min_x2 });
+            pointsList.Add(new Point[] { min_x1, max_x2 });
+            pointsList.Add(new Point[] { min_x1, min_y2 });
+            pointsList.Add(new Point[] { min_x1, max_y2 });
 
-            distances.Add(max_x1.DistanceTo(min_x2));
-            distances.Add(max_x1.DistanceTo(max_x2));
-            distances.Add(max_x1.DistanceTo(min_y2));
-            distances.Add(max_x1.DistanceTo(max_y2));
+            pointsList.Add(new Point[] { max_x1, min_x2 });
+            pointsList.Add(new Point[] { max_x1, max_x2 });
+            pointsList.Add(new Point[] { max_x1, min_y2 });
+            pointsList.Add(new Point[] { max_x1, max_y2 });
 
-            distances.Add(min_y1.DistanceTo(min_x2));
-            distances.Add(min_y1.DistanceTo(max_x2));
-            distances.Add(min_y1.DistanceTo(min_y2));
-            distances.Add(min_y1.DistanceTo(max_y2));
+            pointsList.Add(new Point[] { min_y1, min_x2 });
+            pointsList.Add(new Point[] { min_y1, max_x2 });
+            pointsList.Add(new Point[] { min_y1, min_y2 });
+            pointsList.Add(new Point[] { min_y1, max_y2 });
 
-            distances.Add(max_y1.DistanceTo(min_x2));
-            distances.Add(max_y1.DistanceTo(max_x2));
-            distances.Add(max_y1.DistanceTo(min_y2));
-            distances.Add(max_y1.DistanceTo(max_y2));
+            pointsList.Add(new Point[] { max_y1, min_x2 });
+            pointsList.Add(new Point[] { max_y1, max_x2 });
+            pointsList.Add(new Point[] { max_y1, min_y2 });
+            pointsList.Add(new Point[] { max_y1, max_y2 });
 
+          var distances=  pointsList.ConvertAll(c => c[0].DistanceTo(c[1]));
+            var value = CloseOrFar ? distances.Min() : distances.Max();
+            var index = distances.IndexOf(value);
+            return pointsList[index];
+        }
 
-            return CloseOrFar? distances.Min(): distances.Max();
+        public static double GetDistanceBetween(this IEnumerable<Point> Shape1, IEnumerable<Point> Shape2, bool CloseOrFar)
+        {
+            var points = GetPointsBetween(Shape1, Shape2, CloseOrFar);
+            return points[0].DistanceTo(points[1]);
+        }
+
+        public static Point MidPoint(this Point p1,Point p2)
+        {
+            return new Point((p1.X + p2.X) / 2, (p1.Y + p2.Y) / 2);
         }
 
         /// <summary>
         /// Find the index of the closest shape to this shape
         /// </summary>
-        public static List<Point> FindShape(this List<List<Point>> AllShapes, List<Point> TargetShape,bool CloseOrFar)
+        public static List<Point> FindShape(this List<List<Point>> AllShapes, List<Point> TargetShape, bool CloseOrFar)
         {
             var minDistances = new Dictionary<List<Point>, double>();
             foreach (var item in AllShapes)
@@ -280,40 +267,132 @@ namespace LogoDetector
                 minDistances[item] = GetDistanceBetween(TargetShape, item, CloseOrFar);
             }
             if (minDistances.Count == 0) return null;
-            var misDistance = CloseOrFar? minDistances.Values.Min() : minDistances.Values.Max();
+            var misDistance = CloseOrFar ? minDistances.Values.Min() : minDistances.Values.Max();
             var closestShape = minDistances.Where(c => c.Value == misDistance).Select(c => c.Key).First();
-            return closestShape ;
+            return closestShape;
         }
-
 
         /// <summary>
-        /// Find all shapes that has the same distance between each other
+        /// Find all shapes that can show up in a circle broder
         /// </summary>
-        public static List<List<Point>> FindShapesOfSameDistance(this List<List<Point>> AllShapes, int MinShapes)
+        public static List<List<Point>> FindShapesInCirclesBorder(this List<List<Point>> AllShapes, int MinShapes)
         {
-            var farDistances = new Dictionary<List<Point>, List<List<Point>>>();
-            foreach (var item1 in AllShapes)
-            {
-                double farDistance = AllShapes.Max(c => GetDistanceBetween(item1, c, false));
-                var farCounter = new List<List<Point>>();
-                foreach (var item2 in AllShapes)
-                {
-                    if (item1 == item2) continue;
-                    var d1 = GetDistanceBetween(item1,item2,false);
-                    if (d1 < 50 && d1 > 15 && farDistance - d1 <= 7)
-                        farCounter.Add(item2);
-                }
-                farDistances[item1] = farCounter;
-            }
-            var removeFromList = farDistances.Where(c => c.Value.Count < MinShapes).Select(c=>c.Key);
-            foreach (var item in farDistances)
-            {
-                foreach (var rem in removeFromList)
-                    item.Value.Remove(rem);
-            }
-            return farDistances.Where(c=>c.Value.Count>= MinShapes).Select(c=>c.Key).ToList() ;
-        }
+            var shapeEdges = new Dictionary<List<Point>,ShapeEdge>();
+            foreach (var item in AllShapes)
+                shapeEdges[item] = item.CalcEdges();
 
+            AllShapes=AllShapes.FindAll(c=>
+            {
+                var rec = shapeEdges[c].Sides();
+                return rec.Width > 1 && rec.Height > 1 &&(rec.Width/rec.Height)<4 && (rec.Height / rec.Width) < 4;
+            });
+            var thresholdDev = 3;
+            var bestDeviation = double.MaxValue;
+            var bestResult = new Dictionary<List<Point>,double>();
+            AllShapes.Permutations((c1, c2) =>
+            {
+                if (c1 == c2) return true;
+                var edge1 = shapeEdges[c1];
+                var edge2 = shapeEdges[c2];
+                var p1 = edge1.MidPoint();
+                var p2 = edge2.MidPoint();
+                
+                AllShapes.ForEach(c3 =>
+                {
+                    if (c1 == c3 || c2 == c3) return ;
+                    var shapeCenter = p1.MidPoint(p2).MidPoint(shapeEdges[c3].MidPoint());
+                    var root = shapeCenter.DistanceTo(p2) ;
+                    var roots = AllShapes.Select(c4 => shapeEdges[c4].MidPoint().DistanceTo(shapeCenter));
+
+                    var deviation = roots.Select(r => Math.Abs(r - root)).ToArray();
+                    var items = AllShapes.ToArray();
+                    Array.Sort(deviation, items);
+                    deviation = deviation.Take(5).ToArray() ;
+                    var avgDev = deviation.Average();
+                    if (avgDev < bestDeviation && deviation.Count(c => c < thresholdDev) >= MinShapes)
+                    {
+                        bestDeviation = avgDev;
+                        bestResult.Clear();
+                        for (int i = 0; i < deviation.Length; i++)
+                        {
+                            if (deviation[i] >= thresholdDev) break;
+                            bestResult[items[i]] = deviation[i];
+                        }
+                    }
+                    
+                });
+                return true;
+            });
+            AllShapes = bestResult.Keys.ToList();
+
+            if (AllShapes.Count >= MinShapes)
+            {
+                var sortedShapes = new List<List<Point>>();
+                var distances = new List<double>();
+                sortedShapes.Add(AllShapes[0]);
+                while(sortedShapes.Count< AllShapes.Count)
+                {
+                    var lastShape = sortedShapes.Last();
+                    var remainShapes = AllShapes.Except(sortedShapes).ToList();
+                    //Try to sort the shapes
+                    var shapeDistances = remainShapes.ConvertAll(c2 =>
+                    {
+                        var p1 = shapeEdges[lastShape].MidPoint();
+                        var p2 = shapeEdges[c2].MidPoint();
+                        return p1.DistanceTo(p2);
+                    });
+                    distances.Add(shapeDistances.Min());
+                    var nextShape = remainShapes[shapeDistances.IndexOf(shapeDistances.Min())];
+                    sortedShapes.Add(nextShape);
+                }
+                distances.Add(shapeEdges[sortedShapes.Last()].MidPoint().DistanceTo(shapeEdges[sortedShapes.First()].MidPoint()));
+                for (int i = 0; i < sortedShapes.Count; i++)
+                {
+                    var d = distances[i];
+                    if (d > 5&&d<=40) continue;
+                    sortedShapes.Clear();
+                    break;
+                }
+                var dev = new List<double>();
+                foreach (var item in distances)
+                {
+                    if (dev.Count>0 && Math.Abs(dev.First() - item) <= 10) continue;
+                    dev.Add(item);
+                }
+                if (dev.Count > 2 || dev.Count == 0 || (distances.Count==5&&dev.Count>1 ) || ( dev.Count > 1&&dev.Max()/dev.Min()>3 ))
+                    sortedShapes.Clear();
+                if (sortedShapes.Count >= MinShapes)
+                {
+                    var rec1 = shapeEdges[sortedShapes[0]].Sides();
+                    sortedShapes = sortedShapes.FindAll(c =>
+                    {
+                        var rec2 = shapeEdges[c].Sides();
+                        var max1 = Math.Max(rec1.Width, rec1.Height);
+                        var max2 = Math.Max(rec2.Width, rec2.Height);
+                        return Math.Abs(max1 - max2) < 7;
+                    });
+                }
+                AllShapes = sortedShapes;
+            }
+            return AllShapes;
+        }
+    
+        static void Permutations<T>(this IEnumerable<T> source,Func<T,T,bool> fun)
+        {
+            var called = new List<T>();
+            foreach (var item1 in source)
+            {
+                called.Add(item1);
+                   var stop = false;
+                foreach (var item2 in source)
+                {
+                    if (called.Contains(item2)) continue;
+                    stop = !fun(item1,item2);
+                    if (stop) break;
+                }
+                if (stop) break;
+            }
+        }
 
         /// <summary>
         /// Mark the path
@@ -347,6 +426,44 @@ namespace LogoDetector
             list.Sort();
             list.Reverse();
             return list;
+        }
+    }
+
+    public struct ShapeEdge
+    {
+        public Point LeftTop { get; set; }
+        public Point LeftBottom { get; set; }
+        public Point RightTop { get; set; }
+        public Point RightBottom { get; set; }
+
+        public ShapeEdge(Point LeftTop, Point LeftBottom, Point RightTop, Point RightBottom)
+        {
+            this.LeftTop = LeftTop;
+            this.LeftBottom = LeftBottom;
+            this.RightTop = RightTop;
+            this.RightBottom = RightBottom;
+        }
+
+        public double[] Qatars()
+        {
+            var d1 = LeftTop.DistanceTo(RightBottom);
+            var d2 = LeftBottom.DistanceTo(RightTop);
+            return new double[] {d1,d2 };
+        }
+
+        public RectangleF Sides()
+        {
+            var leftSide = LeftTop.DistanceTo(LeftBottom);
+            var topSide = LeftTop.DistanceTo(RightTop);
+            return new RectangleF(LeftTop, new SizeF((float)topSide, (float)leftSide));
+        }
+
+        public Point MidPoint()
+        {
+            var q = Qatars();
+            if (q[0] >= q[1])
+                return LeftTop.MidPoint(RightBottom);
+            else return LeftBottom.MidPoint(RightTop);
         }
     }
 }

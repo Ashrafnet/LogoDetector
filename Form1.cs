@@ -164,8 +164,8 @@ namespace LogoDetector
                     // var target = source.Crop(60, 60);
                     pictureBox1.Image = source;
                     //   pictureBox2.Image = target;
-                   // ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
-                    pictureBox2.Image = info.ProcessedImage;
+                    ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
+                    pictureBox2.Image = info1.ProcessedImage;
                 }
 
             }
@@ -245,27 +245,18 @@ namespace LogoDetector
 
     public static class BitmapProcess
     {
-        public static int HasLogo(Bitmap bitmap, int minShapes)
+        public static int HasLogo(Bitmap bitmap, int minShapes, int MinPixels=30, int MaxPixels=150)
         {
             var pixels = new LockBitmap(bitmap);
             pixels.LockBits();
             try
             {
                 //Filter the shapes similar to logo
-                var closedPaths = pixels.FindClosedAreas(30, 150);
-                var shapesFopund = closedPaths.Count;
-                closedPaths = closedPaths.FindAll(area =>
-                {
-                    var l = area.CalcEdgesQatars();
-                    if (l[0] < 5 | l[1] < 5 || l[0] > 20 || l[1] > 20)
-                        return false;
-                    return true;
-                });
-                if (closedPaths.Count >= minShapes)
-                    closedPaths = closedPaths.FindAll(c1 => closedPaths.Count(c2 => Math.Abs(c1.Count - c2.Count) < 40) >= minShapes);
+                var closedPaths = pixels.FindClosedAreas(MinPixels, MaxPixels);
+                 var shapesFopund = closedPaths.Count;
                 if (closedPaths.Count >= minShapes)
                 {
-                    closedPaths=closedPaths.FindShapesOfSameDistance(2);
+                    closedPaths=closedPaths.FindShapesInCirclesBorder(minShapes);
                     //var farShapesDic = new Dictionary<List<Point>, List<Point>>();
                     //var closestShapesDic = new Dictionary<List<Point>, List<Point>>();
                     //var clone = closedPaths.ToList();
@@ -318,7 +309,7 @@ namespace LogoDetector
                 }
                 if (closedPaths.Count < minShapes)
                     return 0;
-                return 100 - Math.Abs(shapesFopund - closedPaths.Count) * 10 - Math.Abs(closedPaths.Count - minShapes) * 10;
+                return 100 - Math.Abs(closedPaths.Count - 5) * 10;
             }
             finally
             {
@@ -382,25 +373,42 @@ namespace LogoDetector
             info.ImagePath = imgPath;
             Bitmap source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
             var sw = System.Diagnostics.Stopwatch.StartNew();
-
-            // crop the right button image
-            var croppedImage = source.Crop(65, 65);
-            var firstCheck = BitmapProcess.HasLogo(croppedImage, 4);
-            if (firstCheck < 50)
+            var min = Math.Min(source.Width,source.Height);
+            var scales = min > 500 ? new float[] { 1 }:(min > 400 ? new float[] { 1,1.5f } : new float[] { 1, 1.5f, 2f });
+            foreach (var item in scales)
             {
-                croppedImage=source.Crop(65, 65);
-                firstCheck = BitmapProcess.HasLogo(croppedImage = EdgeDetector.ProposedEdgeDetection(croppedImage), 4);
+                // crop the right button image
+                var croppedImage = source.Crop(65, 65, item);
+                var firstCheck = BitmapProcess.HasLogo(croppedImage, 4);
+                if (firstCheck < 50)
+                {
+                    croppedImage = EdgeDetector.ProposedEdgeDetection(source.Crop(65, 65, item));
+                    firstCheck = BitmapProcess.HasLogo(croppedImage, 4);
+                }
+                if (firstCheck < 50)
+                {
+                    croppedImage = EdgeDetector.Sobel(source.Crop(65, 65, item));
+                    firstCheck = BitmapProcess.HasLogo(croppedImage, 4);
+                }
+                info.HasLogo = firstCheck > 50;
+                if (info.HasLogo)
+                {
+                    var image = source.Crop(65, 65, item);
+                    var secondCheck = BitmapProcess.HasLogo(image, 5);
+                    if (secondCheck < firstCheck)
+                        info.Confidence = firstCheck - 20;
+                    else
+                    {
+                        croppedImage = image;
+                        info.Confidence = secondCheck;
+                    }
+                }
+                info.ProcessedImage = croppedImage;
+                if (info.HasLogo) break;
             }
-            info.HasLogo = firstCheck > 50;
-            if (info.HasLogo)
-            {
-                var secondCheck = BitmapProcess.HasLogo(source.Crop(65, 65), 5);
-                if (secondCheck < firstCheck)
-                    info.Confidence = firstCheck - 20;
-                else info.Confidence = secondCheck;
-            }
+            
 
-            info.ProcessedImage = croppedImage;
+           
             sw.Stop();
             info.ProcessingTime = sw.ElapsedMilliseconds;
 
