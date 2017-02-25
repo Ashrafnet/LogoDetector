@@ -175,6 +175,9 @@ namespace LogoDetector
                     for (j = 0; j < height; j += 2)
                     {
                         compareValue = Compare(template, imageData, i, j, 20);
+                        if (compareValue < 0.5)
+                            compareValue = Compare(template, imageData, i, j, 13);
+                       
                         if (compareValue >= 0.5)
                             break;
                     }
