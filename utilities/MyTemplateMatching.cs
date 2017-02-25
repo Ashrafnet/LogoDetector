@@ -24,7 +24,7 @@ namespace LogoDetector
             LogoTemplates.Clear();
             foreach (var item in scales)
             {
-                var data = GetBitmapData(Resources.template_logo, item, c => c.R == 0 ? (byte)0 : (byte)1);
+                var data = GetBitmapData(Resources.template_logo_60x60, item, c => c.R == 0 ? (byte)0 : (byte)1);
                 LogoTemplates.Add(new TemplateLogoInfo(data));
             }
         }
@@ -71,7 +71,7 @@ namespace LogoDetector
 
 
         /// <summary>
-        /// Compare the ImageData with this Template and return a number from 0-1 that describe how the image close to the template
+        /// Compare the ImageData with this Template and return a number from 0-100 that describe how the image close to the template
         /// </summary>
         public static double Compare(TemplateLogoInfo Template, byte[,] ImageData, int Start_X, int Start_Y, int Threshold)
         {
@@ -101,7 +101,7 @@ namespace LogoDetector
                     }
                 }
             }
-            var minObjectsPixels = (int)(objectsColors.Length * 0.65);
+            var minObjectsPixels = (int)(objectsColors.Length * 0.55);
             var minBackgroundPixels = (int)(backgroundColors.Length * 0.8);
            
 
@@ -111,11 +111,11 @@ namespace LogoDetector
             if (similarObjectsCount < minObjectsPixels)
                 return 0;
 
-          //  Array.Sort(backgroundColors, 0, backgrounCounter);
+            //  Array.Sort(backgroundColors, 0, backgrounCounter);
             var differentBackgroundPixelsCount = countDifferentValues(backgroundColors, compareColor, minBackgroundPixels, Threshold);
             if (differentBackgroundPixelsCount < minBackgroundPixels)
                 return 0;
-            return (1.0 * similarObjectsCount / objectsColors.Length * 50) + (1.0 * differentBackgroundPixelsCount / backgroundColors.Length * 50);
+            return Math.Min((1.0* similarObjectsCount / objectsColors.Length ) , (1.0 * differentBackgroundPixelsCount / backgroundColors.Length)) *100;
         }
       
 
@@ -151,7 +151,7 @@ namespace LogoDetector
             {
                 if (Math.Abs(array[i] - compareValue) > threshold)
                     counter++;
-                if (counter >= stopCount) break;
+                //if (counter >= stopCount) break;
             }
             return counter;
         }
@@ -175,22 +175,21 @@ namespace LogoDetector
                     for (j = 0; j < height; j += 2)
                     {
                         compareValue = Compare(template, imageData, i, j, 20);
-                        if (compareValue < 0.5)
+                        if (compareValue < 50)
                             compareValue = Compare(template, imageData, i, j, 13);
-                       
-                        if (compareValue >= 0.5)
+                        if (compareValue >= 50)
                             break;
                     }
-                    if (compareValue >= 0.5) break;
+                    if (compareValue >= 50) break;
                 }
-                if (compareValue >= 0.5)
+                if (compareValue >= 50)
                 {
                     validTemplate = template;
                     break;
                 }
             }
 
-            if (compareValue >= 0.5)
+            if (compareValue >= 50)
                 SetBitmapData(validTemplate.Data, source, i, j, c => c == 0 ? Color.Empty : Color.Red);
             return compareValue;
         }
