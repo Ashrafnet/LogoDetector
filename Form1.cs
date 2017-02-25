@@ -1,5 +1,4 @@
-﻿using Devcorp.Controls.Design;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -33,7 +32,7 @@ namespace LogoDetector
             if (OperationStarted)
             {
                 button1.Text = "Process";
-                TokenCanceller.Cancel(false );
+                TokenCanceller.Cancel(false);
                 TokenCanceller.Dispose();
                 return;
             }
@@ -51,7 +50,7 @@ namespace LogoDetector
             {
                 var imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF" };
                 // foreach (var item in MyDirectory.GetFiles(textBox1.Text, imgExts, SearchOption.AllDirectories))
-                
+
                 Task task = Task.Factory.StartNew(delegate
                 {
                     try
@@ -59,57 +58,57 @@ namespace LogoDetector
 
 
                         Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, SearchOption.AllDirectories), new ParallelOptions { MaxDegreeOfParallelism = System.Environment.ProcessorCount, CancellationToken = TokenCanceller.Token }, (item) =>
-                       {
+                        {
 
-                           if (TokenCanceller.IsCancellationRequested)
-                           {
+                            if (TokenCanceller.IsCancellationRequested)
+                            {
 
-                               return;
-                           }
-                           {
-                               ListViewItem lvi = null;
-                               ImageLogoInfo info = null;
-                               if (File.Exists(item))
-                               {
+                                return;
+                            }
+                            {
+                                ListViewItem lvi = null;
+                                ImageLogoInfo info = null;
+                                if (File.Exists(item))
+                                {
 
-                                   info = ImageLogoInfo.ProccessImage(item);
+                                    info = ImageLogoInfo.ProccessImage(item);
 
-                                   lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
+                                    lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
 
-                                   lvi.SubItems.Add(info.HasLogo ? "Yes" : "No");
-                                   lvi.SubItems.Add(info.ProcessingTime + " ms");
-                                   lvi.SubItems.Add(info.HasLogo ? info.Confidence + " %" : "");
-                                   total_process_time += info.ProcessingTime;
-                                   lvi.Tag = info;
-                                   processedImages.Add(info);
-                                   _cnt++;
-                                   if (info.HasLogo)
-                                       _cnt_true++;
-                                   else
-                                       _cnt_false++;
+                                    lvi.SubItems.Add(info.HasLogo ? "Yes" : "No");
+                                    lvi.SubItems.Add(info.ProcessingTime + " ms");
+                                    lvi.SubItems.Add(info.HasLogo ? info.Confidence + " %" : "");
+                                    total_process_time += info.ProcessingTime;
+                                    lvi.Tag = info;
+                                    processedImages.Add(info);
+                                    _cnt++;
+                                    if (info.HasLogo)
+                                        _cnt_true++;
+                                    else
+                                        _cnt_false++;
 
 
-                               }
-                               else
-                               {
+                                }
+                                else
+                                {
 
-                                   lvi = new ListViewItem(Path.GetFileName(item), 1);
-                                   lvi.SubItems.Add("File does not exist!");
-                                   lvi.BackColor = Color.Red;
-                                   lvi.ForeColor = Color.White;
+                                    lvi = new ListViewItem(Path.GetFileName(item), 1);
+                                    lvi.SubItems.Add("File does not exist!");
+                                    lvi.BackColor = Color.Red;
+                                    lvi.ForeColor = Color.White;
 
-                               }
+                                }
 
-                               BeginInvoke((Action)(() =>
-                               {
-                                   if (_cnt < maxItemsinListview)
-                                       if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo))
-                                           listView1.Items.Add(lvi);
-                                   Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
-                               }));
+                                BeginInvoke((Action)(() =>
+                                {
+                                    if (_cnt < maxItemsinListview)
+                                        if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo))
+                                            listView1.Items.Add(lvi);
+                                    Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
+                                }));
 
-                           }
-                       }
+                            }
+                        }
                      );
                     }
                     catch (OperationCanceledException er)
@@ -161,12 +160,9 @@ namespace LogoDetector
                 else
                 {
                     var source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(info.ImagePath)));
-                    // var target = source.Crop(60, 60);
                     pictureBox1.Image = source;
-                    //   pictureBox2.Image = target;
-                     ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
-                     pictureBox2.Image = info1.ProcessedImage;
-                   // pictureBox2.Image = BitmapConverters.CMYKEdgeDetection(source.Crop(65, 65));
+                    ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath);
+                    pictureBox2.Image = info1.ProcessedImage;
                 }
 
             }
@@ -220,7 +216,7 @@ namespace LogoDetector
                 {
                     var item = processedImages[i];
                     if ((checkBox1.Checked && item.HasLogo) || (checkBox2.Checked && !item.HasLogo))
-                        txt.AppendLine(item.ImagePath + "," + item.HasLogo + "," + (item.Confidence>0?"%"+ item.Confidence:""));
+                        txt.AppendLine(item.ImagePath + "," + item.HasLogo + "," + (item.Confidence > 0 ? "%" + item.Confidence : ""));
                 }
                 var fpath = saveFileDialog1.FileName;
 
@@ -246,7 +242,7 @@ namespace LogoDetector
 
     public static class BitmapProcess
     {
-        public static KeyValuePair<Bitmap,int> HasLogo(Bitmap source, int minShapes, int MinPixels=30, int MaxPixels=150)
+        public static KeyValuePair<Bitmap, int> HasLogo(Bitmap source, int minShapes, int MinPixels = 30, int MaxPixels = 150)
         {
             var sourceData = new LockBitmap(source);
             var target = new Bitmap(source.Width, source.Height, PixelFormat.Format24bppRgb);
@@ -257,13 +253,13 @@ namespace LogoDetector
             {
                 //Filter the shapes similar to logo
                 var closedPaths = sourceData.FindClosedAreas(MinPixels, MaxPixels);
-                 var shapesFopund = closedPaths.Count;
+                var shapesFopund = closedPaths.Count;
                 if (closedPaths.Count >= minShapes)
                 {
-                    closedPaths=closedPaths.FindShapesInCirclesBorder(minShapes);
+                    closedPaths = closedPaths.FindShapesInCirclesBorder(minShapes);
                     foreach (var item in closedPaths)
                     {
-                      // var cmykColors= item.ConvertAll(c => ColorSpaceHelper.RGBtoCMYK(sourceData[c.X, c.Y]));
+                        // var cmykColors= item.ConvertAll(c => ColorSpaceHelper.RGBtoCMYK(sourceData[c.X, c.Y]));
                         targetData.ChangeColor(item, Color.Red);
                     }
                 }
@@ -327,41 +323,55 @@ namespace LogoDetector
         public int Confidence { get; set; }
         public Bitmap ProcessedImage { get; set; }
 
+        //public static ImageLogoInfo ProccessImage_old2(string imgPath)
+        //{
+        //    ImageLogoInfo info = new ImageLogoInfo();
+        //    info.ImagePath = imgPath;
+        //    Bitmap source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
+        //    var sw = System.Diagnostics.Stopwatch.StartNew();
+        //    var min = Math.Min(source.Width, source.Height);
+        //    var scales = min > 500 ? new float[] { 1 } : (min > 400 ? new float[] { 1, 1.5f } : new float[] { 1, 1.5f, 2f });
+        //    var grayScales = new byte[] { 90, 100, 130, 150, 160, 180, 200, 220 };
+        //    foreach (var scale in scales)
+        //    {
+        //        foreach (var gray in grayScales)
+        //        {
+        //            var firstCheck = MyLogoDetector.Process(source.Crop(65, 65, scale), gray, 4);
+        //            info.HasLogo = firstCheck.Value > 50;
+        //            info.Confidence = firstCheck.Value;
+        //            info.ProcessedImage = firstCheck.Key;
+        //            if (info.HasLogo) break;
+        //        }
+
+        //        if (info.HasLogo) break;
+        //    }
+        //    sw.Stop();
+        //    info.ProcessingTime = sw.ElapsedMilliseconds;
+
+        //    return info;
+        //}
         public static ImageLogoInfo ProccessImage(string imgPath)
         {
             ImageLogoInfo info = new ImageLogoInfo();
             info.ImagePath = imgPath;
             Bitmap source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            var min = Math.Min(source.Width,source.Height);
-            var scales = min > 500 ? new float[] { 1 }:(min > 400 ? new float[] { 1,1.5f } : new float[] { 1, 1.5f, 2f });
-            foreach (var item in scales)
+            var min = Math.Min(source.Width, source.Height);
+            var scales = min > 500 ? new float[] { 1 } : (min > 400 ? new float[] { 1, 1.5f } : new float[] { 1, 1.5f, 2f });
+            foreach (var scale in scales)
             {
-                // crop the right button image
-                var croppedImage = source.Crop(65, 65, item);
-                var firstCheck = BitmapProcess.HasLogo(croppedImage, 4);
-                if (firstCheck.Value < 50)
-                {
-                    firstCheck = BitmapProcess.HasLogo(BitmapConverters.ProposedEdgeDetection(croppedImage), 4);
-                }
-                if (firstCheck.Value < 50)
-                {
-                    firstCheck = BitmapProcess.HasLogo(BitmapConverters.Sobel(croppedImage), 4);
-                }
-               
-                info.HasLogo = firstCheck.Value > 50;
-                info.Confidence = firstCheck.Value;
-                info.ProcessedImage = firstCheck.Key;
+                var image = source.Crop(65, 65, scale);
+                var firstCheck = MyTemplateMatching.DetectLogo(image);
+                info.HasLogo = firstCheck > 50;
+                info.Confidence = (int)firstCheck;
+                info.ProcessedImage = image;
+
                 if (info.HasLogo) break;
             }
-            
-
-           
             sw.Stop();
             info.ProcessingTime = sw.ElapsedMilliseconds;
 
             return info;
         }
-
     }
 }

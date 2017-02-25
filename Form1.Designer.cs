@@ -117,6 +117,7 @@
             this.columnHeader3,
             this.columnHeader4});
             this.listView1.FullRowSelect = true;
+            this.listView1.HideSelection = false;
             this.listView1.LargeImageList = this.imageList1;
             this.listView1.Location = new System.Drawing.Point(0, 56);
             this.listView1.Name = "listView1";
