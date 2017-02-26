@@ -20,8 +20,8 @@ namespace LogoDetector
         /// </summary>
         private static void LoadLogoTemplates()
         {
-            var scales = new double[] { 0.4,0.5, 0.6,0.7,0.8 };
             LogoTemplates.Clear();
+            var scales = new double[] { 28, 32, 24, 36, 42 }.Select(c=> 1.0 / (56.0 / c));
             foreach (var item in scales)
             {
                 var data = GetBitmapData(Resources.template_logo, item, c => c.R == 0 ? (byte)0 : (byte)1);
@@ -102,23 +102,23 @@ namespace LogoDetector
                 }
             }
             var minObjectsPixels = (int)(objectsColors.Length * 0.55);
-            var minBackgroundPixels = (int)(backgroundColors.Length * 0.8 );
-           
+            var minBackgroundPixels = (int)(backgroundColors.Length * 0.8);
+
 
             Array.Sort(objectsColors, 0, objectsCounter);
             var compareColor = objectsColors[objectsColors.Length / 2];
 
             var similarObjectsCount = countCloseValues(objectsColors, compareColor, Threshold);
-            var differentBackgroundPixelsCount = countDifferentValues(backgroundColors, compareColor, minBackgroundPixels, Threshold);
+            var differentBackgroundPixelsCount = countDifferentValues(backgroundColors, compareColor, minBackgroundPixels, Threshold+3);
 
-            var failRatio =  Math.Min(50.0*similarObjectsCount / minObjectsPixels,50.0* differentBackgroundPixelsCount / minBackgroundPixels);
+            var failRatio = Math.Min(50.0 * similarObjectsCount / minObjectsPixels, 50.0 * differentBackgroundPixelsCount / minBackgroundPixels);
             if (failRatio > 40)
             { }
             if (failRatio < 50)
                 return failRatio;
-
+            
             var vaildRatio = (65.0 * similarObjectsCount / objectsColors.Length) + (35.0 * differentBackgroundPixelsCount / backgroundColors.Length);
-            return vaildRatio ;
+            return vaildRatio;
         }
       
 
@@ -129,19 +129,20 @@ namespace LogoDetector
         {
             var counter = 0;
             var mid = sortedArray.Length / 2;
-            for (int i = mid; i >= 0; i--)
+            var shift = 1;
+            for (int i = mid; i >= 0; i-= shift)
             {
                 if (compareValue-sortedArray[i]  <= threshold)
                     counter++;
                 else break;
             }
-            for (int i = mid+1; i < sortedArray.Length; i++)
+            for (int i = mid+1; i < sortedArray.Length; i+= shift)
             {
                 if (sortedArray[i]-compareValue <= threshold)
                     counter++;
                 else break;
             }
-            return counter;
+            return counter * shift;
         }
 
         /// <summary>
@@ -158,46 +159,60 @@ namespace LogoDetector
             }
             return counter;
         }
+        static double[] RGBtoYUV(Color rgb)
+        {
+            double y = rgb.R * .299000 + rgb.G * .587000 + rgb.B * .114000;
+            double u = rgb.R * -.168736 + rgb.G * -.331264 + rgb.B * .500000 + 128;
+            double v = rgb.R * .500000 + rgb.G * -.418688 + rgb.B * -.081312 + 128;
 
+            return new double[] { y, u, v };
+        }
         /// <summary>
         /// Compare the ImageData with this Template and return a number from 0-100 that describe how the image close to the template
         /// </summary>
         public static double DetectLogo(Bitmap source)
         {
-            var imageData = GetBitmapData(source, 1, c => (byte)((c.R + c.G + c.B) / 3));
+            var imageData = GetBitmapData(source, 1, c =>
+            {
+               var yuv= RGBtoYUV(c);
+                return (byte)yuv[0];// (byte)((c.R + c.G + c.B) / 3);
+            });
 
-            
-            int i = 0, j = 0;
             TemplateLogoInfo bestTemplate = null;
+            int bestTemplate_x=0, bestTemplate_y=0;
             double bestCompareValue = 0;
             foreach (var template in LogoTemplates)
             {
                 var width = source.Width - template.Data.GetLength(0);
                 var height = source.Height - template.Data.GetLength(1);
-                double compareValue = bestCompareValue;
-                for (i = 0; i < width; i += 2)
+                for (int i = 0; i < width; i += 2)
                 {
-                    for (j = 0; j < height; j += 2)
+                    for (int j = 0; j < height; j += 2)
                     {
-                        compareValue = Math.Max(compareValue, Compare(template, imageData, i, j, 20));
-                        if (compareValue < 50)
-                            compareValue = Math.Max(compareValue, Compare(template, imageData, i, j, 13));
-                        if (compareValue >= 50)
+                        var compare = Compare(template, imageData, i, j, 20);
+                        if (compare < 50)
+                            compare = Math.Max(compare, Compare(template, imageData, i, j, 13));
+                        if (compare < 50)
+                            compare = Math.Max(compare, Compare(template, imageData, i, j, 10));
+                        if (compare > bestCompareValue)
+                        {
+                            bestCompareValue = compare;
+                            bestTemplate = template;
+                            bestTemplate_x = i;
+                            bestTemplate_y = j;
+                        }
+                        if (bestCompareValue >= 50)
                             break;
                     }
-                    if (compareValue >= 50) break;
+                    if (bestCompareValue >= 50) break;
                 }
-                if (compareValue > bestCompareValue)
-                {
-                    bestCompareValue = compareValue;
-                    bestTemplate = template;
-                }
-                if (compareValue >= 50)
+               
+                if (bestCompareValue >= 50)
                     break;
             }
-            //
+            // 
             if (bestTemplate!=null && bestCompareValue >= 50)
-                SetBitmapData(bestTemplate.Data, source, i, j, c => c == 0 ? Color.Empty : Color.Red);
+                SetBitmapData(bestTemplate.Data, source, bestTemplate_x, bestTemplate_y, c => c == 0 ? Color.Empty : Color.Red);
             return bestCompareValue;
         }
     }

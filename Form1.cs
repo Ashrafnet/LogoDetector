@@ -161,8 +161,8 @@ namespace LogoDetector
                 {
                     var source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(info.ImagePath)));
                     pictureBox1.Image = source;
-                    ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath);
-                    pictureBox2.Image = info1.ProcessedImage;
+                  //  ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath);
+                    pictureBox2.Image = info.ProcessedImage;
                 }
 
             }
