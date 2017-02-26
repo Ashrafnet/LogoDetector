@@ -20,11 +20,11 @@ namespace LogoDetector
         /// </summary>
         private static void LoadLogoTemplates()
         {
-            var scales = new double[] { 0.5, 0.4, 0.6, 0.7,0.8 };
+            var scales = new double[] { 0.4,0.5, 0.6,0.7,0.8 };
             LogoTemplates.Clear();
             foreach (var item in scales)
             {
-                var data = GetBitmapData(Resources.template_logo_60x60, item, c => c.R == 0 ? (byte)0 : (byte)1);
+                var data = GetBitmapData(Resources.template_logo, item, c => c.R == 0 ? (byte)0 : (byte)1);
                 LogoTemplates.Add(new TemplateLogoInfo(data));
             }
         }
@@ -102,20 +102,23 @@ namespace LogoDetector
                 }
             }
             var minObjectsPixels = (int)(objectsColors.Length * 0.55);
-            var minBackgroundPixels = (int)(backgroundColors.Length * 0.8);
+            var minBackgroundPixels = (int)(backgroundColors.Length * 0.8 );
            
 
             Array.Sort(objectsColors, 0, objectsCounter);
             var compareColor = objectsColors[objectsColors.Length / 2];
-            var similarObjectsCount = countCloseValues(objectsColors, compareColor, Threshold);
-            if (similarObjectsCount < minObjectsPixels)
-                return 0;
 
-            //  Array.Sort(backgroundColors, 0, backgrounCounter);
+            var similarObjectsCount = countCloseValues(objectsColors, compareColor, Threshold);
             var differentBackgroundPixelsCount = countDifferentValues(backgroundColors, compareColor, minBackgroundPixels, Threshold);
-            if (differentBackgroundPixelsCount < minBackgroundPixels)
-                return 0;
-            return Math.Min((1.0* similarObjectsCount / objectsColors.Length ) , (1.0 * differentBackgroundPixelsCount / backgroundColors.Length)) *100;
+
+            var failRatio =  Math.Min(50.0*similarObjectsCount / minObjectsPixels,50.0* differentBackgroundPixelsCount / minBackgroundPixels);
+            if (failRatio > 40)
+            { }
+            if (failRatio < 50)
+                return failRatio;
+
+            var vaildRatio = (65.0 * similarObjectsCount / objectsColors.Length) + (35.0 * differentBackgroundPixelsCount / backgroundColors.Length);
+            return vaildRatio ;
         }
       
 
@@ -163,35 +166,39 @@ namespace LogoDetector
         {
             var imageData = GetBitmapData(source, 1, c => (byte)((c.R + c.G + c.B) / 3));
 
-            double compareValue = 0;
+            
             int i = 0, j = 0;
-            TemplateLogoInfo validTemplate = null;
+            TemplateLogoInfo bestTemplate = null;
+            double bestCompareValue = 0;
             foreach (var template in LogoTemplates)
             {
                 var width = source.Width - template.Data.GetLength(0);
                 var height = source.Height - template.Data.GetLength(1);
+                double compareValue = bestCompareValue;
                 for (i = 0; i < width; i += 2)
                 {
                     for (j = 0; j < height; j += 2)
                     {
-                        compareValue = Compare(template, imageData, i, j, 20);
+                        compareValue = Math.Max(compareValue, Compare(template, imageData, i, j, 20));
                         if (compareValue < 50)
-                            compareValue = Compare(template, imageData, i, j, 13);
+                            compareValue = Math.Max(compareValue, Compare(template, imageData, i, j, 13));
                         if (compareValue >= 50)
                             break;
                     }
                     if (compareValue >= 50) break;
                 }
-                if (compareValue >= 50)
+                if (compareValue > bestCompareValue)
                 {
-                    validTemplate = template;
-                    break;
+                    bestCompareValue = compareValue;
+                    bestTemplate = template;
                 }
+                if (compareValue >= 50)
+                    break;
             }
-
-            if (compareValue >= 50)
-                SetBitmapData(validTemplate.Data, source, i, j, c => c == 0 ? Color.Empty : Color.Red);
-            return compareValue;
+            //
+            if (bestTemplate!=null && bestCompareValue >= 50)
+                SetBitmapData(bestTemplate.Data, source, i, j, c => c == 0 ? Color.Empty : Color.Red);
+            return bestCompareValue;
         }
     }
 

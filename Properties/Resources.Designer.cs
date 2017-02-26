@@ -89,5 +89,15 @@ namespace LogoDetector.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap template_logo_72x72 {
+            get {
+                object obj = ResourceManager.GetObject("template_logo_72x72", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

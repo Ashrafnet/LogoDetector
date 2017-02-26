@@ -77,7 +77,7 @@ namespace LogoDetector
 
                                     lvi.SubItems.Add(info.HasLogo ? "Yes" : "No");
                                     lvi.SubItems.Add(info.ProcessingTime + " ms");
-                                    lvi.SubItems.Add(info.HasLogo ? info.Confidence + " %" : "");
+                                    lvi.SubItems.Add(info.Confidence + " %");
                                     total_process_time += info.ProcessingTime;
                                     lvi.Tag = info;
                                     processedImages.Add(info);
@@ -186,7 +186,7 @@ namespace LogoDetector
 
                         lvi.SubItems.Add(info.HasLogo ? "Yes" : "No");
                         lvi.SubItems.Add(info.ProcessingTime + " ms");
-                        lvi.SubItems.Add(info.HasLogo ? info.Confidence + " %" : "");
+                        lvi.SubItems.Add(info.Confidence + " %");
                         lvi.Tag = info;
                         listView1.Items.Add(lvi);
                         _cnt++;
