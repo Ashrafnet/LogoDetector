@@ -121,28 +121,7 @@
   <data name="1487537573_document-excel-csv" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\res\1487537573_document-excel-csv.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="logo22x22" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\logo22x22.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="logo28x28" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\logo28x28.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="logo33x33" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\logo33x33.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="logo39x39" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\logo39x39.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="logo42x42" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\logo42x42.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="template_logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\template_logo.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="template_logo_60x60" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\template_logo_60x60.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="template_logo_72x72" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\template_logo_72x72.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

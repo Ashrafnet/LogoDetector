@@ -75,32 +75,21 @@ namespace LogoDetector
         /// </summary>
         public static double Compare(TemplateLogoInfo Template, byte[,] ImageData, int Start_X, int Start_Y, int Threshold)
         {
-            var width = Math.Min(ImageData.GetLength(0) - Start_X, Template.Data.GetLength(0));
-            var height = Math.Min(ImageData.GetLength(1) - Start_Y, Template.Data.GetLength(1));
+            var width = Math.Min(ImageData.GetLength(0) - Start_X, Template.Width);
+            var height = Math.Min(ImageData.GetLength(1) - Start_Y, Template.Height);
 
-            if (width < Template.Data.GetLength(0) * 0.7) return 0;
-            if (height < Template.Data.GetLength(1) * 0.7) return 0;
+            if (width < Template.Width * 0.7) return 0;
+            if (height < Template.Height * 0.7) return 0;
 
-            int x, y;
-            byte[] backgroundColors = new byte[Template.BackgroundPixelsCount];
-            byte[] objectsColors = new byte[Template.ObjectPixelsCount];
+            byte[] backgroundColors = new byte[Template.BackgroundPixels.Count];
+            byte[] objectsColors = new byte[Template.ObjectsPixels.Count];
             int backgrounCounter = 0, objectsCounter = 0;
-            for (int i = 0; i < width; i++)
-            {
-                x = i + Start_X;
-                for (int j = 0; j < height; j++)
-                {
-                    y = Start_Y + j;
-                    if (Template.Data[i, j] == 0)//This is a background pixel
-                    {
-                        backgroundColors[backgrounCounter++] = ImageData[x, y];
-                    }
-                    else//This is an object pixel
-                    {
-                        objectsColors[objectsCounter++] = ImageData[x, y];
-                    }
-                }
-            }
+
+            foreach (var item in Template.BackgroundPixels)
+                backgroundColors[backgrounCounter++] = ImageData[item.X + Start_X, item.Y + Start_Y];
+            foreach (var item in Template.ObjectsPixels)
+                objectsColors[objectsCounter++] = ImageData[item.X + Start_X, item.Y + Start_Y];
+
             var minObjectsPixels = (int)(objectsColors.Length * 0.55);
             var minBackgroundPixels = (int)(backgroundColors.Length * 0.8);
 
@@ -183,8 +172,8 @@ namespace LogoDetector
             double bestCompareValue = 0;
             foreach (var template in LogoTemplates)
             {
-                var width = source.Width - template.Data.GetLength(0);
-                var height = source.Height - template.Data.GetLength(1);
+                var width = source.Width - template.Width;
+                var height = source.Height - template.Height;
                 for (int i = 0; i < width; i += 2)
                 {
                     for (int j = 0; j < height; j += 2)
@@ -211,37 +200,72 @@ namespace LogoDetector
                     break;
             }
             // 
-            if (bestTemplate!=null && bestCompareValue >= 50)
-                SetBitmapData(bestTemplate.Data, source, bestTemplate_x, bestTemplate_y, c => c == 0 ? Color.Empty : Color.Red);
+            if (bestTemplate != null && bestCompareValue >= 50)
+            {
+                var data = bestTemplate.GetTemplateData(0,1,0);
+                SetBitmapData(data, source, bestTemplate_x, bestTemplate_y, c =>c==0?Color.Empty: Color.White);
+            }
             return bestCompareValue;
         }
     }
 
     public class TemplateLogoInfo
     {
-        public byte[,] Data { get; private set; }
+        //public byte[,] Data { get; private set; }
+
         /// <summary>
-        /// Gets or Sets the background pixels count
+        /// Gets or Sets the background pixels 
         /// </summary>
-        public int BackgroundPixelsCount { get; private set; }
+        public List<Point> BackgroundPixels { get; private set; }
         /// <summary>
-        /// Gets or Sets the objects pixels count
+        /// Gets or Sets the objects pixels 
         /// </summary>
-        public int ObjectPixelsCount { get; private set; }
+        public List<Point> ObjectsPixels { get; private set; }
+        /// <summary>
+        /// Gets or Sets the pixels between backgound and objects
+        /// </summary>
+        public List<Point> BorderPixels { get; private set; }
+
+        public int Width { get; private set; }
+        public int Height { get; private set; }
         public TemplateLogoInfo(byte[,] Data)
         {
-            this.Data = Data;
-            var width = Data.GetLength(0);
-            var height = Data.GetLength(1);
-            for (int i = 0; i < width; i++)
+            //this.Data = Data;
+            Width = Data.GetLength(0);
+            Height = Data.GetLength(1);
+            BackgroundPixels = new List<Point>();
+            ObjectsPixels = new List<Point>();
+            BorderPixels = new List<Point>();
+            Point p;
+            for (int i = 0; i < Width; i++)
             {
-                for (int j = 0; j < height; j++)
+                for (int j = 0; j < Height; j++)
                 {
-                    if (Data[i, j] == 0)
-                        BackgroundPixelsCount++;
-                    else ObjectPixelsCount++;
+                    p = new Point(i,j);
+                    if (i > 0 && Data[i, j]==1&& Data[i - 1, j]==0)
+                        BorderPixels.Add(p);
+
+                    else if (Data[i, j] == 0)
+                        BackgroundPixels.Add(p);
+                    else ObjectsPixels.Add(p);
                 }
             }
         }
+        /// <summary>
+        /// Gets the two dimentional array that represent the template data
+        /// </summary>
+        /// <returns></returns>
+        public byte[,] GetTemplateData(byte Background,byte Objects,byte Border)
+        {
+            var data = new byte[Width, Height];
+
+            foreach (var item in BackgroundPixels)
+                data[item.X, item.Y] = Background;
+            foreach (var item in ObjectsPixels)
+                data[item.X, item.Y] = Objects;
+            foreach (var item in BorderPixels)
+                data[item.X, item.Y] = Border;
+            return data;
+        } 
     }
 }
