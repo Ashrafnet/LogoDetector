@@ -93,7 +93,8 @@ namespace LogoDetector
                                         lvi.ImageIndex = 2;
                                         lvi.ForeColor = Color.Orange;
                                     }
-                                    lvi.SubItems.Add(info.HasLogo ? "Yes" : "No");
+
+                                    lvi.SubItems.Add(info .ConfusedImage == true ? "Maybe" :  info.HasLogo ? "Yes" : "No");
                                     lvi.SubItems.Add(info.ProcessingTime + " ms");
                                     lvi.SubItems.Add(info.Confidence + " %");
                                     total_process_time += info.ProcessingTime;
@@ -211,7 +212,7 @@ namespace LogoDetector
                             lvi.ForeColor = Color.Orange;
                             lvi.ImageIndex = 2;
                         }
-                        lvi.SubItems.Add(info.HasLogo ? "Yes" : "No");
+                        lvi.SubItems.Add(info.ConfusedImage == true ? "Maybe" : info.HasLogo ? "Yes" : "No");
                         lvi.SubItems.Add(info.ProcessingTime + " ms");
                         lvi.SubItems.Add(info.Confidence + " %");
                         lvi.Tag = info;
@@ -240,13 +241,13 @@ namespace LogoDetector
                     return;
                 StringBuilder txt = new StringBuilder();
 
-                txt.AppendLine("Image Path,Has Logo,Confidence");
+                txt.AppendLine("Image Path,Has Logo,Processing Time,Confidence");
                 for (int i = 0; i < processedImages.Count; i++)
 
                 {
                     var item = processedImages[i];
-                    if ((checkBox1.Checked && item.HasLogo) || (checkBox2.Checked && !item.HasLogo))
-                        txt.AppendLine(item.ImagePath + "," + item.HasLogo + "," + (item.Confidence > 0 ? "%" + item.Confidence : ""));
+                    if ((checkBox1.Checked && item.HasLogo) || (checkBox2.Checked && !item.HasLogo && !item.ConfusedImage) || (checkBox3.Checked && item.ConfusedImage))
+                        txt.AppendLine(item.ImagePath + "," + (item.ConfusedImage ==true ?"Maybe": item.HasLogo+"" )+ "," + item.ProcessingTime + "ms,"+ item.Confidence + "%");
                 }
                 var fpath = saveFileDialog1.FileName;
 
@@ -294,6 +295,29 @@ namespace LogoDetector
                                                               listView1.Sorting);
             sw.Stop();
             status_info.Text = sw.ElapsedMilliseconds + " Milliseconds.";
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(textBox1.Text))
+            {
+                MessageBox.Show("You have to set the images folder!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                textBox1.Focus();
+                textBox1.SelectAll();
+                return;
+            }
+            if (!Directory.Exists(textBox1.Text))
+            {
+                MessageBox.Show("This directory is not exist!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                textBox1.Focus();
+                textBox1.SelectAll();
+                return;
+            }
+            var imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF" };
+            var cnt=MyDirectory.GetFiles(textBox1.Text, imgExts, SearchOption.AllDirectories).LongCount();
+
+            MessageBox.Show("Number of images= " + cnt +" images"+ Environment.NewLine + "Images supported are:" + Environment.NewLine + string.Join(" , ", imgExts)     +"");
 
         }
     }

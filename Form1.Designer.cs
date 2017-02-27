@@ -54,6 +54,7 @@
             this.status_info = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.stat_time = new System.Windows.Forms.ToolStripStatusLabel();
+            this.button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -84,14 +85,14 @@
             this.textBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
             this.textBox1.Location = new System.Drawing.Point(64, 6);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(528, 20);
+            this.textBox1.Size = new System.Drawing.Size(482, 20);
             this.textBox1.TabIndex = 1;
             this.textBox1.Text = "C:\\Users\\aqssass\\Desktop\\Sample_\\007\\NotWorking";
             // 
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(598, 4);
+            this.button1.Location = new System.Drawing.Point(645, 4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 2;
@@ -108,7 +109,7 @@
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(353, 202);
+            this.pictureBox1.Size = new System.Drawing.Size(379, 208);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 4;
             this.pictureBox1.TabStop = false;
@@ -128,7 +129,7 @@
             this.listView1.LargeImageList = this.imageList1;
             this.listView1.Location = new System.Drawing.Point(0, 72);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(304, 218);
+            this.listView1.Size = new System.Drawing.Size(325, 228);
             this.listView1.SmallImageList = this.imageList1;
             this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
@@ -180,8 +181,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(661, 290);
-            this.splitContainer1.SplitterDistance = 304;
+            this.splitContainer1.Size = new System.Drawing.Size(708, 300);
+            this.splitContainer1.SplitterDistance = 325;
             this.splitContainer1.TabIndex = 6;
             // 
             // buttonExportMatches
@@ -201,8 +202,6 @@
             // checkBox3
             // 
             this.checkBox3.AutoSize = true;
-            this.checkBox3.Checked = true;
-            this.checkBox3.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox3.Location = new System.Drawing.Point(3, 49);
             this.checkBox3.Name = "checkBox3";
             this.checkBox3.Size = new System.Drawing.Size(135, 17);
@@ -215,8 +214,6 @@
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Checked = true;
-            this.checkBox2.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox2.Location = new System.Drawing.Point(3, 26);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(150, 17);
@@ -252,8 +249,8 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.pictureBox2);
-            this.splitContainer2.Size = new System.Drawing.Size(353, 290);
-            this.splitContainer2.SplitterDistance = 202;
+            this.splitContainer2.Size = new System.Drawing.Size(379, 300);
+            this.splitContainer2.SplitterDistance = 208;
             this.splitContainer2.TabIndex = 5;
             // 
             // pictureBox2
@@ -261,7 +258,7 @@
             this.pictureBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox2.Location = new System.Drawing.Point(0, 0);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(353, 84);
+            this.pictureBox2.Size = new System.Drawing.Size(379, 88);
             this.pictureBox2.TabIndex = 5;
             this.pictureBox2.TabStop = false;
             // 
@@ -276,9 +273,9 @@
             this.status_info,
             this.toolStripStatusLabel1,
             this.stat_time});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 325);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 335);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(685, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(732, 22);
             this.statusStrip1.TabIndex = 7;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -300,13 +297,25 @@
             this.stat_time.Name = "stat_time";
             this.stat_time.Size = new System.Drawing.Size(0, 17);
             // 
+            // button2
+            // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button2.Location = new System.Drawing.Point(552, 4);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(87, 23);
+            this.button2.TabIndex = 2;
+            this.button2.Text = "Images Count";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(685, 347);
+            this.ClientSize = new System.Drawing.Size(732, 357);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label1);
@@ -357,6 +366,7 @@
         private System.Windows.Forms.ToolStripStatusLabel status_info;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel stat_time;
+        private System.Windows.Forms.Button button2;
     }
 }
 
