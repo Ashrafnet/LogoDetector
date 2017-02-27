@@ -150,41 +150,38 @@ namespace LogoDetector
             }
             return counter;
         }
-        static double[] RGBtoYUV(Color rgb)
+        static byte RGBtoYUV(Color rgb)
         {
             double y = rgb.R * .299000 + rgb.G * .587000 + rgb.B * .114000;
-            double u = rgb.R * -.168736 + rgb.G * -.331264 + rgb.B * .500000 + 128;
-            double v = rgb.R * .500000 + rgb.G * -.418688 + rgb.B * -.081312 + 128;
+            //double u = rgb.R * -.168736 + rgb.G * -.331264 + rgb.B * .500000 + 128;
+            //double v = rgb.R * .500000 + rgb.G * -.418688 + rgb.B * -.081312 + 128;
 
-            return new double[] { y, u, v };
+            //return new double[] { y, u, v };
+            return (byte)y;
         }
         /// <summary>
         /// Compare the ImageData with this Template and return a number from 0-100 that describe how the image close to the template
         /// </summary>
         public static double DetectLogo(Bitmap source)
         {
-            var imageData = GetBitmapData(source, 1, c =>
-            {
-               var yuv= RGBtoYUV(c);
-                return (byte)yuv[0];// (byte)((c.R + c.G + c.B) / 3);
-            });
+            var imageData = GetBitmapData(source, 1, RGBtoYUV);
 
             TemplateLogoInfo bestTemplate = null;
             int bestTemplate_x=0, bestTemplate_y=0;
-            double bestCompareValue = 0;
+            double bestCompareValue = 0,temp;
             foreach (var template in LogoTemplates)
             {
                 var width = source.Width - template.Width;
                 var height = source.Height - template.Height;
                 for (int i = 0; i < width; i += 2)
                 {
+                    temp = 0;
                     for (int j = 0; j < height; j += 2)
                     {
                         var compare = Compare(template, imageData, i, j, 20);
                         if (compare < 50)
                             compare = Math.Max(compare, Compare(template, imageData, i, j, 13));
-                      //  if (compare < 50)
-                        //    compare = Math.Max(compare, Compare(template, imageData, i, j, 10));
+                        if (compare > temp) temp = compare;
                         if (compare > bestCompareValue)
                         {
                             bestCompareValue = compare;
@@ -194,9 +191,10 @@ namespace LogoDetector
                         }
                         if (bestCompareValue >= 50)
                             break;
-                        if (compare < 20) j++;
+                        if (compare < 25) j+=2;
                     }
                     if (bestCompareValue >= 50) break;
+                    if (temp < 25) i += 2;
                 }
                
                 if (bestCompareValue >= 50)
