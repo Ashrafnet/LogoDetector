@@ -36,6 +36,20 @@ namespace LogoDetector
                 TokenCanceller.Dispose();
                 return;
             }
+            if(string.IsNullOrWhiteSpace(textBox1.Text))
+            {
+                MessageBox.Show("You have to set the images folder!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                textBox1.Focus();
+                textBox1.SelectAll();
+                return;
+            }
+            if (!Directory.Exists (textBox1.Text))
+            {
+                MessageBox.Show("This directory is not exist!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                textBox1.Focus();
+                textBox1.SelectAll();
+                return;
+            }
             TokenCanceller = new CancellationTokenSource();
             button1.Text = "Stop";
             OperationStarted = true;
@@ -74,7 +88,11 @@ namespace LogoDetector
                                     info = ImageLogoInfo.ProccessImage(item);
 
                                     lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
-
+                                    if (info.ConfusedImage )
+                                    {
+                                        lvi.ImageIndex = 2;
+                                        lvi.ForeColor = Color.Orange;
+                                    }
                                     lvi.SubItems.Add(info.HasLogo ? "Yes" : "No");
                                     lvi.SubItems.Add(info.ProcessingTime + " ms");
                                     lvi.SubItems.Add(info.Confidence + " %");
@@ -102,9 +120,10 @@ namespace LogoDetector
                                 BeginInvoke((Action)(() =>
                                 {
                                     if (_cnt < maxItemsinListview)
-                                        if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo))
+                                        if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage) || (checkBox3.Checked && info.ConfusedImage))
                                             listView1.Items.Add(lvi);
-                                    Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
+                                    stat_time.Text  = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
+                                    status_info.Text = listView1.Items.Count + " Items";
                                 }));
 
                             }
@@ -125,7 +144,7 @@ namespace LogoDetector
         BeginInvoke((Action)(() =>
         {
             s.Stop();
-            Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
+            stat_time.Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
             listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             listView1.ResumeLayout();
             OperationStarted = false;
@@ -172,6 +191,7 @@ namespace LogoDetector
         {
             try
             {
+                status_info.Text = "Working..";
                 listView1.SuspendLayout();
                 listView1.Items.Clear();
                 Cursor = Cursors.WaitCursor;
@@ -180,10 +200,16 @@ namespace LogoDetector
                 {
                     if (_cnt >= maxItemsinListview) return;
                     var info = processedImages[i];
-                    if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo))
+                    if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage) || (checkBox3.Checked && info.ConfusedImage))
                     {
+                     
                         var lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
-
+                        
+                        if (info.ConfusedImage  )
+                        {
+                            lvi.ForeColor = Color.Orange;
+                            lvi.ImageIndex = 2;
+                        }
                         lvi.SubItems.Add(info.HasLogo ? "Yes" : "No");
                         lvi.SubItems.Add(info.ProcessingTime + " ms");
                         lvi.SubItems.Add(info.Confidence + " %");
@@ -196,7 +222,10 @@ namespace LogoDetector
             catch { }
             finally
             {
+                listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+
                 listView1.ResumeLayout();
+                status_info.Text = listView1.Items.Count + " Items";
                 Cursor = Cursors.Default;
             }
         }
@@ -321,6 +350,7 @@ namespace LogoDetector
         }
         public bool HasLogo { get; set; }
         public int Confidence { get; set; }
+        public bool ConfusedImage { get { return Confidence < 50 && Confidence > 45; } }
         public Bitmap ProcessedImage { get; set; }
 
         //public static ImageLogoInfo ProccessImage_old2(string imgPath)
