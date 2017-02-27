@@ -194,6 +194,7 @@ namespace LogoDetector
                 status_info.Text = "Working..";
                 listView1.SuspendLayout();
                 listView1.Items.Clear();
+                listView1.Sorting = SortOrder.None;sortColumn = -1;
                 Cursor = Cursors.WaitCursor;
                 long _cnt = 0;
                 for (int i = 0; i < processedImages.Count; i++)
@@ -263,6 +264,37 @@ namespace LogoDetector
 #else
             textBox1.Text = "";
 #endif
+        }
+        private int sortColumn = -1;
+
+        private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+           var sw= System.Diagnostics.Stopwatch.StartNew();
+            if (e.Column != sortColumn)
+            {
+                // Set the sort column to the new column.
+                sortColumn = e.Column;
+                // Set the sort order to ascending by default.
+                listView1.Sorting = SortOrder.Ascending;
+            }
+            else
+            {
+                // Determine what the last sort order was and change it.
+                if (listView1.Sorting == SortOrder.Ascending)
+                    listView1.Sorting = SortOrder.Descending;
+                else
+                    listView1.Sorting = SortOrder.Ascending;
+            }
+
+            // Call the sort method to manually sort.
+            listView1.Sort();
+            // Set the ListViewItemSorter property to a new ListViewItemComparer
+            // object.
+            this.listView1.ListViewItemSorter = new ListViewItemComparer(e.Column,
+                                                              listView1.Sorting);
+            sw.Stop();
+            status_info.Text = sw.ElapsedMilliseconds + " Milliseconds.";
+
         }
     }
 
@@ -384,6 +416,7 @@ namespace LogoDetector
         {
             ImageLogoInfo info = new ImageLogoInfo();
             info.ImagePath = imgPath;
+          
             Bitmap source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
             var sw = System.Diagnostics.Stopwatch.StartNew();
             var min = Math.Min(source.Width, source.Height);

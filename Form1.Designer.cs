@@ -43,12 +43,12 @@
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.buttonExportMatches = new System.Windows.Forms.Button();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.status_info = new System.Windows.Forms.ToolStripStatusLabel();
@@ -133,6 +133,7 @@
             this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
+            this.listView1.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView1_ColumnClick);
             this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
             // 
             // columnHeader1
@@ -197,6 +198,20 @@
             this.buttonExportMatches.UseVisualStyleBackColor = true;
             this.buttonExportMatches.Click += new System.EventHandler(this.buttonExport_Click);
             // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.Checked = true;
+            this.checkBox3.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox3.Location = new System.Drawing.Point(3, 49);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(135, 17);
+            this.checkBox3.TabIndex = 6;
+            this.checkBox3.Text = "Show confused images";
+            this.toolTip1.SetToolTip(this.checkBox3, "Show images with low confedance (<%50 and > %45)");
+            this.checkBox3.UseVisualStyleBackColor = true;
+            this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
@@ -254,20 +269,6 @@
             // 
             this.saveFileDialog1.DefaultExt = "csv";
             this.saveFileDialog1.Filter = "CSV Files |*.csv";
-            // 
-            // checkBox3
-            // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Checked = true;
-            this.checkBox3.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox3.Location = new System.Drawing.Point(3, 49);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(135, 17);
-            this.checkBox3.TabIndex = 6;
-            this.checkBox3.Text = "Show confused images";
-            this.toolTip1.SetToolTip(this.checkBox3, "Show images with low confedance (<%50 and > %45)");
-            this.checkBox3.UseVisualStyleBackColor = true;
-            this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // statusStrip1
             // 
