@@ -1,5 +1,6 @@
 ﻿using LogoDetector.Properties;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -10,11 +11,12 @@ namespace LogoDetector
 {
     public class MyTemplateMatching
     {
+        public static List<TemplateLogoInfo> LogoTemplates = new List<TemplateLogoInfo>();
+
         static MyTemplateMatching()
         {
             LoadLogoTemplates();
         }
-        public static List<TemplateLogoInfo> LogoTemplates = new List<TemplateLogoInfo>();
         /// <summary>
         /// Loads a differnt sizes of the target logo
         /// </summary>
@@ -114,7 +116,7 @@ namespace LogoDetector
         /// <summary>
         /// Gets how many values not close to compareValue
         /// </summary>
-        private static int countCloseValues(byte[] sortedArray, int compareValue, int threshold)
+        private static int countCloseValues(byte[] sortedArray, byte compareValue, int threshold)
         {
             var counter = 0;
             var mid = sortedArray.Length / 2;
@@ -181,8 +183,8 @@ namespace LogoDetector
                         var compare = Compare(template, imageData, i, j, 20);
                         if (compare < 50)
                             compare = Math.Max(compare, Compare(template, imageData, i, j, 13));
-                        if (compare < 50)
-                            compare = Math.Max(compare, Compare(template, imageData, i, j, 10));
+                      //  if (compare < 50)
+                        //    compare = Math.Max(compare, Compare(template, imageData, i, j, 10));
                         if (compare > bestCompareValue)
                         {
                             bestCompareValue = compare;
@@ -192,6 +194,7 @@ namespace LogoDetector
                         }
                         if (bestCompareValue >= 50)
                             break;
+                        if (compare < 20) j++;
                     }
                     if (bestCompareValue >= 50) break;
                 }
@@ -268,4 +271,5 @@ namespace LogoDetector
             return data;
         } 
     }
+
 }
