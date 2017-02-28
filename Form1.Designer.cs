@@ -56,10 +56,11 @@
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.labelFailImage = new System.Windows.Forms.Label();
             this.buttonCopyImages = new System.Windows.Forms.Button();
+            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+            this.buttonPause = new System.Windows.Forms.Button();
             this.buttonExportMatches = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -90,7 +91,7 @@
             this.textBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
             this.textBox1.Location = new System.Drawing.Point(64, 6);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(482, 20);
+            this.textBox1.Size = new System.Drawing.Size(405, 20);
             this.textBox1.TabIndex = 1;
             this.textBox1.Text = "C:\\Users\\aqssass\\Desktop\\Sample_\\007\\NotWorking";
             // 
@@ -277,7 +278,7 @@
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(552, 4);
+            this.button2.Location = new System.Drawing.Point(475, 4);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(87, 23);
             this.button2.TabIndex = 2;
@@ -321,6 +322,18 @@
             this.buttonCopyImages.UseVisualStyleBackColor = true;
             this.buttonCopyImages.Click += new System.EventHandler(this.buttonCopyImages_Click);
             // 
+            // buttonPause
+            // 
+            this.buttonPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonPause.Enabled = false;
+            this.buttonPause.Location = new System.Drawing.Point(566, 4);
+            this.buttonPause.Name = "buttonPause";
+            this.buttonPause.Size = new System.Drawing.Size(75, 23);
+            this.buttonPause.TabIndex = 8;
+            this.buttonPause.Text = "Pause";
+            this.buttonPause.UseVisualStyleBackColor = true;
+            this.buttonPause.Click += new System.EventHandler(this.buttonPause_Click);
+            // 
             // buttonExportMatches
             // 
             this.buttonExportMatches.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
@@ -359,6 +372,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(732, 357);
+            this.Controls.Add(this.buttonPause);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.button2);
@@ -418,6 +432,7 @@
         private System.Windows.Forms.Label labelFailImage;
         private System.Windows.Forms.Button buttonCopyImages;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
+        private System.Windows.Forms.Button buttonPause;
     }
 }
 

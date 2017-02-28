@@ -50,13 +50,20 @@ namespace LogoDetector
                 return;
             }
             button1.Text = "Stop";
-          
+            buttonPause.Text = "Pause";
+          buttonPause.Enabled = true;
             backgroundWorker1.RunWorkerAsync( textBox1.Text);
            
 
         }
-
-
+        bool processPaused;
+        private void buttonPause_Click(object sender, EventArgs e)
+        {
+            processPaused = !processPaused;
+            buttonPause.Text = processPaused ? "Resume" : "Pause";
+            if (processPaused) processStopwatch.Stop();
+            else processStopwatch.Start();
+        }
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
@@ -64,6 +71,7 @@ namespace LogoDetector
             string folderPath = e.Argument+"";
             total_process_time = 0;
             withLogoCount = 0;
+            processPaused = false;
             processStopwatch = Stopwatch.StartNew();
             var imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF" };
             cancellationTokenSource = new CancellationTokenSource();
@@ -72,6 +80,8 @@ namespace LogoDetector
             {
                 if (backgroundWorker1.CancellationPending)
                     return;
+                while (processPaused && !backgroundWorker1.CancellationPending)
+                    Thread.Sleep(1000);
                 var info = ImageLogoInfo.ProccessImage(item);
                 total_process_time += info.ProcessingTime;
                 lock (processedImages) processedImages.Add(info);
@@ -83,6 +93,8 @@ namespace LogoDetector
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
+            buttonPause.Enabled = false;
+            processPaused = false;
             processStopwatch.Stop();
             timerRefreshlistview_Tick(null, null);
             button1.Text = "Process";
@@ -256,6 +268,8 @@ namespace LogoDetector
             var files = listviewItems.ConvertAll(c => c.ImagePath);
             new CopyFiles.CopyFiles(files, folderBrowserDialog1.SelectedPath).CopyAsync(new CopyFiles.DIA_CopyFiles() {  SynchronizationObject=this});
         }
+
+      
     }
 
 
