@@ -204,7 +204,7 @@ namespace LogoDetector
             if (bestTemplate != null && bestCompareValue >= 50)
             {
                 var data = bestTemplate.GetTemplateData(0,1,0);
-                SetBitmapData(data, source, bestTemplate_x, bestTemplate_y, c =>c==0?Color.Empty: Color.White);
+                SetBitmapData(data, source, bestTemplate_x, bestTemplate_y, c =>c==0?Color.Empty: Color.Red);
             }
             return bestCompareValue;
         }

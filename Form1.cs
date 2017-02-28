@@ -16,7 +16,8 @@ namespace LogoDetector
     public partial class Form1 : Form
     {
         List<ImageLogoInfo> processedImages = new List<ImageLogoInfo>();
-        int maxItemsinListview = 100 * 1000;
+        List<ImageLogoInfo> listviewItems = new List<ImageLogoInfo>();
+        //int maxItemsinListview = 100 * 1000;
 
         CancellationTokenSource TokenCanceller = null;
         bool OperationStarted = false;
@@ -53,9 +54,7 @@ namespace LogoDetector
             TokenCanceller = new CancellationTokenSource();
             button1.Text = "Stop";
             OperationStarted = true;
-            listView1.Items.Clear();
             processedImages.Clear();
-            listView1.SuspendLayout();
             string folderPath = textBox1.Text;
             double total_process_time = 0;
             long _cnt = 0, _cnt_true = 0, _cnt_false = 0;
@@ -80,25 +79,12 @@ namespace LogoDetector
                                 return;
                             }
                             {
-                                ListViewItem lvi = null;
                                 ImageLogoInfo info = null;
                                 if (File.Exists(item))
                                 {
 
                                     info = ImageLogoInfo.ProccessImage(item);
-
-                                    lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
-                                    if (info.ConfusedImage )
-                                    {
-                                        lvi.ImageIndex = 2;
-                                        lvi.ForeColor = Color.Orange;
-                                    }
-
-                                    lvi.SubItems.Add(info .ConfusedImage == true ? "Maybe" :  info.HasLogo ? "Yes" : "No");
-                                    lvi.SubItems.Add(info.ProcessingTime + " ms");
-                                    lvi.SubItems.Add(info.Confidence + " %");
                                     total_process_time += info.ProcessingTime;
-                                    lvi.Tag = info;
                                     processedImages.Add(info);
                                     _cnt++;
                                     if (info.HasLogo)
@@ -108,23 +94,11 @@ namespace LogoDetector
 
 
                                 }
-                                else
-                                {
-
-                                    lvi = new ListViewItem(Path.GetFileName(item), 1);
-                                    lvi.SubItems.Add("File does not exist!");
-                                    lvi.BackColor = Color.Red;
-                                    lvi.ForeColor = Color.White;
-
-                                }
 
                                 BeginInvoke((Action)(() =>
                                 {
-                                    if (_cnt < maxItemsinListview)
-                                        if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage) || (checkBox3.Checked && info.ConfusedImage))
-                                            listView1.Items.Add(lvi);
                                     stat_time.Text  = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
-                                    status_info.Text = listView1.Items.Count + " Items";
+                                    status_info.Text = processedImages.Count + " Items";
                                 }));
 
                             }
@@ -146,8 +120,6 @@ namespace LogoDetector
         {
             s.Stop();
             stat_time.Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
-            listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            listView1.ResumeLayout();
             OperationStarted = false;
             button1.Text = "Process";
         }))
@@ -168,10 +140,11 @@ namespace LogoDetector
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listView1.SelectedItems.Count == 1)
+            var selectedIndexes = listView1.SelectedIndices;
+            if (selectedIndexes.Count == 1)
             {
 
-                var info = (ImageLogoInfo)listView1.SelectedItems[0].Tag;
+                var info = listviewItems[selectedIndexes[0]];
                 if (info == null)
                 {
                     pictureBox1.Image =
@@ -181,8 +154,8 @@ namespace LogoDetector
                 {
                     var source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(info.ImagePath)));
                     pictureBox1.Image = source;
-                  //  ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath);
-                    pictureBox2.Image = info.ProcessedImage;
+                    //  ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath);
+                    pictureBox2.Image = info.ProcessedImage ?? source.Crop(65, 65);
                 }
 
             }
@@ -190,46 +163,8 @@ namespace LogoDetector
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            try
-            {
-                status_info.Text = "Working..";
-                listView1.SuspendLayout();
-                listView1.Items.Clear();
-                listView1.Sorting = SortOrder.None;sortColumn = -1;
-                Cursor = Cursors.WaitCursor;
-                long _cnt = 0;
-                for (int i = 0; i < processedImages.Count; i++)
-                {
-                    if (_cnt >= maxItemsinListview) return;
-                    var info = processedImages[i];
-                    if ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage) || (checkBox3.Checked && info.ConfusedImage))
-                    {
-                     
-                        var lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
-                        
-                        if (info.ConfusedImage  )
-                        {
-                            lvi.ForeColor = Color.Orange;
-                            lvi.ImageIndex = 2;
-                        }
-                        lvi.SubItems.Add(info.ConfusedImage == true ? "Maybe" : info.HasLogo ? "Yes" : "No");
-                        lvi.SubItems.Add(info.ProcessingTime + " ms");
-                        lvi.SubItems.Add(info.Confidence + " %");
-                        lvi.Tag = info;
-                        listView1.Items.Add(lvi);
-                        _cnt++;
-                    }
-                }
-            }
-            catch { }
-            finally
-            {
-                listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-
-                listView1.ResumeLayout();
-                status_info.Text = listView1.Items.Count + " Items";
-                Cursor = Cursors.Default;
-            }
+            listView1.SelectedIndices.Clear();
+            timerRefreshlistview_Tick(null, null) ;
         }
 
         private void buttonExport_Click(object sender, EventArgs e)
@@ -270,7 +205,6 @@ namespace LogoDetector
 
         private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-           var sw= System.Diagnostics.Stopwatch.StartNew();
             if (e.Column != sortColumn)
             {
                 // Set the sort column to the new column.
@@ -286,16 +220,7 @@ namespace LogoDetector
                 else
                     listView1.Sorting = SortOrder.Ascending;
             }
-
-            // Call the sort method to manually sort.
-            listView1.Sort();
-            // Set the ListViewItemSorter property to a new ListViewItemComparer
-            // object.
-            this.listView1.ListViewItemSorter = new ListViewItemComparer(e.Column,
-                                                              listView1.Sorting);
-            sw.Stop();
-            status_info.Text = sw.ElapsedMilliseconds + " Milliseconds.";
-
+            timerRefreshlistview_Tick(null, null);
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -319,6 +244,34 @@ namespace LogoDetector
 
             MessageBox.Show("Number of images= " + cnt +" images"+ Environment.NewLine + "Images supported are:" + Environment.NewLine + string.Join(" , ", imgExts)     +"");
 
+        }
+
+        private void listView1_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
+        {
+            var info = listviewItems[e.ItemIndex];
+            var lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
+
+            if (info.ConfusedImage)
+            {
+                lvi.ForeColor = Color.Orange;
+                lvi.ImageIndex = 2;
+            }
+            lvi.SubItems.Add(info.ConfusedImage == true ? "Maybe" : info.HasLogo ? "Yes" : "No");
+            lvi.SubItems.Add(info.ProcessingTime + " ms");
+            lvi.SubItems.Add(info.Confidence + " %");
+            lvi.Tag = info;
+            e.Item = lvi;
+        }
+
+        private void timerRefreshlistview_Tick(object sender, EventArgs e)
+        {
+            var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage) || (checkBox3.Checked && info.ConfusedImage)));
+
+            if (sortColumn != -1 && listView1.Sorting != SortOrder.None)
+                items.Sort(new ListViewItemComparer(sortColumn, listView1.Sorting));
+
+            listviewItems = items;
+            listView1.VirtualListSize = listviewItems.Count;
         }
     }
 
@@ -409,33 +362,6 @@ namespace LogoDetector
         public bool ConfusedImage { get { return Confidence < 50 && Confidence > 45; } }
         public Bitmap ProcessedImage { get; set; }
 
-        //public static ImageLogoInfo ProccessImage_old2(string imgPath)
-        //{
-        //    ImageLogoInfo info = new ImageLogoInfo();
-        //    info.ImagePath = imgPath;
-        //    Bitmap source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
-        //    var sw = System.Diagnostics.Stopwatch.StartNew();
-        //    var min = Math.Min(source.Width, source.Height);
-        //    var scales = min > 500 ? new float[] { 1 } : (min > 400 ? new float[] { 1, 1.5f } : new float[] { 1, 1.5f, 2f });
-        //    var grayScales = new byte[] { 90, 100, 130, 150, 160, 180, 200, 220 };
-        //    foreach (var scale in scales)
-        //    {
-        //        foreach (var gray in grayScales)
-        //        {
-        //            var firstCheck = MyLogoDetector.Process(source.Crop(65, 65, scale), gray, 4);
-        //            info.HasLogo = firstCheck.Value > 50;
-        //            info.Confidence = firstCheck.Value;
-        //            info.ProcessedImage = firstCheck.Key;
-        //            if (info.HasLogo) break;
-        //        }
-
-        //        if (info.HasLogo) break;
-        //    }
-        //    sw.Stop();
-        //    info.ProcessingTime = sw.ElapsedMilliseconds;
-
-        //    return info;
-        //}
         public static ImageLogoInfo ProccessImage(string imgPath)
         {
             ImageLogoInfo info = new ImageLogoInfo();
@@ -451,7 +377,8 @@ namespace LogoDetector
                 var firstCheck = MyTemplateMatching.DetectLogo(image);
                 info.HasLogo = firstCheck > 50;
                 info.Confidence = (int)firstCheck;
-                info.ProcessedImage = image;
+                if (info.HasLogo)
+                    info.ProcessedImage = image;
 
                 if (info.HasLogo) break;
             }
