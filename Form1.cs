@@ -30,6 +30,8 @@ namespace LogoDetector
         {
             if (backgroundWorker1.IsBusy)
             {
+                if (MessageBox.Show(this,"Do you want to cancel the process?", "Cancel process", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                    return;
                 button1.Text = "Process";
                 backgroundWorker1.CancelAsync();
                 cancellationTokenSource.Cancel();
@@ -150,13 +152,8 @@ namespace LogoDetector
                 StringBuilder txt = new StringBuilder();
 
                 txt.AppendLine("Image Path,Has Logo,Processing Time,Confidence");
-                for (int i = 0; i < processedImages.Count; i++)
-
-                {
-                    var item = processedImages[i];
-                    if ((checkBox1.Checked && item.HasLogo) || (checkBox2.Checked && !item.HasLogo && !item.ConfusedImage) || (checkBox3.Checked && item.ConfusedImage))
-                        txt.AppendLine(item.ImagePath + "," + (item.ConfusedImage ==true ?"Maybe": item.HasLogo+"" )+ "," + item.ProcessingTime + "ms,"+ item.Confidence + "%");
-                }
+                foreach (var item in listviewItems)
+                    txt.AppendLine(item.ImagePath + "," + (item.ConfusedImage == true ? "Maybe" : item.HasLogo + "") + "," + item.ProcessingTime + "ms," + item.Confidence + "%");
                 var fpath = saveFileDialog1.FileName;
 
                 File.WriteAllText(saveFileDialog1.FileName, txt.ToString());
@@ -252,7 +249,7 @@ namespace LogoDetector
             else if (!backgroundWorker1.IsBusy)
                 status_info.Text += " (Process completed)";
 
-            var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage) || (checkBox3.Checked && info.ConfusedImage)));
+            var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo&&info.Error==null) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage && info.Error == null) || (checkBox3.Checked && info.ConfusedImage && info.Error == null) || (checkBoxShowErrors.Checked && info.Error!=null)));
 
             if (sortColumn != -1 && listView1.Sorting != SortOrder.None)
                 items.Sort(new ListViewItemComparer(sortColumn, listView1.Sorting));

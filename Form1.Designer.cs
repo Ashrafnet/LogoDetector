@@ -41,10 +41,16 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.checkBoxShowErrors = new System.Windows.Forms.CheckBox();
+            this.buttonCopyImages = new System.Windows.Forms.Button();
+            this.buttonExportMatches = new System.Windows.Forms.Button();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.labelFailImage = new System.Windows.Forms.Label();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -54,13 +60,8 @@
             this.button2 = new System.Windows.Forms.Button();
             this.timerRefreshlistview = new System.Windows.Forms.Timer(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.labelFailImage = new System.Windows.Forms.Label();
-            this.buttonCopyImages = new System.Windows.Forms.Button();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.buttonPause = new System.Windows.Forms.Button();
-            this.buttonExportMatches = new System.Windows.Forms.Button();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -69,9 +70,9 @@
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -123,9 +124,9 @@
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
             this.listView1.LargeImageList = this.imageList1;
-            this.listView1.Location = new System.Drawing.Point(0, 72);
+            this.listView1.Location = new System.Drawing.Point(0, 77);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(325, 228);
+            this.listView1.Size = new System.Drawing.Size(325, 223);
             this.listView1.SmallImageList = this.imageList1;
             this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
@@ -171,6 +172,7 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.checkBoxShowErrors);
             this.splitContainer1.Panel1.Controls.Add(this.buttonCopyImages);
             this.splitContainer1.Panel1.Controls.Add(this.buttonExportMatches);
             this.splitContainer1.Panel1.Controls.Add(this.checkBox3);
@@ -185,10 +187,51 @@
             this.splitContainer1.SplitterDistance = 325;
             this.splitContainer1.TabIndex = 6;
             // 
+            // checkBoxShowErrors
+            // 
+            this.checkBoxShowErrors.AutoSize = true;
+            this.checkBoxShowErrors.Location = new System.Drawing.Point(3, 58);
+            this.checkBoxShowErrors.Name = "checkBoxShowErrors";
+            this.checkBoxShowErrors.Size = new System.Drawing.Size(117, 17);
+            this.checkBoxShowErrors.TabIndex = 9;
+            this.checkBoxShowErrors.Text = "Show failed images";
+            this.toolTip1.SetToolTip(this.checkBoxShowErrors, "Show failed images");
+            this.checkBoxShowErrors.UseVisualStyleBackColor = true;
+            this.checkBoxShowErrors.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
+            // buttonCopyImages
+            // 
+            this.buttonCopyImages.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCopyImages.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
+            this.buttonCopyImages.ForeColor = System.Drawing.Color.Green;
+            this.buttonCopyImages.Location = new System.Drawing.Point(201, 25);
+            this.buttonCopyImages.Name = "buttonCopyImages";
+            this.buttonCopyImages.Size = new System.Drawing.Size(124, 24);
+            this.buttonCopyImages.TabIndex = 8;
+            this.buttonCopyImages.Text = "Copy Images...";
+            this.buttonCopyImages.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.buttonCopyImages.UseVisualStyleBackColor = true;
+            this.buttonCopyImages.Click += new System.EventHandler(this.buttonCopyImages_Click);
+            // 
+            // buttonExportMatches
+            // 
+            this.buttonExportMatches.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonExportMatches.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
+            this.buttonExportMatches.ForeColor = System.Drawing.Color.Green;
+            this.buttonExportMatches.Image = global::LogoDetector.Properties.Resources._1487537573_document_excel_csv;
+            this.buttonExportMatches.Location = new System.Drawing.Point(201, 50);
+            this.buttonExportMatches.Name = "buttonExportMatches";
+            this.buttonExportMatches.Size = new System.Drawing.Size(124, 24);
+            this.buttonExportMatches.TabIndex = 7;
+            this.buttonExportMatches.Text = "Export to csv..";
+            this.buttonExportMatches.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.buttonExportMatches.UseVisualStyleBackColor = true;
+            this.buttonExportMatches.Click += new System.EventHandler(this.buttonExport_Click);
+            // 
             // checkBox3
             // 
             this.checkBox3.AutoSize = true;
-            this.checkBox3.Location = new System.Drawing.Point(3, 49);
+            this.checkBox3.Location = new System.Drawing.Point(3, 39);
             this.checkBox3.Name = "checkBox3";
             this.checkBox3.Size = new System.Drawing.Size(135, 17);
             this.checkBox3.TabIndex = 6;
@@ -200,7 +243,7 @@
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(3, 26);
+            this.checkBox2.Location = new System.Drawing.Point(3, 21);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(150, 17);
             this.checkBox2.TabIndex = 6;
@@ -239,6 +282,36 @@
             this.splitContainer2.Size = new System.Drawing.Size(379, 300);
             this.splitContainer2.SplitterDistance = 208;
             this.splitContainer2.TabIndex = 5;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(379, 208);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 4;
+            this.pictureBox1.TabStop = false;
+            // 
+            // labelFailImage
+            // 
+            this.labelFailImage.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
+            this.labelFailImage.ForeColor = System.Drawing.Color.Red;
+            this.labelFailImage.Location = new System.Drawing.Point(3, 1);
+            this.labelFailImage.Name = "labelFailImage";
+            this.labelFailImage.Size = new System.Drawing.Size(376, 87);
+            this.labelFailImage.TabIndex = 6;
+            this.labelFailImage.Text = "Fail Image";
+            this.labelFailImage.Visible = false;
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBox2.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(379, 88);
+            this.pictureBox2.TabIndex = 5;
+            this.pictureBox2.TabStop = false;
             // 
             // saveFileDialog1
             // 
@@ -298,30 +371,6 @@
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             // 
-            // labelFailImage
-            // 
-            this.labelFailImage.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
-            this.labelFailImage.ForeColor = System.Drawing.Color.Red;
-            this.labelFailImage.Location = new System.Drawing.Point(3, 1);
-            this.labelFailImage.Name = "labelFailImage";
-            this.labelFailImage.Size = new System.Drawing.Size(376, 87);
-            this.labelFailImage.TabIndex = 6;
-            this.labelFailImage.Text = "Fail Image";
-            this.labelFailImage.Visible = false;
-            // 
-            // buttonCopyImages
-            // 
-            this.buttonCopyImages.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
-            this.buttonCopyImages.ForeColor = System.Drawing.Color.Green;
-            this.buttonCopyImages.Location = new System.Drawing.Point(177, 19);
-            this.buttonCopyImages.Name = "buttonCopyImages";
-            this.buttonCopyImages.Size = new System.Drawing.Size(124, 24);
-            this.buttonCopyImages.TabIndex = 8;
-            this.buttonCopyImages.Text = "Copy Images...";
-            this.buttonCopyImages.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.buttonCopyImages.UseVisualStyleBackColor = true;
-            this.buttonCopyImages.Click += new System.EventHandler(this.buttonCopyImages_Click);
-            // 
             // buttonPause
             // 
             this.buttonPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -333,39 +382,6 @@
             this.buttonPause.Text = "Pause";
             this.buttonPause.UseVisualStyleBackColor = true;
             this.buttonPause.Click += new System.EventHandler(this.buttonPause_Click);
-            // 
-            // buttonExportMatches
-            // 
-            this.buttonExportMatches.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
-            this.buttonExportMatches.ForeColor = System.Drawing.Color.Green;
-            this.buttonExportMatches.Image = global::LogoDetector.Properties.Resources._1487537573_document_excel_csv;
-            this.buttonExportMatches.Location = new System.Drawing.Point(177, 44);
-            this.buttonExportMatches.Name = "buttonExportMatches";
-            this.buttonExportMatches.Size = new System.Drawing.Size(124, 24);
-            this.buttonExportMatches.TabIndex = 7;
-            this.buttonExportMatches.Text = "Export to csv..";
-            this.buttonExportMatches.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.buttonExportMatches.UseVisualStyleBackColor = true;
-            this.buttonExportMatches.Click += new System.EventHandler(this.buttonExport_Click);
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(379, 208);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 4;
-            this.pictureBox1.TabStop = false;
-            // 
-            // pictureBox2
-            // 
-            this.pictureBox2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox2.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(379, 88);
-            this.pictureBox2.TabIndex = 5;
-            this.pictureBox2.TabStop = false;
             // 
             // Form1
             // 
@@ -391,10 +407,10 @@
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -433,6 +449,7 @@
         private System.Windows.Forms.Button buttonCopyImages;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.Button buttonPause;
+        private System.Windows.Forms.CheckBox checkBoxShowErrors;
     }
 }
 
