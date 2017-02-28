@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -27,7 +28,9 @@ namespace LogoDetector
             InitializeComponent();
             TokenCanceller = new CancellationTokenSource();
         }
-
+        double total_process_time = 0;
+        long withLogoCount = 0;
+        Stopwatch processStopwatch;
         private void button1_Click(object sender, EventArgs e)
         {
             if (OperationStarted)
@@ -56,9 +59,9 @@ namespace LogoDetector
             OperationStarted = true;
             processedImages.Clear();
             string folderPath = textBox1.Text;
-            double total_process_time = 0;
-            long _cnt = 0, _cnt_true = 0, _cnt_false = 0;
-            var s = System.Diagnostics.Stopwatch.StartNew();
+            total_process_time = 0;
+            withLogoCount = 0;
+            processStopwatch = Stopwatch.StartNew();
             try
             {
                 var imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF" };
@@ -68,8 +71,6 @@ namespace LogoDetector
                 {
                     try
                     {
-
-
                         Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, SearchOption.AllDirectories), new ParallelOptions { MaxDegreeOfParallelism = System.Environment.ProcessorCount, CancellationToken = TokenCanceller.Token }, (item) =>
                         {
 
@@ -85,31 +86,16 @@ namespace LogoDetector
 
                                     info = ImageLogoInfo.ProccessImage(item);
                                     total_process_time += info.ProcessingTime;
-                                    processedImages.Add(info);
-                                    _cnt++;
+                                    lock (processedImages) processedImages.Add(info);
                                     if (info.HasLogo)
-                                        _cnt_true++;
-                                    else
-                                        _cnt_false++;
-
-
+                                        withLogoCount++;
                                 }
-
-                                BeginInvoke((Action)(() =>
-                                {
-                                    stat_time.Text  = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
-                                    status_info.Text = processedImages.Count + " Items";
-                                }));
 
                             }
                         }
                      );
                     }
-                    catch (OperationCanceledException er)
-                    {
-
-
-                    }
+                    catch (OperationCanceledException er) { }
                     catch (Exception er)
                     {
                         MessageBox.Show(er.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -118,8 +104,8 @@ namespace LogoDetector
                 task.ContinueWith((t) =>
         BeginInvoke((Action)(() =>
         {
-            s.Stop();
-            stat_time.Text = s.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + _cnt + " Items, True=" + _cnt_true + " False=" + _cnt_false + ")";
+            processStopwatch.Stop();
+            timerRefreshlistview_Tick(null, null);
             OperationStarted = false;
             button1.Text = "Process";
         }))
@@ -265,6 +251,11 @@ namespace LogoDetector
 
         private void timerRefreshlistview_Tick(object sender, EventArgs e)
         {
+            if (!OperationStarted&& sender==timerRefreshlistview) return;
+
+            status_info.Text = processedImages.Count + " Items";
+            stat_time.Text = processStopwatch.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + processedImages.Count + " Items, True=" + withLogoCount + " False=" + (processedImages.Count - withLogoCount) + ")";
+
             var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage) || (checkBox3.Checked && info.ConfusedImage)));
 
             if (sortColumn != -1 && listView1.Sorting != SortOrder.None)
@@ -366,9 +357,9 @@ namespace LogoDetector
         {
             ImageLogoInfo info = new ImageLogoInfo();
             info.ImagePath = imgPath;
-          
+
             Bitmap source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
-            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var sw = Stopwatch.StartNew();
             var min = Math.Min(source.Width, source.Height);
             var scales = min > 500 ? new float[] { 1 } : (min > 400 ? new float[] { 1, 1.5f } : new float[] { 1, 1.5f, 2f });
             foreach (var scale in scales)

@@ -314,7 +314,7 @@
             // timerRefreshlistview
             // 
             this.timerRefreshlistview.Enabled = true;
-            this.timerRefreshlistview.Interval = 500;
+            this.timerRefreshlistview.Interval = 300;
             this.timerRefreshlistview.Tick += new System.EventHandler(this.timerRefreshlistview_Tick);
             // 
             // Form1
