@@ -18,26 +18,21 @@ namespace LogoDetector
     {
         List<ImageLogoInfo> processedImages = new List<ImageLogoInfo>();
         List<ImageLogoInfo> listviewItems = new List<ImageLogoInfo>();
-        //int maxItemsinListview = 100 * 1000;
-
-        CancellationTokenSource TokenCanceller = null;
-        bool OperationStarted = false;
-
+        CancellationTokenSource cancellationTokenSource;
         public Form1()
         {
             InitializeComponent();
-            TokenCanceller = new CancellationTokenSource();
         }
         double total_process_time = 0;
         long withLogoCount = 0;
         Stopwatch processStopwatch;
         private void button1_Click(object sender, EventArgs e)
         {
-            if (OperationStarted)
+            if (backgroundWorker1.IsBusy)
             {
                 button1.Text = "Process";
-                TokenCanceller.Cancel(false);
-                TokenCanceller.Dispose();
+                backgroundWorker1.CancelAsync();
+                cancellationTokenSource.Cancel();
                 return;
             }
             if(string.IsNullOrWhiteSpace(textBox1.Text))
@@ -54,74 +49,51 @@ namespace LogoDetector
                 textBox1.SelectAll();
                 return;
             }
-            TokenCanceller = new CancellationTokenSource();
             button1.Text = "Stop";
-            OperationStarted = true;
+          
+            backgroundWorker1.RunWorkerAsync( textBox1.Text);
+           
+
+        }
+
+
+
+        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
             processedImages.Clear();
-            string folderPath = textBox1.Text;
+            string folderPath = e.Argument+"";
             total_process_time = 0;
             withLogoCount = 0;
             processStopwatch = Stopwatch.StartNew();
-            try
+            var imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF" };
+            cancellationTokenSource = new CancellationTokenSource();
+          
+            Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, SearchOption.AllDirectories), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
             {
-                var imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF" };
-                // foreach (var item in MyDirectory.GetFiles(textBox1.Text, imgExts, SearchOption.AllDirectories))
+                if (backgroundWorker1.CancellationPending)
+                    return;
+                var info = ImageLogoInfo.ProccessImage(item);
+                total_process_time += info.ProcessingTime;
+                lock (processedImages) processedImages.Add(info);
+                if (info.HasLogo)
+                    withLogoCount++;
+            });
 
-                Task task = Task.Factory.StartNew(delegate
-                {
-                    try
-                    {
-                        Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, SearchOption.AllDirectories), new ParallelOptions { MaxDegreeOfParallelism = System.Environment.ProcessorCount, CancellationToken = TokenCanceller.Token }, (item) =>
-                        {
+        }
 
-                            if (TokenCanceller.IsCancellationRequested)
-                            {
-
-                                return;
-                            }
-                            {
-                                ImageLogoInfo info = null;
-                                if (File.Exists(item))
-                                {
-
-                                    info = ImageLogoInfo.ProccessImage(item);
-                                    total_process_time += info.ProcessingTime;
-                                    lock (processedImages) processedImages.Add(info);
-                                    if (info.HasLogo)
-                                        withLogoCount++;
-                                }
-
-                            }
-                        }
-                     );
-                    }
-                    catch (OperationCanceledException er) { }
-                    catch (Exception er)
-                    {
-                        MessageBox.Show(er.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                });
-                task.ContinueWith((t) =>
-        BeginInvoke((Action)(() =>
+        private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
             processStopwatch.Stop();
             timerRefreshlistview_Tick(null, null);
-            OperationStarted = false;
             button1.Text = "Process";
-        }))
-);
-
-
-            }
-            catch (Exception ex)
+            if (e.Error != null&&!(e.Error is OperationCanceledException))
             {
-                MessageBox.Show(ex.Message, "error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(e.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            finally
+            else if (e.Error == null)
             {
-
+                MessageBox.Show("Process completed", "Ready", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-
         }
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
@@ -131,10 +103,13 @@ namespace LogoDetector
             {
 
                 var info = listviewItems[selectedIndexes[0]];
-                if (info == null)
+                labelFailImage.Visible = false;
+                pictureBox1.Image =pictureBox2.Image = null;
+                if (info == null) { }
+                else if (info.Error != null)
                 {
-                    pictureBox1.Image =
-                    pictureBox2.Image = null;
+                    labelFailImage.Text = info.Error.Message;
+                    labelFailImage.Visible = true;
                 }
                 else
                 {
@@ -242,6 +217,11 @@ namespace LogoDetector
                 lvi.ForeColor = Color.Orange;
                 lvi.ImageIndex = 2;
             }
+            else if (info.Error!=null)
+            {
+                lvi.ForeColor = Color.Red;
+                lvi.ImageIndex = 3;
+            }
             lvi.SubItems.Add(info.ConfusedImage == true ? "Maybe" : info.HasLogo ? "Yes" : "No");
             lvi.SubItems.Add(info.ProcessingTime + " ms");
             lvi.SubItems.Add(info.Confidence + " %");
@@ -251,10 +231,14 @@ namespace LogoDetector
 
         private void timerRefreshlistview_Tick(object sender, EventArgs e)
         {
-            if (!OperationStarted&& sender==timerRefreshlistview) return;
+            if (!backgroundWorker1.IsBusy&& sender==timerRefreshlistview) return;
 
             status_info.Text = processedImages.Count + " Items";
             stat_time.Text = processStopwatch.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + processedImages.Count + " Items, True=" + withLogoCount + " False=" + (processedImages.Count - withLogoCount) + ")";
+            if (cancellationTokenSource != null && cancellationTokenSource.IsCancellationRequested)
+                status_info.Text += " (User canceled the process)";
+            else if (!backgroundWorker1.IsBusy)
+                status_info.Text += " (Process completed)";
 
             var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage) || (checkBox3.Checked && info.ConfusedImage)));
 
@@ -263,6 +247,14 @@ namespace LogoDetector
 
             listviewItems = items;
             listView1.VirtualListSize = listviewItems.Count;
+        }
+
+        private void buttonCopyImages_Click(object sender, EventArgs e)
+        {
+            if (DialogResult.OK != folderBrowserDialog1.ShowDialog(this))
+                return;
+            var files = listviewItems.ConvertAll(c => c.ImagePath);
+            new CopyFiles.CopyFiles(files, folderBrowserDialog1.SelectedPath).CopyAsync(new CopyFiles.DIA_CopyFiles() {  SynchronizationObject=this});
         }
     }
 
@@ -353,26 +345,30 @@ namespace LogoDetector
         public bool ConfusedImage { get { return Confidence < 50 && Confidence > 45; } }
         public Bitmap ProcessedImage { get; set; }
 
+        public Exception Error { get; private set; }
         public static ImageLogoInfo ProccessImage(string imgPath)
         {
             ImageLogoInfo info = new ImageLogoInfo();
             info.ImagePath = imgPath;
-
-            Bitmap source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
             var sw = Stopwatch.StartNew();
-            var min = Math.Min(source.Width, source.Height);
-            var scales = min > 500 ? new float[] { 1 } : (min > 400 ? new float[] { 1, 1.5f } : new float[] { 1, 1.5f, 2f });
-            foreach (var scale in scales)
+            try
             {
-                var image = source.Crop(65, 65, scale);
-                var firstCheck = MyTemplateMatching.DetectLogo(image);
-                info.HasLogo = firstCheck > 50;
-                info.Confidence = (int)firstCheck;
-                if (info.HasLogo)
-                    info.ProcessedImage = image;
+                Bitmap source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
+                var min = Math.Min(source.Width, source.Height);
+                var scales = min > 500 ? new float[] { 1 } : (min > 400 ? new float[] { 1, 1.5f } : new float[] { 1, 1.5f, 2f });
+                foreach (var scale in scales)
+                {
+                    var image = source.Crop(65, 65, scale);
+                    var firstCheck = MyTemplateMatching.DetectLogo(image);
+                    info.HasLogo = firstCheck > 50;
+                    info.Confidence = (int)firstCheck;
+                    if (info.HasLogo)
+                        info.ProcessedImage = image;
 
-                if (info.HasLogo) break;
+                    if (info.HasLogo) break;
+                }
             }
+            catch(Exception ex) { info.Error = ex; }
             sw.Stop();
             info.ProcessingTime = sw.ElapsedMilliseconds;
 

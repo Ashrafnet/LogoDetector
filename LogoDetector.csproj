@@ -51,6 +51,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CopyFiles\CopyFiles.cs" />
+    <Compile Include="CopyFiles\DIA_CopyFiles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CopyFiles\DIA_CopyFiles.designer.cs">
+      <DependentUpon>DIA_CopyFiles.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -64,6 +71,9 @@
     <Compile Include="utilities\LockBitmap.cs" />
     <Compile Include="utilities\MyLogoDetector.cs" />
     <Compile Include="utilities\MyTemplateMatching.cs" />
+    <EmbeddedResource Include="CopyFiles\DIA_CopyFiles.resx">
+      <DependentUpon>DIA_CopyFiles.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -119,6 +129,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\logo28x28.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Clipboard.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CopyFiles\CopyFiles.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
