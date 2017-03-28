@@ -202,6 +202,7 @@
             // buttonCopyImages
             // 
             this.buttonCopyImages.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCopyImages.Enabled = false;
             this.buttonCopyImages.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
             this.buttonCopyImages.ForeColor = System.Drawing.Color.Green;
             this.buttonCopyImages.Location = new System.Drawing.Point(201, 25);
@@ -216,6 +217,7 @@
             // buttonExportMatches
             // 
             this.buttonExportMatches.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonExportMatches.Enabled = false;
             this.buttonExportMatches.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
             this.buttonExportMatches.ForeColor = System.Drawing.Color.Green;
             this.buttonExportMatches.Image = global::LogoDetector.Properties.Resources._1487537573_document_excel_csv;

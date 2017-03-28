@@ -146,17 +146,34 @@ namespace LogoDetector
         {
             try
             {
-
+                if (listviewItems == null || listviewItems.Count < 1)
+                {
+                    MessageBox.Show("No items in list to export!", "No Items", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
                 if (DialogResult.OK != saveFileDialog1.ShowDialog(this))
                     return;
+                var fpath = saveFileDialog1.FileName;
                 StringBuilder txt = new StringBuilder();
 
                 txt.AppendLine("Image Path,Has Logo,Processing Time,Confidence");
-                foreach (var item in listviewItems)
-                    txt.AppendLine(item.ImagePath + "," + (item.ConfusedImage == true ? "Maybe" : item.HasLogo + "") + "," + item.ProcessingTime + "ms," + item.Confidence + "%");
-                var fpath = saveFileDialog1.FileName;
+                using (StreamWriter outfile = new StreamWriter(fpath))
+                {
 
-                File.WriteAllText(saveFileDialog1.FileName, txt.ToString());
+                    foreach (var item in listviewItems)
+                    {
+
+                        txt.AppendLine(item.ImagePath + "," + (item.ConfusedImage == true ? "Maybe" : item.HasLogo + "") + "," + item.ProcessingTime + "ms," + item.Confidence + "%");
+                        outfile.Write(txt.ToString());
+
+
+                        txt.Clear();
+                    }
+
+                }
+                
+
+               // File.WriteAllText(fpath, txt.ToString());
             }
             catch (Exception ex)
             {
@@ -243,7 +260,8 @@ namespace LogoDetector
             if (!backgroundWorker1.IsBusy&& sender==timerRefreshlistview) return;
 
             status_info.Text = processedImages.Count + " Items";
-            stat_time.Text = processStopwatch.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + processedImages.Count + " Items, True=" + withLogoCount + " False=" + (processedImages.Count - withLogoCount) + ")";
+            if(processStopwatch!=null )
+                stat_time.Text = processStopwatch.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + processedImages.Count + " Items, True=" + withLogoCount + " False=" + (processedImages.Count - withLogoCount) + ")";
             if (cancellationTokenSource != null && cancellationTokenSource.IsCancellationRequested)
                 status_info.Text += " (User canceled the process)";
             else if (!backgroundWorker1.IsBusy)
@@ -256,10 +274,16 @@ namespace LogoDetector
 
             listviewItems = items;
             listView1.VirtualListSize = listviewItems.Count;
+            buttonCopyImages.Enabled = buttonExportMatches.Enabled = listviewItems!=null && listviewItems.Count > 0;
         }
 
         private void buttonCopyImages_Click(object sender, EventArgs e)
         {
+            if(listviewItems==null || listviewItems.Count <1)
+            {
+                MessageBox.Show("No items in list to copy!", "No Items", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             if (DialogResult.OK != folderBrowserDialog1.ShowDialog(this))
                 return;
             var files = listviewItems.ConvertAll(c => c.ImagePath);
