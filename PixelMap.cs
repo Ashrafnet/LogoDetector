@@ -14,7 +14,7 @@ using System.Text;
 using SysColor = System.Drawing.Color;
 using SysRectangle = System.Drawing.Rectangle;
 
-namespace PixelMap
+namespace LogoDetector
 {
     /// <summary>
     /// This class provides a managed C# abstraction for Portable Bit Map (.pbm), Portable Grey Map (.pgm) and 
@@ -108,7 +108,8 @@ namespace PixelMap
         {
             if (File.Exists(filename))
             {
-                FileStream stream = new FileStream(filename, FileMode.Open);
+                Stream  stream = new MemoryStream(File.ReadAllBytes(filename));// new FileStream(filename, FileMode.Open);
+                
                 this.FromStream(stream);
                 stream.Close();
             }

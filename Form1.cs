@@ -18,6 +18,9 @@ namespace LogoDetector
     {
         List<ImageLogoInfo> processedImages = new List<ImageLogoInfo>();
         List<ImageLogoInfo> listviewItems = new List<ImageLogoInfo>();
+        string[] imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF", "*.ppm", "*.pgm", "*.pbm" };
+      
+
         CancellationTokenSource cancellationTokenSource;
         public Form1()
         {
@@ -75,7 +78,6 @@ namespace LogoDetector
             withLogoCount = 0;
             processPaused = false;
             processStopwatch = Stopwatch.StartNew();
-            var imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF" };
             cancellationTokenSource = new CancellationTokenSource();
           
             Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, SearchOption.AllDirectories), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
@@ -127,7 +129,8 @@ namespace LogoDetector
                 }
                 else
                 {
-                    var source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(info.ImagePath)));
+                   // var source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(info.ImagePath)));
+                    Bitmap source =ImageLogoInfo. GetBitmap(info.ImagePath);
                     pictureBox1.Image = source;
                     //  ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath);
                     pictureBox2.Image = info.ProcessedImage ?? source.Crop(65, 65);
@@ -226,7 +229,6 @@ namespace LogoDetector
                 textBox1.SelectAll();
                 return;
             }
-            var imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF" };
             var cnt=MyDirectory.GetFiles(textBox1.Text, imgExts, SearchOption.AllDirectories).LongCount();
 
             MessageBox.Show("Number of images= " + cnt +" images"+ Environment.NewLine + "Images supported are:" + Environment.NewLine + string.Join(" , ", imgExts)     +"");
@@ -388,7 +390,7 @@ namespace LogoDetector
             var sw = Stopwatch.StartNew();
             try
             {
-                Bitmap source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
+                Bitmap source = GetBitmap(imgPath);
                 var min = Math.Min(source.Width, source.Height);
                 var scales = min > 500 ? new float[] { 1 } : (min > 400 ? new float[] { 1, 1.5f } : new float[] { 1, 1.5f, 2f });
                 foreach (var scale in scales)
@@ -403,11 +405,23 @@ namespace LogoDetector
                     if (info.HasLogo) break;
                 }
             }
-            catch(Exception ex) { info.Error = ex; }
+            catch (Exception ex) { info.Error = ex; }
             sw.Stop();
             info.ProcessingTime = sw.ElapsedMilliseconds;
 
             return info;
+        }
+
+        internal  static Bitmap GetBitmap(string imgPath)
+        {
+            string[] imgExts_ppm = new string[] { ".ppm", ".pgm", ".pbm" };
+            Bitmap source = null;
+
+            if (imgExts_ppm.Contains((Path.GetExtension(imgPath)+"").ToLower()))
+                source = new PixelMap(imgPath).BitMap;
+            else
+                source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
+            return source;
         }
     }
 }
