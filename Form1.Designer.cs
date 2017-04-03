@@ -94,7 +94,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(405, 20);
             this.textBox1.TabIndex = 1;
-            this.textBox1.Text = "C:\\Users\\aqssass\\Desktop\\Sample_\\007\\NotWorking";
+            this.textBox1.Text = "C:\\D\\Ken\\LogoDetector\\Photos\\New folder";
             // 
             // button1
             // 

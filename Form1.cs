@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SQLite;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -69,7 +70,7 @@ namespace LogoDetector
             if (processPaused) processStopwatch.Stop();
             else processStopwatch.Start();
         }
-
+        ProcessedItems items;
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             processedImages.Clear();
@@ -79,7 +80,10 @@ namespace LogoDetector
             processPaused = false;
             processStopwatch = Stopwatch.StartNew();
             cancellationTokenSource = new CancellationTokenSource();
-          
+            if (items != null)
+                items.Dispose();
+            items = new ProcessedItems(true);
+           
             Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, SearchOption.AllDirectories), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
             {
                 if (backgroundWorker1.CancellationPending)
@@ -88,9 +92,18 @@ namespace LogoDetector
                     Thread.Sleep(1000);
                 var info = ImageLogoInfo.ProccessImage(item);
                 total_process_time += info.ProcessingTime;
-                lock (processedImages) processedImages.Add(info);
-                if (info.HasLogo)
-                    withLogoCount++;
+                
+
+                for (int i = 0; i < 1000 * 1000; i++)
+                {
+
+                     lock (processedImages)  processedImages.Add(info);
+                    // items.InsertItemToSqlite(info);
+
+
+                    if (info.HasLogo)
+                        withLogoCount++;
+                }
             });
 
         }
@@ -186,6 +199,7 @@ namespace LogoDetector
 
         private void Form1_Load(object sender, EventArgs e)
         {
+           
 #if DEBUG
 #else
             textBox1.Text = "";
@@ -259,6 +273,7 @@ namespace LogoDetector
 
         private void timerRefreshlistview_Tick(object sender, EventArgs e)
         {
+            if (this.items == null) return;
             if (!backgroundWorker1.IsBusy&& sender==timerRefreshlistview) return;
 
             status_info.Text = processedImages.Count + " Items";
@@ -269,8 +284,9 @@ namespace LogoDetector
             else if (!backgroundWorker1.IsBusy)
                 status_info.Text += " (Process completed)";
 
-            var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo&&info.Error==null) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage && info.Error == null) || (checkBox3.Checked && info.ConfusedImage && info.Error == null) || (checkBoxShowErrors.Checked && info.Error!=null)));
-
+            var items=   this.items.FindAll(checkBox1.Checked, checkBox2.Checked, checkBox3.Checked, checkBoxShowErrors.Checked);
+          // var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo&&info.Error==null) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage && info.Error == null) || (checkBox3.Checked && info.ConfusedImage && info.Error == null) || (checkBoxShowErrors.Checked && info.Error!=null)));
+            
             if (sortColumn != -1 && listView1.Sorting != SortOrder.None)
                 items.Sort(new ListViewItemComparer(sortColumn, listView1.Sorting));
 
@@ -363,7 +379,7 @@ namespace LogoDetector
     /// <summary>
     /// This class just holds the image info after we process it.
     /// </summary>
-    class ImageLogoInfo
+   public  class ImageLogoInfo
     {
         public long ProcessingTime { get; set; }
         public string ImagePath { get; set; }
@@ -382,7 +398,7 @@ namespace LogoDetector
         public bool ConfusedImage { get { return Confidence < 50 && Confidence > 45; } }
         public Bitmap ProcessedImage { get; set; }
 
-        public Exception Error { get; private set; }
+        public Exception Error { get;  set; }
         public static ImageLogoInfo ProccessImage(string imgPath)
         {
             ImageLogoInfo info = new ImageLogoInfo();
