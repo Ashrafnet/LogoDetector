@@ -62,6 +62,8 @@
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.buttonPause = new System.Windows.Forms.Button();
+            this.chk_auto_csv_file = new System.Windows.Forms.CheckBox();
+            this.txt_auto_csv_file = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -80,9 +82,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(37, 13);
+            this.label1.Size = new System.Drawing.Size(73, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Folder";
+            this.label1.Text = "Images folder";
             // 
             // textBox1
             // 
@@ -90,16 +92,17 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.textBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
-            this.textBox1.Location = new System.Drawing.Point(64, 6);
+            this.textBox1.Location = new System.Drawing.Point(100, 6);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(405, 20);
+            this.textBox1.Size = new System.Drawing.Size(454, 20);
             this.textBox1.TabIndex = 1;
             this.textBox1.Text = "C:\\D\\Ken\\LogoDetector\\Photos\\New folder";
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(645, 4);
+            this.button1.Location = new System.Drawing.Point(730, 4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 2;
@@ -126,7 +129,7 @@
             this.listView1.LargeImageList = this.imageList1;
             this.listView1.Location = new System.Drawing.Point(0, 77);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(325, 223);
+            this.listView1.Size = new System.Drawing.Size(364, 197);
             this.listView1.SmallImageList = this.imageList1;
             this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
@@ -148,6 +151,7 @@
             // columnHeader3
             // 
             this.columnHeader3.Text = "Process Time";
+            this.columnHeader3.Width = 72;
             // 
             // columnHeader4
             // 
@@ -167,7 +171,7 @@
             this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer1.Location = new System.Drawing.Point(12, 32);
+            this.splitContainer1.Location = new System.Drawing.Point(12, 58);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -183,8 +187,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(708, 300);
-            this.splitContainer1.SplitterDistance = 325;
+            this.splitContainer1.Size = new System.Drawing.Size(793, 274);
+            this.splitContainer1.SplitterDistance = 364;
             this.splitContainer1.TabIndex = 6;
             // 
             // checkBoxShowErrors
@@ -205,7 +209,7 @@
             this.buttonCopyImages.Enabled = false;
             this.buttonCopyImages.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
             this.buttonCopyImages.ForeColor = System.Drawing.Color.Green;
-            this.buttonCopyImages.Location = new System.Drawing.Point(201, 25);
+            this.buttonCopyImages.Location = new System.Drawing.Point(240, 25);
             this.buttonCopyImages.Name = "buttonCopyImages";
             this.buttonCopyImages.Size = new System.Drawing.Size(124, 24);
             this.buttonCopyImages.TabIndex = 8;
@@ -221,7 +225,7 @@
             this.buttonExportMatches.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
             this.buttonExportMatches.ForeColor = System.Drawing.Color.Green;
             this.buttonExportMatches.Image = global::LogoDetector.Properties.Resources._1487537573_document_excel_csv;
-            this.buttonExportMatches.Location = new System.Drawing.Point(201, 50);
+            this.buttonExportMatches.Location = new System.Drawing.Point(240, 50);
             this.buttonExportMatches.Name = "buttonExportMatches";
             this.buttonExportMatches.Size = new System.Drawing.Size(124, 24);
             this.buttonExportMatches.TabIndex = 7;
@@ -281,8 +285,8 @@
             // 
             this.splitContainer2.Panel2.Controls.Add(this.labelFailImage);
             this.splitContainer2.Panel2.Controls.Add(this.pictureBox2);
-            this.splitContainer2.Size = new System.Drawing.Size(379, 300);
-            this.splitContainer2.SplitterDistance = 208;
+            this.splitContainer2.Size = new System.Drawing.Size(425, 274);
+            this.splitContainer2.SplitterDistance = 189;
             this.splitContainer2.TabIndex = 5;
             // 
             // pictureBox1
@@ -290,7 +294,7 @@
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(379, 208);
+            this.pictureBox1.Size = new System.Drawing.Size(425, 189);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 4;
             this.pictureBox1.TabStop = false;
@@ -311,7 +315,7 @@
             this.pictureBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox2.Location = new System.Drawing.Point(0, 0);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(379, 88);
+            this.pictureBox2.Size = new System.Drawing.Size(425, 81);
             this.pictureBox2.TabIndex = 5;
             this.pictureBox2.TabStop = false;
             // 
@@ -328,7 +332,7 @@
             this.stat_time});
             this.statusStrip1.Location = new System.Drawing.Point(0, 335);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(732, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(817, 22);
             this.statusStrip1.TabIndex = 7;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -353,7 +357,7 @@
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(475, 4);
+            this.button2.Location = new System.Drawing.Point(560, 4);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(87, 23);
             this.button2.TabIndex = 2;
@@ -377,7 +381,7 @@
             // 
             this.buttonPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonPause.Enabled = false;
-            this.buttonPause.Location = new System.Drawing.Point(566, 4);
+            this.buttonPause.Location = new System.Drawing.Point(651, 4);
             this.buttonPause.Name = "buttonPause";
             this.buttonPause.Size = new System.Drawing.Size(75, 23);
             this.buttonPause.TabIndex = 8;
@@ -385,16 +389,43 @@
             this.buttonPause.UseVisualStyleBackColor = true;
             this.buttonPause.Click += new System.EventHandler(this.buttonPause_Click);
             // 
+            // chk_auto_csv_file
+            // 
+            this.chk_auto_csv_file.AutoSize = true;
+            this.chk_auto_csv_file.Checked = true;
+            this.chk_auto_csv_file.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chk_auto_csv_file.Location = new System.Drawing.Point(15, 32);
+            this.chk_auto_csv_file.Name = "chk_auto_csv_file";
+            this.chk_auto_csv_file.Size = new System.Drawing.Size(77, 17);
+            this.chk_auto_csv_file.TabIndex = 9;
+            this.chk_auto_csv_file.Text = "csv export";
+            this.chk_auto_csv_file.UseVisualStyleBackColor = true;
+            this.chk_auto_csv_file.CheckedChanged += new System.EventHandler(this.chk_auto_csv_file_CheckedChanged);
+            // 
+            // txt_auto_csv_file
+            // 
+            this.txt_auto_csv_file.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txt_auto_csv_file.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.txt_auto_csv_file.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
+            this.txt_auto_csv_file.Location = new System.Drawing.Point(100, 32);
+            this.txt_auto_csv_file.Name = "txt_auto_csv_file";
+            this.txt_auto_csv_file.Size = new System.Drawing.Size(454, 20);
+            this.txt_auto_csv_file.TabIndex = 1;
+            this.txt_auto_csv_file.Text = "C:\\D\\Ken\\LogoDetector\\Photos\\New folder";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(732, 357);
+            this.ClientSize = new System.Drawing.Size(817, 357);
+            this.Controls.Add(this.chk_auto_csv_file);
             this.Controls.Add(this.buttonPause);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
+            this.Controls.Add(this.txt_auto_csv_file);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label1);
             this.Name = "Form1";
@@ -452,6 +483,8 @@
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.Button buttonPause;
         private System.Windows.Forms.CheckBox checkBoxShowErrors;
+        private System.Windows.Forms.CheckBox chk_auto_csv_file;
+        private System.Windows.Forms.TextBox txt_auto_csv_file;
     }
 }
 
