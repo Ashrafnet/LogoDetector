@@ -53,17 +53,26 @@
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.lbl_confusedlogos = new System.Windows.Forms.LinkLabel();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.status_info = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.stat_time = new System.Windows.Forms.ToolStripStatusLabel();
-            this.button2 = new System.Windows.Forms.Button();
+            this.btn_imags_cnt = new System.Windows.Forms.Button();
             this.timerRefreshlistview = new System.Windows.Forms.Timer(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.buttonPause = new System.Windows.Forms.Button();
             this.chk_auto_csv_file = new System.Windows.Forms.CheckBox();
             this.txt_auto_csv_file = new System.Windows.Forms.TextBox();
+            this.pic_haslogs = new System.Windows.Forms.PictureBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.lbl_HasLogo = new System.Windows.Forms.LinkLabel();
+            this.pic_failedlogos = new System.Windows.Forms.PictureBox();
+            this.lbl_failedlogos = new System.Windows.Forms.LinkLabel();
+            this.pic_confusedlogos = new System.Windows.Forms.PictureBox();
+            this.pic_hasnologos = new System.Windows.Forms.PictureBox();
+            this.lbl_hasnologos = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -75,6 +84,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.statusStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pic_haslogs)).BeginInit();
+            this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pic_failedlogos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pic_confusedlogos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pic_hasnologos)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -94,15 +108,15 @@
             this.textBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
             this.textBox1.Location = new System.Drawing.Point(100, 6);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(454, 20);
+            this.textBox1.Size = new System.Drawing.Size(446, 20);
             this.textBox1.TabIndex = 1;
-            this.textBox1.Text = "C:\\D\\Ken\\LogoDetector\\Photos\\New folder";
+            this.textBox1.Text = "C:\\D\\Ken\\LogoDetector\\Photos\\New folder\\New folder";
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(730, 4);
+            this.button1.Location = new System.Drawing.Point(722, 4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 2;
@@ -129,7 +143,7 @@
             this.listView1.LargeImageList = this.imageList1;
             this.listView1.Location = new System.Drawing.Point(0, 77);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(364, 197);
+            this.listView1.Size = new System.Drawing.Size(360, 42);
             this.listView1.SmallImageList = this.imageList1;
             this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
@@ -171,7 +185,7 @@
             this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer1.Location = new System.Drawing.Point(12, 58);
+            this.splitContainer1.Location = new System.Drawing.Point(811, 83);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -187,9 +201,10 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(793, 274);
-            this.splitContainer1.SplitterDistance = 364;
+            this.splitContainer1.Size = new System.Drawing.Size(785, 119);
+            this.splitContainer1.SplitterDistance = 360;
             this.splitContainer1.TabIndex = 6;
+            this.splitContainer1.Visible = false;
             // 
             // checkBoxShowErrors
             // 
@@ -209,7 +224,7 @@
             this.buttonCopyImages.Enabled = false;
             this.buttonCopyImages.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
             this.buttonCopyImages.ForeColor = System.Drawing.Color.Green;
-            this.buttonCopyImages.Location = new System.Drawing.Point(240, 25);
+            this.buttonCopyImages.Location = new System.Drawing.Point(236, 25);
             this.buttonCopyImages.Name = "buttonCopyImages";
             this.buttonCopyImages.Size = new System.Drawing.Size(124, 24);
             this.buttonCopyImages.TabIndex = 8;
@@ -225,7 +240,7 @@
             this.buttonExportMatches.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
             this.buttonExportMatches.ForeColor = System.Drawing.Color.Green;
             this.buttonExportMatches.Image = global::LogoDetector.Properties.Resources._1487537573_document_excel_csv;
-            this.buttonExportMatches.Location = new System.Drawing.Point(240, 50);
+            this.buttonExportMatches.Location = new System.Drawing.Point(236, 50);
             this.buttonExportMatches.Name = "buttonExportMatches";
             this.buttonExportMatches.Size = new System.Drawing.Size(124, 24);
             this.buttonExportMatches.TabIndex = 7;
@@ -285,8 +300,8 @@
             // 
             this.splitContainer2.Panel2.Controls.Add(this.labelFailImage);
             this.splitContainer2.Panel2.Controls.Add(this.pictureBox2);
-            this.splitContainer2.Size = new System.Drawing.Size(425, 274);
-            this.splitContainer2.SplitterDistance = 189;
+            this.splitContainer2.Size = new System.Drawing.Size(421, 119);
+            this.splitContainer2.SplitterDistance = 82;
             this.splitContainer2.TabIndex = 5;
             // 
             // pictureBox1
@@ -294,7 +309,7 @@
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(425, 189);
+            this.pictureBox1.Size = new System.Drawing.Size(421, 82);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 4;
             this.pictureBox1.TabStop = false;
@@ -315,7 +330,7 @@
             this.pictureBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox2.Location = new System.Drawing.Point(0, 0);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(425, 81);
+            this.pictureBox2.Size = new System.Drawing.Size(421, 33);
             this.pictureBox2.TabIndex = 5;
             this.pictureBox2.TabStop = false;
             // 
@@ -324,15 +339,27 @@
             this.saveFileDialog1.DefaultExt = "csv";
             this.saveFileDialog1.Filter = "CSV Files |*.csv";
             // 
+            // lbl_confusedlogos
+            // 
+            this.lbl_confusedlogos.AutoSize = true;
+            this.lbl_confusedlogos.Location = new System.Drawing.Point(46, 85);
+            this.lbl_confusedlogos.Name = "lbl_confusedlogos";
+            this.lbl_confusedlogos.Size = new System.Drawing.Size(141, 13);
+            this.lbl_confusedlogos.TabIndex = 14;
+            this.lbl_confusedlogos.TabStop = true;
+            this.lbl_confusedlogos.Text = "images with low confedance";
+            this.toolTip1.SetToolTip(this.lbl_confusedlogos, "images with low confedance (<%50 and > %45)");
+            this.lbl_confusedlogos.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lbl_HasLogo_LinkClicked);
+            // 
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.status_info,
             this.toolStripStatusLabel1,
             this.stat_time});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 335);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 217);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(817, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(809, 22);
             this.statusStrip1.TabIndex = 7;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -354,16 +381,16 @@
             this.stat_time.Name = "stat_time";
             this.stat_time.Size = new System.Drawing.Size(0, 17);
             // 
-            // button2
+            // btn_imags_cnt
             // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(560, 4);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(87, 23);
-            this.button2.TabIndex = 2;
-            this.button2.Text = "Images Count";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.btn_imags_cnt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_imags_cnt.Location = new System.Drawing.Point(552, 4);
+            this.btn_imags_cnt.Name = "btn_imags_cnt";
+            this.btn_imags_cnt.Size = new System.Drawing.Size(87, 23);
+            this.btn_imags_cnt.TabIndex = 2;
+            this.btn_imags_cnt.Text = "Images Count";
+            this.btn_imags_cnt.UseVisualStyleBackColor = true;
+            this.btn_imags_cnt.Click += new System.EventHandler(this.button2_Click);
             // 
             // timerRefreshlistview
             // 
@@ -381,7 +408,7 @@
             // 
             this.buttonPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonPause.Enabled = false;
-            this.buttonPause.Location = new System.Drawing.Point(651, 4);
+            this.buttonPause.Location = new System.Drawing.Point(643, 4);
             this.buttonPause.Name = "buttonPause";
             this.buttonPause.Size = new System.Drawing.Size(75, 23);
             this.buttonPause.TabIndex = 8;
@@ -394,6 +421,7 @@
             this.chk_auto_csv_file.AutoSize = true;
             this.chk_auto_csv_file.Checked = true;
             this.chk_auto_csv_file.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chk_auto_csv_file.Enabled = false;
             this.chk_auto_csv_file.Location = new System.Drawing.Point(15, 32);
             this.chk_auto_csv_file.Name = "chk_auto_csv_file";
             this.chk_auto_csv_file.Size = new System.Drawing.Size(77, 17);
@@ -410,20 +438,106 @@
             this.txt_auto_csv_file.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
             this.txt_auto_csv_file.Location = new System.Drawing.Point(100, 32);
             this.txt_auto_csv_file.Name = "txt_auto_csv_file";
-            this.txt_auto_csv_file.Size = new System.Drawing.Size(454, 20);
+            this.txt_auto_csv_file.Size = new System.Drawing.Size(446, 20);
             this.txt_auto_csv_file.TabIndex = 1;
-            this.txt_auto_csv_file.Text = "C:\\D\\Ken\\LogoDetector\\Photos\\New folder";
+            this.txt_auto_csv_file.Text = "C:\\D\\Ken\\LogoDetector\\Photos\\New folder\\New folder\\results.csv";
+            // 
+            // pic_haslogs
+            // 
+            this.pic_haslogs.Location = new System.Drawing.Point(18, 19);
+            this.pic_haslogs.Name = "pic_haslogs";
+            this.pic_haslogs.Size = new System.Drawing.Size(24, 24);
+            this.pic_haslogs.TabIndex = 11;
+            this.pic_haslogs.TabStop = false;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.lbl_HasLogo);
+            this.groupBox1.Controls.Add(this.pic_failedlogos);
+            this.groupBox1.Controls.Add(this.lbl_failedlogos);
+            this.groupBox1.Controls.Add(this.pic_confusedlogos);
+            this.groupBox1.Controls.Add(this.lbl_confusedlogos);
+            this.groupBox1.Controls.Add(this.pic_hasnologos);
+            this.groupBox1.Controls.Add(this.lbl_hasnologos);
+            this.groupBox1.Controls.Add(this.pic_haslogs);
+            this.groupBox1.Location = new System.Drawing.Point(15, 58);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(790, 151);
+            this.groupBox1.TabIndex = 12;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Statistics Info";
+            // 
+            // lbl_HasLogo
+            // 
+            this.lbl_HasLogo.AutoSize = true;
+            this.lbl_HasLogo.Location = new System.Drawing.Point(48, 25);
+            this.lbl_HasLogo.Name = "lbl_HasLogo";
+            this.lbl_HasLogo.Size = new System.Drawing.Size(88, 13);
+            this.lbl_HasLogo.TabIndex = 18;
+            this.lbl_HasLogo.TabStop = true;
+            this.lbl_HasLogo.Text = "Images with logo";
+            this.lbl_HasLogo.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lbl_HasLogo_LinkClicked);
+            // 
+            // pic_failedlogos
+            // 
+            this.pic_failedlogos.Location = new System.Drawing.Point(18, 109);
+            this.pic_failedlogos.Name = "pic_failedlogos";
+            this.pic_failedlogos.Size = new System.Drawing.Size(24, 24);
+            this.pic_failedlogos.TabIndex = 17;
+            this.pic_failedlogos.TabStop = false;
+            // 
+            // lbl_failedlogos
+            // 
+            this.lbl_failedlogos.AutoSize = true;
+            this.lbl_failedlogos.Location = new System.Drawing.Point(46, 115);
+            this.lbl_failedlogos.Name = "lbl_failedlogos";
+            this.lbl_failedlogos.Size = new System.Drawing.Size(71, 13);
+            this.lbl_failedlogos.TabIndex = 16;
+            this.lbl_failedlogos.TabStop = true;
+            this.lbl_failedlogos.Text = "Failed images";
+            this.lbl_failedlogos.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lbl_HasLogo_LinkClicked);
+            // 
+            // pic_confusedlogos
+            // 
+            this.pic_confusedlogos.Location = new System.Drawing.Point(18, 79);
+            this.pic_confusedlogos.Name = "pic_confusedlogos";
+            this.pic_confusedlogos.Size = new System.Drawing.Size(24, 24);
+            this.pic_confusedlogos.TabIndex = 15;
+            this.pic_confusedlogos.TabStop = false;
+            // 
+            // pic_hasnologos
+            // 
+            this.pic_hasnologos.Location = new System.Drawing.Point(18, 49);
+            this.pic_hasnologos.Name = "pic_hasnologos";
+            this.pic_hasnologos.Size = new System.Drawing.Size(24, 24);
+            this.pic_hasnologos.TabIndex = 13;
+            this.pic_hasnologos.TabStop = false;
+            // 
+            // lbl_hasnologos
+            // 
+            this.lbl_hasnologos.AutoSize = true;
+            this.lbl_hasnologos.Location = new System.Drawing.Point(46, 55);
+            this.lbl_hasnologos.Name = "lbl_hasnologos";
+            this.lbl_hasnologos.Size = new System.Drawing.Size(103, 13);
+            this.lbl_hasnologos.TabIndex = 12;
+            this.lbl_hasnologos.TabStop = true;
+            this.lbl_hasnologos.Text = "Images with no logo";
+            this.lbl_hasnologos.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lbl_HasLogo_LinkClicked);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(817, 357);
+            this.ClientSize = new System.Drawing.Size(809, 239);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.chk_auto_csv_file);
             this.Controls.Add(this.buttonPause);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.splitContainer1);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.btn_imags_cnt);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.txt_auto_csv_file);
             this.Controls.Add(this.textBox1);
@@ -444,6 +558,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pic_haslogs)).EndInit();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pic_failedlogos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pic_confusedlogos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pic_hasnologos)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -475,7 +595,7 @@
         private System.Windows.Forms.ToolStripStatusLabel status_info;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel stat_time;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btn_imags_cnt;
         private System.Windows.Forms.Timer timerRefreshlistview;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.Label labelFailImage;
@@ -485,6 +605,15 @@
         private System.Windows.Forms.CheckBox checkBoxShowErrors;
         private System.Windows.Forms.CheckBox chk_auto_csv_file;
         private System.Windows.Forms.TextBox txt_auto_csv_file;
+        private System.Windows.Forms.PictureBox pic_haslogs;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.PictureBox pic_failedlogos;
+        private System.Windows.Forms.LinkLabel lbl_failedlogos;
+        private System.Windows.Forms.PictureBox pic_confusedlogos;
+        private System.Windows.Forms.LinkLabel lbl_confusedlogos;
+        private System.Windows.Forms.PictureBox pic_hasnologos;
+        private System.Windows.Forms.LinkLabel lbl_hasnologos;
+        private System.Windows.Forms.LinkLabel lbl_HasLogo;
     }
 }
 

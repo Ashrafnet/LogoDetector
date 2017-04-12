@@ -19,5 +19,22 @@ namespace LogoDetector
             }
             return err;
         }
+
+        public static int? ToIntOrNull(this string strint)
+        {
+            int  r;
+            if (int.TryParse(strint, out r))
+                return r;
+            else
+                return null;
+        }
+        public static double ? ToDoubleOrNull(this string strint)
+        {
+            int r;
+            if (int.TryParse(strint, out r))
+                return r;
+            else
+                return null;
+        }
     }
 }

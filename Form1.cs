@@ -16,8 +16,8 @@ namespace LogoDetector
 {
     public partial class Form1 : Form
     {
-        List<ImageLogoInfo> processedImages = new List<ImageLogoInfo>();
-        List<ImageLogoInfo> listviewItems = new List<ImageLogoInfo>();
+       // List<ImageLogoInfo> processedImages = new List<ImageLogoInfo>();
+       // List<ImageLogoInfo> listviewItems = new List<ImageLogoInfo>();
         string[] imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF", "*.ppm", "*.pgm", "*.pbm" };
       
 
@@ -26,101 +26,170 @@ namespace LogoDetector
         {
             InitializeComponent();
         }
-        double total_process_time = 0;
-        long withLogoCount = 0;
+      //  double total_process_time = 0;
+       // long withLogoCount = 0;
         Stopwatch processStopwatch;
         private void button1_Click(object sender, EventArgs e)
         {
-            if (backgroundWorker1.IsBusy)
+            try
             {
-                if (MessageBox.Show(this,"Do you want to cancel the process?", "Cancel process", MessageBoxButtons.YesNo) != DialogResult.Yes)
-                    return;
-                button1.Text = "Process";
-                backgroundWorker1.CancelAsync();
-                cancellationTokenSource.Cancel();
-                return;
-            }
-            if(string.IsNullOrWhiteSpace(textBox1.Text))
-            {
-                MessageBox.Show("You have to set the images folder!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                textBox1.Focus();
-                textBox1.SelectAll();
-                return;
-            }
-            if (!Directory.Exists (textBox1.Text))
-            {
-                MessageBox.Show("This directory is not exist!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                textBox1.Focus();
-                textBox1.SelectAll();
-                return;
-            }
 
-            if (string.IsNullOrWhiteSpace(txt_auto_csv_file.Text) && chk_auto_csv_file.Checked )
-            {
-                MessageBox.Show("You have to set the csv file to save results automatically!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                txt_auto_csv_file.Focus();
-                txt_auto_csv_file.SelectAll();
-                return;
-            }
-            if (!txt_auto_csv_file.Text.ToLower().EndsWith (".csv") && chk_auto_csv_file.Checked)
-            {
-                MessageBox.Show("csv file must have .csv extension !", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                txt_auto_csv_file.Focus();
-                txt_auto_csv_file.SelectAll();
-                return;
-            }
 
-            if(File.Exists(txt_auto_csv_file.Text) && chk_auto_csv_file.Checked)
-            {
-                if (MessageBox.Show(string.Format("This csv file already exist.{0}Do you want to overwrite it?{0}{0}CSV File:{0}{1}", Environment.NewLine, txt_auto_csv_file.Text), "csv file exist", MessageBoxButtons.YesNo , MessageBoxIcon.Question ) == DialogResult.No)
+                if (backgroundWorker1.IsBusy)
                 {
+                    if (MessageBox.Show(this, "Do you want to cancel the process?", "Cancel process", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                        return;
+                    button1.Text = "Process";
+                    backgroundWorker1.CancelAsync();
+                    cancellationTokenSource.Cancel();
+                    return;
+                }
+                if (string.IsNullOrWhiteSpace(textBox1.Text))
+                {
+                    MessageBox.Show("You have to set the images folder!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    textBox1.Focus();
+                    textBox1.SelectAll();
+                    return;
+                }
+                if (!Directory.Exists(textBox1.Text))
+                {
+                    MessageBox.Show("This directory is not exist!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    textBox1.Focus();
+                    textBox1.SelectAll();
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(txt_auto_csv_file.Text) && chk_auto_csv_file.Checked)
+                {
+                    MessageBox.Show("You have to set the csv file to save results automatically!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     txt_auto_csv_file.Focus();
                     txt_auto_csv_file.SelectAll();
                     return;
                 }
-            }
-            if (chk_auto_csv_file.Checked)
-            {
-                try
+                if (!txt_auto_csv_file.Text.ToLower().EndsWith(".csv") && chk_auto_csv_file.Checked)
                 {
-                    if (CSV_Autofile != null)
-                        CSV_Autofile.Dispose();
-                    var f = new FileInfo(txt_auto_csv_file.Text);
-                    if (f.Exists)
-                    {
-                        File.Create(f.FullName).Dispose();
-                    }
-                    else
-                    {
-                        File.Create(f.FullName).Dispose();
-                        f.Delete();
-                    }
-                }
-                catch (Exception er) 
-                {
-
-                    MessageBox.Show("This csv file is not valid!"+Environment.NewLine + er.Message , "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("csv file must have .csv extension !", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     txt_auto_csv_file.Focus();
                     txt_auto_csv_file.SelectAll();
                     return;
                 }
 
+                if (File.Exists(txt_auto_csv_file.Text) && chk_auto_csv_file.Checked)
+                {
+                    var result = MessageBox.Show(string.Format("This csv file already exist.{0}What do you want to do:{0}{0}Retry: Resume previous operation.{0}Ignore: Start over and clean csv file.{0}Abort: Cancel the operation and do nothing.{0}{0}CSV File:{0}{1}", Environment.NewLine, txt_auto_csv_file.Text), "csv file exist", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Question);
+                    if (result == DialogResult.Cancel || result == DialogResult.Abort)
+                    {
+                        txt_auto_csv_file.Focus();
+                        txt_auto_csv_file.SelectAll();
+                        return;
+                    }
+                    else if (result == DialogResult.Retry)
+                    {
+                        Stat_info = new Stat_Info();
+                        previuseLogs.Clear();
+                        ReadPreviuseLogFile(txt_auto_csv_file.Text);
+                    }
+                    else if (result == DialogResult.Ignore)
+                    {
+                        var f = new FileInfo(txt_auto_csv_file.Text);
+                        if (f.Exists)
+                        {
+                            File.Create(f.FullName).Dispose();//make sure can write to file
+                        }
+                    }
+                }
+                if (!File.Exists(txt_auto_csv_file.Text) && chk_auto_csv_file.Checked)
+                {
+                    try
+                    {
+
+                        var f = new FileInfo(txt_auto_csv_file.Text);
+                        if (f.Exists)
+                        {
+                            File.Create(f.FullName).Dispose();//make sure can write to file
+                        }
+                        else
+                        {
+                            File.Create(f.FullName).Dispose();//make sure can write to file
+                            f.Delete();
+                        }
+                    }
+                    catch (Exception er)
+                    {
+
+                        MessageBox.Show("This csv file is not valid!" + Environment.NewLine + er.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        txt_auto_csv_file.Focus();
+                        txt_auto_csv_file.SelectAll();
+                        return;
+                    }
+
+
+                }
+
+                if (CSV_Autofile != null)
+                    CSV_Autofile.Dispose();
+                if (previuseLogs == null || previuseLogs.Count < 1)
+                    Stat_info = new Stat_Info();
+                button1.Text = "Stop";
+                buttonPause.Text = "Pause";
+                buttonPause.Enabled = txt_auto_csv_file.ReadOnly = true;
+                btn_imags_cnt.Enabled = false;
+                backgroundWorker1.RunWorkerAsync(textBox1.Text);
 
             }
+            catch (Exception er)
+            {
+                MessageBox.Show(er.FullErrorMessage(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        Dictionary<string, int> previuseLogs = new Dictionary<string, int>();
+        Stat_Info Stat_info = new Stat_Info();
+        void ReadPreviuseLogFile(string logfile)
+        {
+            try
+            {
+                SetStatusInfo("Reading previous logs..");
+                Cursor = Cursors.WaitCursor;
 
+                if (!File.Exists(logfile)) return;
 
-            button1.Text = "Stop";
-            buttonPause.Text = "Pause";
-            buttonPause.Enabled = txt_auto_csv_file.ReadOnly = true;
-            chk_auto_csv_file.Enabled = false;
-            backgroundWorker1.RunWorkerAsync( textBox1.Text);
+                Stopwatch sw = Stopwatch.StartNew();
+                
+                foreach (var item in File.ReadLines(logfile))
+                {
+                    if (string.IsNullOrWhiteSpace(item)) continue;
+                    if (!item.EndsWith(","))//failed image
+                    {
+                        Stat_info.Failed_logos++;
+                        continue;
+                    }
+                    var i = item.Split(',');
+                    if (string.IsNullOrWhiteSpace(i[3] + "")) continue;
+                    if (previuseLogs.ContainsKey(i[0] + "")) continue;
+                    int? confidence = (i[3] + "").Replace("%","").ToIntOrNull();
+                    if (!confidence.HasValue ) continue;
+                    previuseLogs.Add(i[0] + "", confidence.Value );
+                    if (confidence.Value  > 50)
+                        Stat_info.Has_Logos++;
+                    else if (confidence.Value  > 45 && confidence.Value  < 50)
+                        Stat_info.Confused_Logos++;
+                    else if (confidence.Value  < 50)
+                        Stat_info.Has_noLogos++;
+                }
+                sw.Stop();
+                SetStatusInfo("Finished read previous logs in " + sw.ElapsedMilliseconds + " Milliseconds");
+            }
            
-
+            finally
+            {
+                Cursor = Cursors.Default;
+            }
         }
         bool processPaused;
         private void buttonPause_Click(object sender, EventArgs e)
         {
             processPaused = !processPaused;
+            btn_imags_cnt.Enabled =  processPaused;
             buttonPause.Text = processPaused ? "Resume" : "Pause";
             if (processPaused) processStopwatch.Stop();
             else processStopwatch.Start();
@@ -129,44 +198,59 @@ namespace LogoDetector
         string  auto_csv_file = "";
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            processedImages.Clear();
+            //processedImages.Clear();
             string folderPath = e.Argument+"";
-            total_process_time = 0;
-            withLogoCount = 0;
+           
+           
             processPaused = false;
             processStopwatch = Stopwatch.StartNew();
             cancellationTokenSource = new CancellationTokenSource();
-            bool export_csv_auto = chk_auto_csv_file.Checked;
+           // bool export_csv_auto = chk_auto_csv_file.Checked;
              auto_csv_file = txt_auto_csv_file.Text;
-            if (export_csv_auto)
-            {
+           // if (export_csv_auto)
+           // {
                 if (CSV_Autofile != null)
                     CSV_Autofile.Dispose();
-                CSV_Autofile = new StreamWriter(auto_csv_file);
+                CSV_Autofile = new StreamWriter(auto_csv_file,previuseLogs.Count >0);
+            if (previuseLogs.Count == 0)
                 WriteToCSV_Auto(CSV_Autofile, "Image Path,Has Logo,Processing Time,Confidence,Error");
-            }
-            Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, SearchOption.AllDirectories), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
+            //}
+            Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, previuseLogs, SearchOption.AllDirectories), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
             {
-                if (backgroundWorker1.CancellationPending)
-                    return;
-                while (processPaused && !backgroundWorker1.CancellationPending)
-                    Thread.Sleep(1000);
-                var info = ImageLogoInfo.ProccessImage(item,false );
-                total_process_time += info.ProcessingTime;
-                
-
-              
-
-                lock (processedImages)  processedImages.Add(info);
-                if (export_csv_auto)
+                try
                 {
+
+
+                    if (backgroundWorker1.CancellationPending)
+                        return;
+                    while (processPaused && !backgroundWorker1.CancellationPending)
+                        Thread.Sleep(1000);
+                    var info = ImageLogoInfo.ProccessImage(item, false);
+                    Stat_info.Total_process_time += info.ProcessingTime;
+
+
+
+
+                   // lock (processedImages) processedImages.Add(info);
+                   WriteToCSV_Auto(CSV_Autofile, info.ImagePath + "," + (info.ConfusedImage == true ? "Maybe" : info.HasLogo + "") + "," + info.ProcessingTime + "ms," + info.Confidence + "%" + "," + info.Error);
                     
-                    WriteToCSV_Auto(CSV_Autofile, info.ImagePath + "," + (info.ConfusedImage == true ? "Maybe" : info.HasLogo + "") + "," + info.ProcessingTime + "ms," + info.Confidence + "%" + "," + info.Error );
+                    if(!string.IsNullOrWhiteSpace(info.Error) )
+                        Stat_info.Failed_logos++;
+                    if (info.HasLogo)
+                        Stat_info.Has_Logos++;
+                    else if (info.ConfusedImage)
+                        Stat_info.Confused_Logos++;
+                    else if (!info.HasLogo)
+                        Stat_info.Has_noLogos++;
                 }
-                if (info.HasLogo)
-                    withLogoCount++;
-               
+                catch (Exception er)
+                {
+                    Stat_info.Failed_logos++;
+                    WriteToCSV_Auto(CSV_Autofile, "{ERROR},,,," + er.FullErrorMessage());
+
+                }
             });
+
 
         }
         void WriteToCSV_Auto(StreamWriter outfile, string csv_row)
@@ -189,7 +273,7 @@ namespace LogoDetector
                     if (outfile != null)
                         outfile.Dispose();
                     outfile = new StreamWriter(auto_csv_file, true);
-                    outfile.WriteLine(csv_row + "," + er.FullErrorMessage());
+                    outfile.WriteLine(csv_row + "" + er.FullErrorMessage());
                 }
                 catch
                 {
@@ -205,7 +289,7 @@ namespace LogoDetector
             buttonPause.Enabled = false;
             processPaused = false;
             txt_auto_csv_file.ReadOnly = false ;
-            chk_auto_csv_file.Enabled = true ;
+             btn_imags_cnt.Enabled= true ;
             processStopwatch.Stop();
             timerRefreshlistview_Tick(null, null);
             button1.Text = "Process";
@@ -236,7 +320,7 @@ namespace LogoDetector
         }
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
+        {/*
             var selectedIndexes = listView1.SelectedIndices;
             if (selectedIndexes.Count == 1)
             {
@@ -262,6 +346,7 @@ namespace LogoDetector
                 }
 
             }
+            */
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
@@ -270,8 +355,21 @@ namespace LogoDetector
             timerRefreshlistview_Tick(null, null) ;
         }
 
-        private void buttonExport_Click(object sender, EventArgs e)
+        void SetStatusInfo(string info)
         {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<string>(SetStatusInfo), info);
+            }
+            else
+            {
+                status_info.Text = info;              
+                Refresh();
+            }
+        }
+
+        private void buttonExport_Click(object sender, EventArgs e)
+        {/*
             try
             {
                 if (listviewItems == null || listviewItems.Count < 1)
@@ -283,14 +381,14 @@ namespace LogoDetector
                     return;
                 Cursor = Cursors.WaitCursor;
                 //  Enabled = false;
-                status_info.Text = "Exporting..";
+                SetStatusInfo( "Exporting..");
 
                 statusStrip1.Refresh();
                 Application.DoEvents();
                 var fpath = saveFileDialog1.FileName;
                 StringBuilder txt = new StringBuilder();
 
-                txt.AppendLine("Image Path,Has Logo,Processing Time,Confidence");
+                txt.AppendLine("Image Path,Has Logo,Processing Time,Confidence,Error");
                 using (StreamWriter outfile = new StreamWriter(fpath))
                 {
                     long i = 0; long maxstep = listviewItems.Count / 50;
@@ -337,10 +435,16 @@ namespace LogoDetector
                 status_info.Text = "Exporting finished";
                 Enabled = true;
             }
+            */
         }
         private void Form1_Load(object sender, EventArgs e)
         {
             Text += " v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+           pic_haslogs.Image= imageList1.Images[0];
+            pic_hasnologos.Image = imageList1.Images[1];
+            pic_confusedlogos.Image = imageList1.Images[2];
+            pic_failedlogos.Image = imageList1.Images[3];
+
 
 #if DEBUG
 #else
@@ -371,28 +475,41 @@ namespace LogoDetector
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(textBox1.Text))
+            try
             {
-                MessageBox.Show("You have to set the images folder!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                textBox1.Focus();
-                textBox1.SelectAll();
-                return;
+
+
+                if (string.IsNullOrWhiteSpace(textBox1.Text))
+                {
+                    MessageBox.Show("You have to set the images folder!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    textBox1.Focus();
+                    textBox1.SelectAll();
+                    return;
+                }
+                if (!Directory.Exists(textBox1.Text))
+                {
+                    MessageBox.Show("This directory is not exist!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    textBox1.Focus();
+                    textBox1.SelectAll();
+                    return;
+                }
+                Cursor = Cursors.WaitCursor;
+                Stopwatch sw = Stopwatch.StartNew();
+                SetStatusInfo("Counting images files..");
+                var cnt = MyDirectory.GetFiles(textBox1.Text, imgExts, previuseLogs, SearchOption.AllDirectories).LongCount(x => !string.IsNullOrWhiteSpace(x));
+                sw.Stop();
+                Text = sw.ElapsedMilliseconds + " ms";
+                SetStatusInfo("Number of images= " + cnt + " images");
+                MessageBox.Show("Number of images= " + cnt + " images" + Environment.NewLine + "Images supported are:" + Environment.NewLine + string.Join(" , ", imgExts) + "");
             }
-            if (!Directory.Exists(textBox1.Text))
+            finally
             {
-                MessageBox.Show("This directory is not exist!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                textBox1.Focus();
-                textBox1.SelectAll();
-                return;
+                Cursor = Cursors.Default;
             }
-            var cnt=MyDirectory.GetFiles(textBox1.Text, imgExts, SearchOption.AllDirectories).LongCount();
-
-            MessageBox.Show("Number of images= " + cnt +" images"+ Environment.NewLine + "Images supported are:" + Environment.NewLine + string.Join(" , ", imgExts)     +"");
-
         }
 
         private void listView1_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
-        {
+        {/*
             var info = listviewItems[e.ItemIndex];
             var lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
 
@@ -410,7 +527,7 @@ namespace LogoDetector
             lvi.SubItems.Add(info.ProcessingTime + " ms");
             lvi.SubItems.Add(info.Confidence + " %");
             lvi.Tag = info;
-            e.Item = lvi;
+            e.Item = lvi;*/
         }
 
         private void timerRefreshlistview_Tick(object sender, EventArgs e)
@@ -418,15 +535,15 @@ namespace LogoDetector
 
             if (!backgroundWorker1.IsBusy && sender == timerRefreshlistview) return;
 
-            status_info.Text = processedImages.Count + " Items";
+            status_info.Text = Stat_info.TotalImages + " Items";
             if (processStopwatch != null)
-                stat_time.Text = processStopwatch.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + total_process_time / 1000 + " Seconds]" + " (" + processedImages.Count + " Items, True=" + withLogoCount + " False=" + (processedImages.Count - withLogoCount) + ")";
+                stat_time.Text = processStopwatch.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + Stat_info.Total_process_time / 1000 + " Seconds]" + " (" + Stat_info.TotalImages  + " Items, True=" + Stat_info.Has_Logos + " False=" + (Stat_info.Has_noLogos + Stat_info.Failed_logos + Stat_info.Confused_Logos) + ")";
             if (cancellationTokenSource != null && cancellationTokenSource.IsCancellationRequested)
                 status_info.Text += " (User canceled the process)";
             else if (!backgroundWorker1.IsBusy)
                 status_info.Text += " (Process completed)";
 
-            var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo && info.Error == null) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage && info.Error == null) || (checkBox3.Checked && info.ConfusedImage && info.Error == null) || (checkBoxShowErrors.Checked && info.Error != null)));
+           /* var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo && info.Error == null) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage && info.Error == null) || (checkBox3.Checked && info.ConfusedImage && info.Error == null) || (checkBoxShowErrors.Checked && info.Error != null)));
 
             if (sortColumn != -1 && listView1.Sorting != SortOrder.None)
                 items.Sort(new ListViewItemComparer(sortColumn, listView1.Sorting));
@@ -434,13 +551,18 @@ namespace LogoDetector
             listviewItems = items;
             listView1.VirtualListSize = listviewItems.Count;
             buttonCopyImages.Enabled = buttonExportMatches.Enabled = listviewItems != null && listviewItems.Count > 0;
-
+            */
             Calc_Groups_Counts();
 
         }
 
         private void Calc_Groups_Counts()
         {
+            lbl_HasLogo.Text = "Images with logo (" + Stat_info.Has_Logos + ")";
+            lbl_hasnologos.Text = "Images with No logo (" + Stat_info.Has_noLogos + ")";
+            lbl_confusedlogos.Text = "Confused images (" + Stat_info.Confused_Logos + ")";
+            lbl_failedlogos.Text = "Failed images (" + Stat_info.Failed_logos + ")";
+            /*
             try
             {
 
@@ -482,11 +604,11 @@ namespace LogoDetector
             catch
             {
                 
-            }
+            }*/
         }
 
         private void buttonCopyImages_Click(object sender, EventArgs e)
-        {
+        {/*
             if(listviewItems==null || listviewItems.Count <1)
             {
                 MessageBox.Show("No items in list to copy!", "No Items", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -496,6 +618,7 @@ namespace LogoDetector
                 return;
             var files = listviewItems.ConvertAll(c => c.ImagePath);
             new CopyFiles.CopyFiles(files, folderBrowserDialog1.SelectedPath).CopyAsync(new CopyFiles.DIA_CopyFiles() {  SynchronizationObject=this});
+            */
         }
 
         private void chk_auto_csv_file_CheckedChanged(object sender, EventArgs e)
@@ -520,6 +643,11 @@ namespace LogoDetector
             }
 
          
+        }
+
+        private void lbl_HasLogo_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            MessageBox.Show("Images logs and details are under construction!", "Under Construction!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
     }
 
@@ -579,15 +707,38 @@ namespace LogoDetector
 
         // Takes same patterns, and executes in parallel
         public static IEnumerable<string> GetFiles(string path,
-                            string[] searchPatterns,
+                            string[] searchPatterns, Dictionary<string, int> previuseLogs,
                             SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
-            return searchPatterns.AsParallel()
-                   .SelectMany(searchPattern =>
-                          Directory.EnumerateFiles(path, searchPattern, searchOption));
+
+             var v=  searchPatterns.AsParallel()
+                     .SelectMany(searchPattern =>
+                            Alphaleonis.Win32.Filesystem.Directory.EnumerateFiles(path, searchPattern, Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions.ContinueOnException| Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions.Files | Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions.Recursive).Where(x=> !previuseLogs.ContainsKey(x) ));
+           
+            
+          /*  var v = searchPatterns.AsParallel()
+       .SelectMany(searchPattern =>
+              Directory.EnumerateFiles(path, searchPattern, SearchOption.AllDirectories ).Where(x => !previuseLogs.ContainsKey(x)));
+              */
+
+            return v;
         }
     }
-
+   public  struct Stat_Info
+    {
+       public  int Has_Logos;
+       public  int Has_noLogos;
+       public  int Confused_Logos;
+       public  int Failed_logos;
+        public double Total_process_time;
+        public long TotalImages
+        {
+            get
+            {
+                return Has_Logos + Has_noLogos + Confused_Logos + Failed_logos;
+            }
+        }
+    }
     /// <summary>
     /// This class just holds the image info after we process it.
     /// </summary>
