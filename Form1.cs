@@ -449,6 +449,7 @@ namespace LogoDetector
 #if DEBUG
 #else
             textBox1.Text = "";
+            txt_auto_csv_file.Text = "";
 #endif
         }
         private int sortColumn = -1;
@@ -805,8 +806,16 @@ namespace LogoDetector
             string[] imgExts_ppm = new string[] { ".ppm", ".pgm", ".pbm" };
             Bitmap source = null;
 
-            if (imgExts_ppm.Contains((Path.GetExtension(imgPath)+"").ToLower()))
-                source = new PixelMap(imgPath).BitMap;
+            if (imgExts_ppm.Contains((Path.GetExtension(imgPath) + "").ToLower()))
+            {
+
+                source = DmitryBrant.ImageFormats.Picture.Load(imgPath);
+
+                if (source == null)
+                {
+                }
+            }
+
             else
                 source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imgPath)));
             return source;

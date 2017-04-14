@@ -71,7 +71,15 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="ListViewItemComparer.cs" />
-    <Compile Include="PixelMap.cs" />
+    <Compile Include="ppm_reader\CutReader.cs" />
+    <Compile Include="ppm_reader\DicomReader.cs" />
+    <Compile Include="ppm_reader\PcxReader.cs" />
+    <Compile Include="ppm_reader\Picture.cs" />
+    <Compile Include="ppm_reader\PnmReader.cs" />
+    <Compile Include="ppm_reader\RasReader.cs" />
+    <Compile Include="ppm_reader\SgiReader.cs" />
+    <Compile Include="ppm_reader\TgaReader.cs" />
+    <Compile Include="ppm_reader\XpmReader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="utilities\BitmapUtilities.cs" />
