@@ -70,6 +70,12 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmTextViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmTextViewer.Designer.cs">
+      <DependentUpon>frmTextViewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="ListViewItemComparer.cs" />
     <Compile Include="ppm_reader\CutReader.cs" />
     <Compile Include="ppm_reader\DicomReader.cs" />
@@ -92,6 +98,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmTextViewer.resx">
+      <DependentUpon>frmTextViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -152,6 +161,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CopyFiles\CopyFiles.csproj" />
+    <None Include="Resources\1492455014_67.png" />
+    <None Include="Resources\1492455058_17.png" />
+    <None Include="Resources\1492455060_clean.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

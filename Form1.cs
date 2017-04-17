@@ -33,8 +33,7 @@ namespace LogoDetector
         {
             try
             {
-
-
+                
                 if (backgroundWorker1.IsBusy)
                 {
                     if (MessageBox.Show(this, "Do you want to cancel the process?", "Cancel process", MessageBoxButtons.YesNo) != DialogResult.Yes)
@@ -86,7 +85,7 @@ namespace LogoDetector
                     else if (result == DialogResult.Retry)
                     {
                         Stat_info = new Stat_Info();
-                        previuseLogs.Clear();
+                        previousLogs.Clear();
                         ReadPreviuseLogFile(txt_auto_csv_file.Text);
                     }
                     else if (result == DialogResult.Ignore)
@@ -128,7 +127,7 @@ namespace LogoDetector
 
                 if (CSV_Autofile != null)
                     CSV_Autofile.Dispose();
-                if (previuseLogs == null || previuseLogs.Count < 1)
+                if (previousLogs == null || previousLogs.Count < 1)
                     Stat_info = new Stat_Info();
                 button1.Text = "Stop";
                 buttonPause.Text = "Pause";
@@ -142,7 +141,8 @@ namespace LogoDetector
                 MessageBox.Show(er.FullErrorMessage(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        Dictionary<string, int> previuseLogs = new Dictionary<string, int>();
+        Dictionary<string, int> previousLogs = new Dictionary<string, int>();
+        List<string> previousLogs_errors = new List<string>();
         Stat_Info Stat_info = new Stat_Info();
         void ReadPreviuseLogFile(string logfile)
         {
@@ -160,15 +160,23 @@ namespace LogoDetector
                     if (string.IsNullOrWhiteSpace(item)) continue;
                     if (!item.EndsWith(","))//failed image
                     {
+                        if (item.EndsWith("Error")) continue;
+                        if (item.EndsWith("Error reading the stream! ")) continue;
+                        if (item.EndsWith("Binary .pbm (Magic Number P4) is not supported at this time.")) continue;
+                        if (item.StartsWith("Parameter name: chars")) continue;
+                        if (item.StartsWith("The output char buffer is too small to contain the decoded characters, ")) continue;
+
+                        previousLogs_errors.Add(item);
                         Stat_info.Failed_logos++;
-                        continue;
+                        Calc_Groups_Counts();
+                        continue; 
                     }
                     var i = item.Split(',');
                     if (string.IsNullOrWhiteSpace(i[3] + "")) continue;
-                    if (previuseLogs.ContainsKey(i[0] + "")) continue;
+                    if (previousLogs.ContainsKey(i[0] + "")) continue;
                     int? confidence = (i[3] + "").Replace("%","").ToIntOrNull();
                     if (!confidence.HasValue ) continue;
-                    previuseLogs.Add(i[0] + "", confidence.Value );
+                    previousLogs.Add(i[0] + "", confidence.Value );
                     if (confidence.Value  > 50)
                         Stat_info.Has_Logos++;
                     else if (confidence.Value  > 45 && confidence.Value  < 50)
@@ -211,11 +219,11 @@ namespace LogoDetector
            // {
                 if (CSV_Autofile != null)
                     CSV_Autofile.Dispose();
-                CSV_Autofile = new StreamWriter(auto_csv_file,previuseLogs.Count >0);
-            if (previuseLogs.Count == 0)
+                CSV_Autofile = new StreamWriter(auto_csv_file,previousLogs.Count >0);
+            if (previousLogs.Count == 0)
                 WriteToCSV_Auto(CSV_Autofile, "Image Path,Has Logo,Processing Time,Confidence,Error");
             //}
-            Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, previuseLogs, SearchOption.AllDirectories), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
+            Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, previousLogs, SearchOption.AllDirectories), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
             {
                 try
                 {
@@ -497,7 +505,7 @@ namespace LogoDetector
                 Cursor = Cursors.WaitCursor;
                 Stopwatch sw = Stopwatch.StartNew();
                 SetStatusInfo("Counting images files..");
-                var cnt = MyDirectory.GetFiles(textBox1.Text, imgExts, previuseLogs, SearchOption.AllDirectories).LongCount(x => !string.IsNullOrWhiteSpace(x));
+                var cnt = MyDirectory.GetFiles(textBox1.Text, imgExts, previousLogs, SearchOption.AllDirectories).LongCount(x => !string.IsNullOrWhiteSpace(x));
                 sw.Stop();
                 Text = sw.ElapsedMilliseconds + " ms";
                 SetStatusInfo("Number of images= " + cnt + " images");
@@ -559,10 +567,20 @@ namespace LogoDetector
 
         private void Calc_Groups_Counts()
         {
-            lbl_HasLogo.Text = "Images with logo (" + Stat_info.Has_Logos + ")";
-            lbl_hasnologos.Text = "Images with No logo (" + Stat_info.Has_noLogos + ")";
-            lbl_confusedlogos.Text = "Confused images (" + Stat_info.Confused_Logos + ")";
-            lbl_failedlogos.Text = "Failed images (" + Stat_info.Failed_logos + ")";
+            if (InvokeRequired)
+            {
+                Invoke(new Action(Calc_Groups_Counts));
+            }
+            else
+            {
+                
+
+                lbl_HasLogo.Text = "Images with logo (" + Stat_info.Has_Logos + ")";
+                lbl_hasnologos.Text = "Images with No logo (" + Stat_info.Has_noLogos + ")";
+                lbl_confusedlogos.Text = "Confused images (" + Stat_info.Confused_Logos + ")";
+                lbl_failedlogos.Text = "Failed images (" + Stat_info.Failed_logos + ")";
+                Refresh();
+            }
             /*
             try
             {
@@ -648,7 +666,50 @@ namespace LogoDetector
 
         private void lbl_HasLogo_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            if((((LinkLabel)sender).Tag +"") == "failed")
+            {
+                StringBuilder str_err_items = new StringBuilder();
+                foreach (var item in previousLogs_errors)
+                {
+                    str_err_items.AppendLine(item);
+                }
+                frmTextViewer frmt = new frmTextViewer(str_err_items.ToString());
+                frmt.ShowDialog();
+                return;
+            }
             MessageBox.Show("Images logs and details are under construction!", "Under Construction!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        private void btn_Pre_logs_Click(object sender, EventArgs e)
+        {
+            if(previousLogs !=null && previousLogs.Count > 0) // clear
+            {
+               if( MessageBox.Show("Are you sure you want to clear current Stats from memory","Clear Memory!", MessageBoxButtons.YesNo , MessageBoxIcon.Question)== DialogResult.Yes)
+                {
+                    previousLogs.Clear();
+                    previousLogs_errors.Clear();
+                    Stat_info = new Stat_Info();
+                    Calc_Groups_Counts();
+                }
+                return;
+            }
+
+            var file_csv = txt_auto_csv_file.Text;
+            if (File.Exists(file_csv))
+            {
+                if (MessageBox.Show(string.Format("Are you sure you want to read previous logs from this csv file.{0}{0}CSV File:{0}{1}", Environment.NewLine , file_csv), "previous logs!", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    ReadPreviuseLogFile(file_csv);
+                    Calc_Groups_Counts();
+                }
+
+            }
+            else
+            {
+                MessageBox.Show(string.Format("This csv file does not exist{0}{0}CSV File:{0}{1}", Environment.NewLine, file_csv), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error );
+                txt_auto_csv_file.Focus();
+                txt_auto_csv_file.SelectAll();
+            }
         }
     }
 
