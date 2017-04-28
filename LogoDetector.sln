@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogoDetector", "LogoDetector.csproj", "{6244E198-4B6E-45FB-B4C1-7B38878BFB61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClarifaiApiClient", "ClarifaiApiClient\ClarifaiApiClient.csproj", "{157C6025-5EBF-49DD-AAF7-7168DEDB85CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClarifaiApi", "TestClarifaiApi\TestClarifaiApi.csproj", "{8B69943D-616F-47FB-A16F-2698C0B04569}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{6244E198-4B6E-45FB-B4C1-7B38878BFB61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6244E198-4B6E-45FB-B4C1-7B38878BFB61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6244E198-4B6E-45FB-B4C1-7B38878BFB61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{157C6025-5EBF-49DD-AAF7-7168DEDB85CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{157C6025-5EBF-49DD-AAF7-7168DEDB85CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{157C6025-5EBF-49DD-AAF7-7168DEDB85CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{157C6025-5EBF-49DD-AAF7-7168DEDB85CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B69943D-616F-47FB-A16F-2698C0B04569}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B69943D-616F-47FB-A16F-2698C0B04569}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B69943D-616F-47FB-A16F-2698C0B04569}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B69943D-616F-47FB-A16F-2698C0B04569}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
