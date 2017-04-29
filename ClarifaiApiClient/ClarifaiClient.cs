@@ -40,7 +40,7 @@ namespace ClarifaiApiClient
         public ClarifaiClient(string clientId, string clientSecret)
         {
             _clientId = clientId;
-            _clientSecret = ClientSecret;
+            _clientSecret = clientSecret;
         }
 
         public ClarifaiClient(string accessToken)

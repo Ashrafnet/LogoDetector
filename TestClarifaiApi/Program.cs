@@ -11,7 +11,7 @@ namespace TestClarifaiApi
     {
         static void Main(string[] args)
         {
-            ClarifaiClient c = new ClarifaiClient("JU5zeSv_YJQG5THfAHwUvuD_oDFI13PqFKTXjKoS", "GQynbkt8D5mQcXUlZhcPqw7SAyQbTjj3WC1SYpkM");
+            ClarifaiClient c = new ClarifaiClient("Wads5t98mMepkTuQFLbQvdYBPH0xIBz_7KqdhMIp", "Igqe-qov2dbcS8EQDHoI8DxRR0PiEN3y3Tj4Vu2m");
             var task_r_ntf = c.GenerateToken();
             task_r_ntf.ConfigureAwait(true)
                 .GetAwaiter()
@@ -25,9 +25,17 @@ namespace TestClarifaiApi
                             {
                                 Task.Run(async () =>
                                 {
-                                    var p = await c.PredictByFolderPath(@"C:\My Files\work\Ashraf\LogoDetection\clarifai_samples");
+                                    var p = await c.PredictByFolderPath(@"C:\My Files\work\Ashraf\LogoDetection\test-positive");
                                     Console.WriteLine(p.Status.Code);
                                     Console.WriteLine(p.Status.Description);
+                                    if(p.Status.Code == 10000)
+                                    {
+                                        foreach(var d in p.Outputs)
+                                        {
+                                            Console.WriteLine(d.Data.Concepts[0].ImageName);
+                                            Console.WriteLine(d.Data.Concepts[0].Prediction);
+                                        }
+                                    }
                                 });
 
                             }

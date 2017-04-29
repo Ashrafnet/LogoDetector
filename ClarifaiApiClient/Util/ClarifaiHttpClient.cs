@@ -25,7 +25,7 @@ namespace ClarifaiApiClient.Util
 
         private static string _apiEndPoint = "https://api.clarifai.com";
         private static string _tokenPath = "/v1/token/";
-        private static string _predictPath = "/v2/models/Logo Detection/outputs";
+        private static string _predictPath = "/v2/models/Cropped Logo Detector/outputs";
 
         public static async Task<object> GetToken(string clientId, string clientSecret)
         {
@@ -33,8 +33,8 @@ namespace ClarifaiApiClient.Util
 
             //
             //  MESSAGE CONTENT
-            //string postData = "client_id="+ clientId + "&client_secret="+ clientSecret + "&grant_type=client_credentials";
-            string postData = "client_id=JU5zeSv_YJQG5THfAHwUvuD_oDFI13PqFKTXjKoS&client_secret=GQynbkt8D5mQcXUlZhcPqw7SAyQbTjj3WC1SYpkM&grant_type=client_credentials";
+            string postData = "client_id="+ clientId + "&client_secret="+ clientSecret + "&grant_type=client_credentials";
+            //string postData = "client_id=Wads5t98mMepkTuQFLbQvdYBPH0xIBz_7KqdhMIp&client_secret=Igqe-qov2dbcS8EQDHoI8DxRR0PiEN3y3Tj4Vu2m&grant_type=client_credentials";
             byte[] byteArray = Encoding.UTF8.GetBytes(postData);
             
             //
