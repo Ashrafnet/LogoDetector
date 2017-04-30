@@ -77,6 +77,7 @@
       <DependentUpon>frmTextViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="ListViewItemComparer.cs" />
+    <Compile Include="MyDirectory.cs" />
     <Compile Include="ppm_reader\CutReader.cs" />
     <Compile Include="ppm_reader\DicomReader.cs" />
     <Compile Include="ppm_reader\PcxReader.cs" />
@@ -164,6 +165,12 @@
     <None Include="Resources\1492455014_67.png" />
     <None Include="Resources\1492455058_17.png" />
     <None Include="Resources\1492455060_clean.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="ClarifaiApiClient\ClarifaiApiClient.csproj">
+      <Project>{157c6025-5ebf-49dd-aaf7-7168dedb85ca}</Project>
+      <Name>ClarifaiApiClient</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

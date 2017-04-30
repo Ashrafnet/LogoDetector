@@ -25,7 +25,7 @@ namespace ClarifaiApiClient.Util
 
         private static string _apiEndPoint = "https://api.clarifai.com";
         private static string _tokenPath = "/v1/token/";
-        private static string _predictPath = "/v2/models/Logo Detection/outputs";
+        private static string _predictPath = "/v2/models/Cropped Logo Detector/outputs";//logo_detector_120
 
         public static async Task<object> GetToken(string clientId, string clientSecret)
         {
@@ -33,8 +33,8 @@ namespace ClarifaiApiClient.Util
 
             //
             //  MESSAGE CONTENT
-            //string postData = "client_id="+ clientId + "&client_secret="+ clientSecret + "&grant_type=client_credentials";
-            string postData = "client_id=JU5zeSv_YJQG5THfAHwUvuD_oDFI13PqFKTXjKoS&client_secret=GQynbkt8D5mQcXUlZhcPqw7SAyQbTjj3WC1SYpkM&grant_type=client_credentials";
+            string postData = "client_id="+ clientId + "&client_secret="+ clientSecret + "&grant_type=client_credentials";
+            // string postData = "client_id=JU5zeSv_YJQG5THfAHwUvuD_oDFI13PqFKTXjKoS&client_secret=GQynbkt8D5mQcXUlZhcPqw7SAyQbTjj3WC1SYpkM&grant_type=client_credentials";
             byte[] byteArray = Encoding.UTF8.GetBytes(postData);
             
             //
@@ -187,12 +187,15 @@ namespace ClarifaiApiClient.Util
         public static async Task<Predict> GetFolderImgsPrediction(string accessToken, string folder_path)
         {
             ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ValidateServerCertificate);
+            try
+            {
 
-            //
-            //  MESSAGE CONTENT
-            //string postData = "client_id="+ clientId + "&client_secret="+ clientSecret + "&grant_type=client_credentials";
-            List<PredictInput> inputs = new List<PredictInput>();
-            var imgPaths = Directory.GetFiles(folder_path, "*.*", SearchOption.AllDirectories).ToList();
+
+                //
+                //  MESSAGE CONTENT
+                //string postData = "client_id="+ clientId + "&client_secret="+ clientSecret + "&grant_type=client_credentials";
+                List<PredictInput> inputs = new List<PredictInput>();
+            var imgPaths = Directory.GetFiles(folder_path, "*.jpg", SearchOption.AllDirectories).ToList();
             foreach (string imgPath in imgPaths)
             {
                 Bitmap source = new Bitmap(imgPath);
@@ -236,10 +239,10 @@ namespace ClarifaiApiClient.Util
             await dataStream.WriteAsync(byteArray, 0, byteArray.Length);
             dataStream.Close();
 
+           
             //
             //  SEND MESSAGE
-            try
-            {
+           
                 WebResponse Response = await Request.GetResponseAsync();
 
                 StreamReader Reader = new StreamReader(Response.GetResponseStream());
@@ -276,6 +279,9 @@ namespace ClarifaiApiClient.Util
                         return error;
                     }
                 }
+            }catch(Exception er)
+            {
+
             }
 
             return new Predict
@@ -287,6 +293,111 @@ namespace ClarifaiApiClient.Util
                 }
             };
         }
+
+        public static async Task<Predict> GetImgsPrediction(string accessToken, Dictionary<string, Bitmap> Images)
+        {
+            if (string.IsNullOrWhiteSpace(accessToken))
+                throw new Exception("Invalid or empty accessToken!");
+            if (Images == null || Images.Count < 1)
+                throw new Exception("list has no images to checkout!");
+
+            try
+            {
+                ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ValidateServerCertificate);
+
+                //
+                //  MESSAGE CONTENT
+                //string postData = "client_id="+ clientId + "&client_secret="+ clientSecret + "&grant_type=client_credentials";
+                List<PredictInput> inputs = new List<PredictInput>();
+
+                foreach (Bitmap source in Images.Values)
+                {
+
+                    MemoryStream ms = new System.IO.MemoryStream();
+                    source.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    byte[] imageArray = ms.ToArray();
+
+                    string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+                    inputs.Add(new PredictInput
+                    {
+                        Data = new PredictImage
+                        {
+                            Image = new PredictImageData
+                            {
+                                Base64 = base64ImageRepresentation
+                            }
+                        }
+                    });
+                }
+                var ins = new
+                {
+                    Inputs = inputs
+                };
+
+                string postData = LowercaseJsonSerializer.SerializeObject(ins);
+                byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+
+                //
+                //  CREATE REQUEST
+                HttpWebRequest Request = (HttpWebRequest)WebRequest.Create(_apiEndPoint + _predictPath);
+                Request.Method = "POST";
+                Request.KeepAlive = false;
+                Request.ContentType = "application/json";
+                Request.Headers.Add("cache-control", "no-cache");
+                Request.Headers.Add("authorization", "Bearer " + accessToken);
+
+                Stream dataStream = await Request.GetRequestStreamAsync();
+                await dataStream.WriteAsync(byteArray, 0, byteArray.Length);
+                dataStream.Close();
+
+
+
+                WebResponse Response = await Request.GetResponseAsync();
+
+                StreamReader Reader = new StreamReader(Response.GetResponseStream());
+                string responseLine = await Reader.ReadToEndAsync();
+                Reader.Close();
+
+                HttpStatusCode ResponseCode = ((HttpWebResponse)Response).StatusCode;
+                if (!ResponseCode.Equals(HttpStatusCode.OK))
+                {
+                    Predict error = Newtonsoft.Json.JsonConvert.DeserializeObject<Predict>(responseLine);
+                    return error;
+                }
+
+                Predict predict = Newtonsoft.Json.JsonConvert.DeserializeObject<Predict>(responseLine);
+                int ind = 0;
+                foreach (string imgPath in Images.Keys)
+                {
+                    var outputs = predict.Outputs;
+                    outputs[ind].Data.Concepts[0].ImageName = imgPath;
+                    ind++;
+                }
+                return predict;
+            }
+            catch (WebException e)
+            {
+                using (WebResponse response = e.Response)
+                {
+                    HttpWebResponse httpResponse = (HttpWebResponse)response;
+                    using (Stream data = response.GetResponseStream())
+                    using (var reader = new StreamReader(data))
+                    {
+                        string text = reader.ReadToEnd();
+                        Predict error = Newtonsoft.Json.JsonConvert.DeserializeObject<Predict>(text);
+                        return error;
+                    }
+                }
+            }
+            catch (Exception er)
+            {
+                Predict error = new Predict { Status = new PredictStatus { Code = 0, Description = er.Message } };
+                return error;
+            }
+
+          
+        }
+
 
     }
 }

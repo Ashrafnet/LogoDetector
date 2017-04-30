@@ -1,25 +1,25 @@
-﻿using System;
+﻿using ClarifaiApiClient;
+using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LogoDetector
 {
+
     public partial class Form1 : Form
     {
        // List<ImageLogoInfo> processedImages = new List<ImageLogoInfo>();
        // List<ImageLogoInfo> listviewItems = new List<ImageLogoInfo>();
         string[] imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF", "*.ppm", "*.pgm", "*.pbm" };
-      
+        private bool _LocalWork = true;//true if localalgoritim, false for clirifi cloud
 
         CancellationTokenSource cancellationTokenSource;
         public Form1()
@@ -132,7 +132,8 @@ namespace LogoDetector
                 button1.Text = "Stop";
                 buttonPause.Text = "Pause";
                 buttonPause.Enabled = txt_auto_csv_file.ReadOnly = true;
-                btn_imags_cnt.Enabled = false;
+                btn_imags_cnt.Enabled =radClarifi.Enabled = radLocal.Enabled = false;
+                _LocalWork = radLocal.Checked;
                 backgroundWorker1.RunWorkerAsync(textBox1.Text);
 
             }
@@ -204,26 +205,27 @@ namespace LogoDetector
         }
         StreamWriter CSV_Autofile = null;
         string  auto_csv_file = "";
+        private int _batch_cnt = 2;
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             //processedImages.Clear();
-            string folderPath = e.Argument+"";
-           
-           
+            string folderPath = e.Argument + "";
+
+
             processPaused = false;
             processStopwatch = Stopwatch.StartNew();
             cancellationTokenSource = new CancellationTokenSource();
-           // bool export_csv_auto = chk_auto_csv_file.Checked;
-             auto_csv_file = txt_auto_csv_file.Text;
-           // if (export_csv_auto)
-           // {
-                if (CSV_Autofile != null)
-                    CSV_Autofile.Dispose();
-                CSV_Autofile = new StreamWriter(auto_csv_file,previousLogs.Count >0);
+            auto_csv_file = txt_auto_csv_file.Text;
+
+            if (CSV_Autofile != null)
+                CSV_Autofile.Dispose();
+            CSV_Autofile = new StreamWriter(auto_csv_file, previousLogs.Count > 0);
             if (previousLogs.Count == 0)
                 WriteToCSV_Auto(CSV_Autofile, "Image Path,Has Logo,Processing Time,Confidence,Error");
-            //}
-            Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, previousLogs, SearchOption.AllDirectories), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
+
+
+            processedImages.Clear();
+            Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, previousLogs, SearchOption.AllDirectories).Batch(_batch_cnt), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
             {
                 try
                 {
@@ -233,23 +235,63 @@ namespace LogoDetector
                         return;
                     while (processPaused && !backgroundWorker1.CancellationPending)
                         Thread.Sleep(1000);
-                    var info = ImageLogoInfo.ProccessImage(item, false);
-                    Stat_info.Total_process_time += info.ProcessingTime;
+
+
+                    List<ImageLogoInfo> infos = new List<ImageLogoInfo>();
+                    Dictionary<string, Bitmap> Images = new Dictionary<string, Bitmap>();
+
+                    foreach (var iitem in item)
+                    {
+                        var image = ImageLogoInfo.GetBitmap(iitem).Crop(120, 120);
+                        Images.Add(iitem, image);
+                    }
 
 
 
 
-                   // lock (processedImages) processedImages.Add(info);
-                   WriteToCSV_Auto(CSV_Autofile, info.ImagePath + "," + (info.ConfusedImage == true ? "Maybe" : info.HasLogo + "") + "," + info.ProcessingTime + "ms," + info.Confidence + "%" + "," + info.Error);
-                    
-                    if(!string.IsNullOrWhiteSpace(info.Error) )
-                        Stat_info.Failed_logos++;
-                    if (info.HasLogo)
-                        Stat_info.Has_Logos++;
-                    else if (info.ConfusedImage)
-                        Stat_info.Confused_Logos++;
-                    else if (!info.HasLogo)
-                        Stat_info.Has_noLogos++;
+                    if (_LocalWork)
+                    {
+                        infos = ImageLogoInfo.ProccessImages(Images);
+                        infos.ForEach(x => Stat_info.Total_process_time += x.ProcessingTime);
+
+                    }
+                    else
+                    {
+                        var task = _client.GetImgsPrediction(Images);
+                        var Results = task.Result;
+                        //_client.GetImgsPrediction(Images).ContinueWith((t) =>
+                        // {
+
+                        foreach (var output in Results.Outputs)
+                        {
+                            infos.Add(new ImageLogoInfo
+                            {
+                                ImagePath = output.Data.Concepts[0].ImageName,
+                                Confidence = float.Parse(output.Data.Concepts[0].Value) * 100,
+                                HasLogo = output.Data.Concepts[0].Prediction == ClarifaiApiClient.Models.PredictClasses.WithLogo,
+                                Error = task.Exception.FullErrorMessage()
+
+                            });
+                        }
+                        //});
+                    }
+
+                    foreach (var info in infos)
+                    {
+
+                        processedImages.Add(info);
+                        WriteToCSV_Auto(CSV_Autofile, info.ImagePath + "," + (info.ConfusedImage == true ? "Maybe" : info.HasLogo + "") + "," + info.ProcessingTime + "ms," + info.Confidence + "%" + "," + info.Error);
+
+                        if (!string.IsNullOrWhiteSpace(info.Error))
+                            Stat_info.Failed_logos++;
+                        if (info.HasLogo)
+                            Stat_info.Has_Logos++;
+                        else if (info.ConfusedImage)
+                            Stat_info.Confused_Logos++;
+                        else if (!info.HasLogo)
+                            Stat_info.Has_noLogos++;
+                    }
+
                 }
                 catch (Exception er)
                 {
@@ -297,7 +339,7 @@ namespace LogoDetector
             buttonPause.Enabled = false;
             processPaused = false;
             txt_auto_csv_file.ReadOnly = false ;
-             btn_imags_cnt.Enabled= true ;
+             btn_imags_cnt.Enabled= radClarifi.Enabled = radLocal.Enabled = true ;
             processStopwatch.Stop();
             timerRefreshlistview_Tick(null, null);
             button1.Text = "Process";
@@ -328,7 +370,7 @@ namespace LogoDetector
         }
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {/*
+        {
             var selectedIndexes = listView1.SelectedIndices;
             if (selectedIndexes.Count == 1)
             {
@@ -337,7 +379,7 @@ namespace LogoDetector
                 labelFailImage.Visible = false;
                 pictureBox1.Image =pictureBox2.Image = null;
                 if (info == null) { }
-                else if (info.Error != null)
+                else if (!string.IsNullOrWhiteSpace( info.Error ))
                 {
                     labelFailImage.Text = info.Error;
                     labelFailImage.Visible = true;
@@ -348,13 +390,13 @@ namespace LogoDetector
                     pictureBox1.Image = source;
                     if (info.ProcessedImage == null)
                     {
-                          ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath,true );
-                        pictureBox2.Image = info1.ProcessedImage ?? source.Crop(65, 65);
+                          ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
+                        pictureBox2.Image = info1.ProcessedImage ?? source.Crop(85, 85);
                     }
                 }
 
             }
-            */
+            
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
@@ -445,8 +487,29 @@ namespace LogoDetector
             }
             */
         }
+        ClarifaiClient _client;
+        private string _client_Id = "32XJoOO4NMLfpRlahCpN277X0eaPd-mCfajIGQlz";
+        private string _client_Secret = "xp8gqaPrvXScKp4w4L3oBmPw4lMNDph_kRgkDmVT";
         private void Form1_Load(object sender, EventArgs e)
         {
+            _client = new ClarifaiClient("Wads5t98mMepkTuQFLbQvdYBPH0xIBz_7KqdhMIp", "Igqe-qov2dbcS8EQDHoI8DxRR0PiEN3y3Tj4Vu2m");
+           // _client = new ClarifaiClient("4x7XD5NmA5JUxDBk1WH23B2UlYFjLu");
+           // radClarifi.Enabled = true;
+            _client.GenerateToken().ContinueWith((t) =>
+            {
+                if (t.Exception == null)
+                    SetStatusInfo("Clarifai Cloud ready to use");
+                else
+                    SetStatusInfo("Clarifai Cloud has error/s: " + t.Exception.FullErrorMessage());
+                if (radClarifi.InvokeRequired)
+                    radClarifi.Invoke((MethodInvoker)(() => radClarifi.Enabled = t.Exception == null));
+                else
+                    radClarifi.Enabled = t.Exception == null;
+            }
+
+            );
+
+
             Text += " v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
            pic_haslogs.Image= imageList1.Images[0];
             pic_hasnologos.Image = imageList1.Images[1];
@@ -461,6 +524,8 @@ namespace LogoDetector
 #endif
         }
         private int sortColumn = -1;
+        private List<ImageLogoInfo> processedImages =new List<ImageLogoInfo> ();
+        private List<ImageLogoInfo> listviewItems;
 
         private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
         {
@@ -505,6 +570,14 @@ namespace LogoDetector
                 Cursor = Cursors.WaitCursor;
                 Stopwatch sw = Stopwatch.StartNew();
                 SetStatusInfo("Counting images files..");
+                foreach (var item in MyDirectory.GetFiles(textBox1.Text, imgExts, previousLogs, SearchOption.AllDirectories))
+                
+                {
+
+                    var src = @"C:\D\Ken\LogoDetector\Photos\notworking";
+                    var src_training = @"C:\D\Ken\LogoDetector\Photos\notworking\training";
+                    ImageLogoInfo.GetBitmap(item).Crop(80, 80).Save(Path.Combine(src_training,Path.GetFileNameWithoutExtension(item)+ ".jpg")) ;
+                }
                 var cnt = MyDirectory.GetFiles(textBox1.Text, imgExts, previousLogs, SearchOption.AllDirectories).LongCount(x => !string.IsNullOrWhiteSpace(x));
                 sw.Stop();
                 Text = sw.ElapsedMilliseconds + " ms";
@@ -518,7 +591,7 @@ namespace LogoDetector
         }
 
         private void listView1_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
-        {/*
+        {
             var info = listviewItems[e.ItemIndex];
             var lvi = new ListViewItem(info.ImageName, info.HasLogo ? 0 : 1);
 
@@ -527,7 +600,7 @@ namespace LogoDetector
                 lvi.ForeColor = Color.Orange;
                 lvi.ImageIndex = 2;
             }
-            else if (info.Error!=null)
+            else if (!string.IsNullOrWhiteSpace(info.Error))
             {
                 lvi.ForeColor = Color.Red;
                 lvi.ImageIndex = 3;
@@ -536,7 +609,7 @@ namespace LogoDetector
             lvi.SubItems.Add(info.ProcessingTime + " ms");
             lvi.SubItems.Add(info.Confidence + " %");
             lvi.Tag = info;
-            e.Item = lvi;*/
+            e.Item = lvi;
         }
 
         private void timerRefreshlistview_Tick(object sender, EventArgs e)
@@ -552,15 +625,15 @@ namespace LogoDetector
             else if (!backgroundWorker1.IsBusy)
                 status_info.Text += " (Process completed)";
 
-           /* var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo && info.Error == null) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage && info.Error == null) || (checkBox3.Checked && info.ConfusedImage && info.Error == null) || (checkBoxShowErrors.Checked && info.Error != null)));
+            var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo && string.IsNullOrWhiteSpace( info.Error)) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage && string.IsNullOrWhiteSpace(info.Error)) || (checkBox3.Checked && info.ConfusedImage && string.IsNullOrWhiteSpace(info.Error)) || (checkBoxShowErrors.Checked && !string.IsNullOrWhiteSpace(info.Error))));
 
             if (sortColumn != -1 && listView1.Sorting != SortOrder.None)
                 items.Sort(new ListViewItemComparer(sortColumn, listView1.Sorting));
 
             listviewItems = items;
             listView1.VirtualListSize = listviewItems.Count;
-            buttonCopyImages.Enabled = buttonExportMatches.Enabled = listviewItems != null && listviewItems.Count > 0;
-            */
+            //buttonCopyImages.Enabled = buttonExportMatches.Enabled = listviewItems != null && listviewItems.Count > 0;
+            
             Calc_Groups_Counts();
 
         }
@@ -754,38 +827,6 @@ namespace LogoDetector
 
 
     }
-
-    public static class MyDirectory
-    {   // Regex version
-        public static IEnumerable<string> GetFiles(string path,
-                            string searchPatternExpression = "",
-                            SearchOption searchOption = SearchOption.TopDirectoryOnly)
-        {
-            Regex reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
-            return Directory.EnumerateFiles(path, "*", searchOption)
-                            .Where(file =>
-                                     reSearchPattern.IsMatch(Path.GetExtension(file)));
-        }
-
-        // Takes same patterns, and executes in parallel
-        public static IEnumerable<string> GetFiles(string path,
-                            string[] searchPatterns, Dictionary<string, int> previuseLogs,
-                            SearchOption searchOption = SearchOption.TopDirectoryOnly)
-        {
-
-             var v=  searchPatterns.AsParallel()
-                     .SelectMany(searchPattern =>
-                            Alphaleonis.Win32.Filesystem.Directory.EnumerateFiles(path, searchPattern, Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions.ContinueOnException| Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions.Files | Alphaleonis.Win32.Filesystem.DirectoryEnumerationOptions.Recursive).Where(x=> !previuseLogs.ContainsKey(x) ));
-           
-            
-          /*  var v = searchPatterns.AsParallel()
-       .SelectMany(searchPattern =>
-              Directory.EnumerateFiles(path, searchPattern, SearchOption.AllDirectories ).Where(x => !previuseLogs.ContainsKey(x)));
-              */
-
-            return v;
-        }
-    }
    public  struct Stat_Info
     {
        public  int Has_Logos;
@@ -819,7 +860,7 @@ namespace LogoDetector
             }
         }
         public bool HasLogo { get; set; }
-        public int Confidence { get; set; }
+        public float Confidence { get; set; }
         public bool ConfusedImage { get { return Confidence < 50 && Confidence > 45; } }
         public string Status { get
             {
@@ -833,7 +874,7 @@ namespace LogoDetector
         public Bitmap ProcessedImage { get; set; }
 
         public string  Error { get;  set; }
-        public static ImageLogoInfo ProccessImage(string imgPath, bool includeprocessedimage)
+        public static ImageLogoInfo ProccessImage(string imgPath)
         {
             ImageLogoInfo info = new ImageLogoInfo();
             info.ImagePath = imgPath;
@@ -849,8 +890,7 @@ namespace LogoDetector
                     var firstCheck = MyTemplateMatching.DetectLogo(image);
                     info.HasLogo = firstCheck > 50;
                     info.Confidence = (int)firstCheck;
-                    if (includeprocessedimage)
-                        info.ProcessedImage = image;
+                   
 
                     if (info.HasLogo) break;
                 }
@@ -862,7 +902,20 @@ namespace LogoDetector
             return info;
         }
 
-        internal  static Bitmap GetBitmap(string imgPath)
+        public static List<ImageLogoInfo> ProccessImages(Dictionary< string,Bitmap> imgPaths)
+        {
+            List<ImageLogoInfo> results = new List<ImageLogoInfo>();
+            for (int i = 0; i < imgPaths.Keys.Count; i++)
+            
+            {
+                var item = imgPaths.Keys.ElementAt(i);
+                results.Add( ProccessImage(item));
+            }
+            return results;
+
+        }
+
+            internal  static Bitmap GetBitmap(string imgPath)
         {
             string[] imgExts_ppm = new string[] { ".ppm", ".pgm", ".pbm" };
             Bitmap source = null;

@@ -25,7 +25,8 @@ namespace TestClarifaiApi
                             {
                                 Task.Run(async () =>
                                 {
-                                    var p = await c.PredictByFolderPath(@"C:\My Files\work\Ashraf\LogoDetection\clarifai_samples");
+                                    
+                                    var p = await c.PredictByFolderPath(@"C:\D\Ken\LogoDetector\Photos\notworking\New folder");
                                     Console.WriteLine(p.Status.Code);
                                     Console.WriteLine(p.Status.Description);
                                 });

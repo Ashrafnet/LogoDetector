@@ -7,6 +7,8 @@ namespace ClarifaiApiClient
 {
     using Util;
     using Models;
+    using System.Drawing;
+
     // This project can output the Class library as a NuGet Package.
     // To enable this option, right-click on the project and select the Properties menu item. In the Build tab select "Produce outputs on build".
     public class ClarifaiClient
@@ -40,7 +42,7 @@ namespace ClarifaiApiClient
         public ClarifaiClient(string clientId, string clientSecret)
         {
             _clientId = clientId;
-            _clientSecret = ClientSecret;
+            _clientSecret = clientSecret;
         }
 
         public ClarifaiClient(string accessToken)
@@ -81,6 +83,13 @@ namespace ClarifaiApiClient
             Predict response = await ClarifaiHttpClient.GetFolderImgsPrediction(AccessToken, folder_path);
             return response;
         }
+
+        public async Task<Predict> GetImgsPrediction(Dictionary<string, Bitmap> Images)
+        {
+            Predict response = await ClarifaiHttpClient.GetImgsPrediction(AccessToken, Images);
+            return response;
+        }
+
         #endregion
     }
 }
