@@ -29,6 +29,14 @@ namespace LogoDetector
             else
                 return null;
         }
+        public static float? ToFloatOrNull(this string strint)
+        {
+            float r;
+            if (float.TryParse(strint, out r))
+                return r;
+            else
+                return null;
+        }
         public static double ? ToDoubleOrNull(this string strint)
         {
             int r;

@@ -93,7 +93,7 @@ namespace LogoDetector
         /// <summary>
         /// Resize the image
         /// </summary>
-        public static Bitmap Crop(this Bitmap bitmap, int Width, int Height, float scale = 1)
+        public static Bitmap Crop(this Bitmap bitmap, int Width=65, int Height=65, float scale = 1)
         {
             var x = Math.Max(0, bitmap.Width - Width);
             var y = Math.Max(0, bitmap.Height - Height);

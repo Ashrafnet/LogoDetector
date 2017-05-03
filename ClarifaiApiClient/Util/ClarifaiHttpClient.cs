@@ -25,8 +25,18 @@ namespace ClarifaiApiClient.Util
 
         private static string _apiEndPoint = "https://api.clarifai.com";
         private static string _tokenPath = "/v1/token/";
-        private static string _predictPath = "/v2/models/Cropped Logo Detector/outputs";//logo_detector_120
+        private static string _predictPath_template = "/v2/models/%modelname%/outputs";//logo_detector_120
+        private static string _trainmodelpath_template = "/v2/models/%modelname%/versions";
 
+        private static string _predictPath = "/v2/models/%modelname%/outputs";//logo_detector_120
+        private static string _trainmodelpath = "/v2/models/%modelname%/versions";
+
+        private static string _trainPath = "/v2/inputs";
+        public static void SetupModelPath(string ModelName)
+        {
+            _predictPath = _predictPath_template.Replace("%modelname%", ModelName);
+            _trainmodelpath = _trainmodelpath_template.Replace("%modelname%", ModelName);
+        }
         public static async Task<object> GetToken(string clientId, string clientSecret)
         {
             ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ValidateServerCertificate);
@@ -369,6 +379,7 @@ namespace ClarifaiApiClient.Util
                 int ind = 0;
                 foreach (string imgPath in Images.Keys)
                 {
+                   
                     var outputs = predict.Outputs;
                     outputs[ind].Data.Concepts[0].ImageName = imgPath;
                     ind++;
@@ -398,6 +409,276 @@ namespace ClarifaiApiClient.Util
           
         }
 
+        public static async Task<PredictOutput> TrainWithImage(string accessToken,string ConceptID,  Bitmap Image,bool HasLogo)
+        {
+            if (string.IsNullOrWhiteSpace(accessToken))
+                throw new Exception("Invalid or empty accessToken!");
+            if (Image == null)
+                throw new ArgumentNullException("Image");
+
+            try
+            {
+                ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ValidateServerCertificate);
+
+                //
+                //  MESSAGE CONTENT
+                //string postData = "client_id="+ clientId + "&client_secret="+ clientSecret + "&grant_type=client_credentials";
+                List<PredictInput> inputs = new List<PredictInput>();
+
+               
+
+                    MemoryStream ms = new System.IO.MemoryStream();
+                    Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    byte[] imageArray = ms.ToArray();
+
+                    string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+
+
+                string json_input = "";
+                var concept = new ConceptData
+                { 
+                    Id = ConceptID,
+                    Value = HasLogo ? "true" : "false"
+                };
+                var Concepts = new List<ConceptData>();
+                Concepts.Add(concept);
+                    inputs.Add(new PredictInput
+                    { 
+                        Data = new PredictImage
+                        {
+                            Image = new PredictImageData
+                            {
+                                Base64 = base64ImageRepresentation
+                            },
+                            Concepts = Concepts
+                        }
+                    });
+                
+                var ins = new
+                {
+                    Inputs = inputs
+                };
+
+                string postData = LowercaseJsonSerializer.SerializeObject(ins);
+                byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+
+                //
+                //  CREATE REQUEST
+                HttpWebRequest Request = (HttpWebRequest)WebRequest.Create(_apiEndPoint + _trainPath);
+                Request.Method = "POST";
+                Request.KeepAlive = false;
+                Request.ContentType = "application/json";
+                Request.Headers.Add("cache-control", "no-cache");
+                Request.Headers.Add("authorization", "Bearer " + accessToken);
+
+               
+                Stream dataStream = await Request.GetRequestStreamAsync();
+                await dataStream.WriteAsync(byteArray, 0, byteArray.Length);
+                dataStream.Close();
+
+
+
+                WebResponse Response = await Request.GetResponseAsync();
+
+                StreamReader Reader = new StreamReader(Response.GetResponseStream());
+                string responseLine = await Reader.ReadToEndAsync();
+                Reader.Close();
+
+                HttpStatusCode ResponseCode = ((HttpWebResponse)Response).StatusCode;
+                if (!ResponseCode.Equals(HttpStatusCode.OK))
+                {
+                    PredictOutput error = Newtonsoft.Json.JsonConvert.DeserializeObject<PredictOutput>(responseLine);
+                    return error;
+                }
+
+                PredictOutput predict = Newtonsoft.Json.JsonConvert.DeserializeObject<PredictOutput>(responseLine);
+               
+               
+                    var outputs = predict.Data;
+                   
+                
+                
+                return predict;
+            }
+            catch (WebException e)
+            {
+                using (WebResponse response = e.Response)
+                {
+                    HttpWebResponse httpResponse = (HttpWebResponse)response;
+                    using (Stream data = response.GetResponseStream())
+                    using (var reader = new StreamReader(data))
+                    {
+                        string text = reader.ReadToEnd();
+                        var error = Newtonsoft.Json.JsonConvert.DeserializeObject<PredictOutput>(text);
+                        return error;
+                    }
+                }
+            }
+            catch (Exception er)
+            {
+                var error = new PredictOutput {  Status = new PredictStatus { Code = 0, Description = er.Message } };
+                return error;
+            }
+
+
+        }
+
+        public static async Task<PredictOutput> TrainWithImages(string accessToken,string ConceptID, List<Bitmap> Images, bool HasLogo)
+        {
+            if (string.IsNullOrWhiteSpace(accessToken))
+                throw new Exception("Invalid or empty accessToken!");
+            if (Images == null || Images.Count <1)
+                throw new ArgumentNullException("Image");
+
+            try
+            {
+                ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ValidateServerCertificate);
+
+                //
+                //  MESSAGE CONTENT
+                //string postData = "client_id="+ clientId + "&client_secret="+ clientSecret + "&grant_type=client_credentials";
+                List<PredictInput> inputs = new List<PredictInput>();
+
+
+                foreach (var Image in Images)
+                {
+
+
+                    MemoryStream ms = new System.IO.MemoryStream();
+                    Image.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                    byte[] imageArray = ms.ToArray();
+
+                    string base64ImageRepresentation = Convert.ToBase64String(imageArray);
+
+
+                    var concept = new ConceptData
+                    {
+                        Id = ConceptID,
+                        Value = HasLogo ? "true" : "false"
+                    };
+                    var Concepts = new List<ConceptData>();
+                    Concepts.Add(concept);
+                    inputs.Add(new PredictInput
+                    {
+                        Data = new PredictImage
+                        {
+                            Image = new PredictImageData
+                            {
+                                Base64 = base64ImageRepresentation
+                            },
+                            Concepts = Concepts
+                        }
+                    });
+                }
+                var ins = new
+                {
+                    Inputs = inputs
+                };
+
+                string postData = LowercaseJsonSerializer.SerializeObject(ins);
+                byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+
+                //
+                //  CREATE REQUEST
+                HttpWebRequest Request = (HttpWebRequest)WebRequest.Create(_apiEndPoint + _trainPath);
+                Request.Method = "POST";
+                Request.KeepAlive = false;
+                Request.ContentType = "application/json";
+                Request.Headers.Add("cache-control", "no-cache");
+                Request.Headers.Add("authorization", "Bearer " + accessToken);
+
+
+                Stream dataStream = await Request.GetRequestStreamAsync();
+                await dataStream.WriteAsync(byteArray, 0, byteArray.Length);
+                dataStream.Close();
+
+
+
+                WebResponse Response = await Request.GetResponseAsync();
+
+                StreamReader Reader = new StreamReader(Response.GetResponseStream());
+                string responseLine = await Reader.ReadToEndAsync();
+                Reader.Close();
+
+                HttpStatusCode ResponseCode = ((HttpWebResponse)Response).StatusCode;
+                if (!ResponseCode.Equals(HttpStatusCode.OK))
+                {
+                    PredictOutput error = Newtonsoft.Json.JsonConvert.DeserializeObject<PredictOutput>(responseLine);
+                    return error;
+                }
+
+                PredictOutput predict = Newtonsoft.Json.JsonConvert.DeserializeObject<PredictOutput>(responseLine);
+
+
+                var outputs = predict.Data;
+
+
+
+                return predict;
+            }
+            catch (WebException e)
+            {
+                using (WebResponse response = e.Response)
+                {
+                    HttpWebResponse httpResponse = (HttpWebResponse)response;
+                    using (Stream data = response.GetResponseStream())
+                    using (var reader = new StreamReader(data))
+                    {
+                        string text = reader.ReadToEnd();
+                        var error = Newtonsoft.Json.JsonConvert.DeserializeObject<PredictOutput>(text);
+                        return error;
+                    }
+                }
+            }
+            catch (Exception er)
+            {
+                var error = new PredictOutput { Status = new PredictStatus { Code = 0, Description = er.Message } };
+                return error;
+            }
+
+
+        }
+
+        public static async Task<Predict> TrainModel(string accessToken)
+        {
+            ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback(ValidateServerCertificate);
+
+
+            //
+            //  CREATE REQUEST
+            HttpWebRequest Request = (HttpWebRequest)WebRequest.Create(_apiEndPoint + _trainmodelpath);
+            Request.Method = "POST";
+            Request.KeepAlive = false;
+            Request.ContentType = "application/json";
+            Request.Headers.Add("cache-control", "no-cache");
+            Request.Headers.Add("authorization", "Bearer " + accessToken);
+
+            Stream dataStream = await Request.GetRequestStreamAsync();
+
+            dataStream.Close();
+
+
+            WebResponse Response = await Request.GetResponseAsync();
+
+            StreamReader Reader = new StreamReader(Response.GetResponseStream());
+            string responseLine = await Reader.ReadToEndAsync();
+            Reader.Close();
+
+            HttpStatusCode ResponseCode = ((HttpWebResponse)Response).StatusCode;
+            if (!ResponseCode.Equals(HttpStatusCode.OK))
+            {
+                Predict error = Newtonsoft.Json.JsonConvert.DeserializeObject<Predict>(responseLine);
+                return error;
+            }
+
+            Predict predict = Newtonsoft.Json.JsonConvert.DeserializeObject<Predict>(responseLine);
+          
+
+            return predict;
+
+
+
+        }
 
     }
 }

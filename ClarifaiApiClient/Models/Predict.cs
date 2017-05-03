@@ -37,6 +37,11 @@ namespace ClarifaiApiClient.Models
     {
         public List<PredictConcept> Concepts { get; set; }
     }
+    public class ConceptData
+    {
+        public string Id { get; set; }
+        public string Value { get; set; }
+    }
     public class PredictConcept
     {
         public string Id { get; set; }
@@ -79,6 +84,7 @@ namespace ClarifaiApiClient.Models
     public class PredictImage
     {
         public PredictImageData Image { get; set; }
+        public List<ConceptData> Concepts { get; set; }
     }
     public class PredictImageData
     {

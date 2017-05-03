@@ -57,6 +57,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClarifiConfig.cs" />
+    <Compile Include="ClarifiConfig_UI.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ClarifiConfig_UI.Designer.cs">
+      <DependentUpon>ClarifiConfig_UI.cs</DependentUpon>
+    </Compile>
     <Compile Include="CopyFiles\CopyFiles.cs" />
     <Compile Include="CopyFiles\DIA_CopyFiles.cs">
       <SubType>Form</SubType>
@@ -76,6 +83,12 @@
     <Compile Include="frmTextViewer.Designer.cs">
       <DependentUpon>frmTextViewer.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmTrainImages_Directory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmTrainImages_Directory.Designer.cs">
+      <DependentUpon>frmTrainImages_Directory.cs</DependentUpon>
+    </Compile>
     <Compile Include="ListViewItemComparer.cs" />
     <Compile Include="MyDirectory.cs" />
     <Compile Include="ppm_reader\CutReader.cs" />
@@ -94,6 +107,9 @@
     <Compile Include="utilities\MyExtensions.cs" />
     <Compile Include="utilities\MyLogoDetector.cs" />
     <Compile Include="utilities\MyTemplateMatching.cs" />
+    <EmbeddedResource Include="ClarifiConfig_UI.resx">
+      <DependentUpon>ClarifiConfig_UI.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CopyFiles\DIA_CopyFiles.resx">
       <DependentUpon>DIA_CopyFiles.cs</DependentUpon>
     </EmbeddedResource>
@@ -102,6 +118,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmTextViewer.resx">
       <DependentUpon>frmTextViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmTrainImages_Directory.resx">
+      <DependentUpon>frmTrainImages_Directory.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

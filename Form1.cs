@@ -16,24 +16,24 @@ namespace LogoDetector
 
     public partial class Form1 : Form
     {
-       // List<ImageLogoInfo> processedImages = new List<ImageLogoInfo>();
-       // List<ImageLogoInfo> listviewItems = new List<ImageLogoInfo>();
+        // List<ImageLogoInfo> processedImages = new List<ImageLogoInfo>();
+        // List<ImageLogoInfo> listviewItems = new List<ImageLogoInfo>();
         string[] imgExts = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF", "*.ppm", "*.pgm", "*.pbm" };
-        private bool _LocalWork = true;//true if localalgoritim, false for clirifi cloud
+        private Algorithm _LocalWork = Algorithm.Local;//true if localalgoritim, false for clirifi cloud
 
         CancellationTokenSource cancellationTokenSource;
         public Form1()
         {
             InitializeComponent();
         }
-      //  double total_process_time = 0;
-       // long withLogoCount = 0;
+        //  double total_process_time = 0;
+        // long withLogoCount = 0;
         Stopwatch processStopwatch;
         private void button1_Click(object sender, EventArgs e)
         {
             try
             {
-                
+
                 if (backgroundWorker1.IsBusy)
                 {
                     if (MessageBox.Show(this, "Do you want to cancel the process?", "Cancel process", MessageBoxButtons.YesNo) != DialogResult.Yes)
@@ -132,8 +132,8 @@ namespace LogoDetector
                 button1.Text = "Stop";
                 buttonPause.Text = "Pause";
                 buttonPause.Enabled = txt_auto_csv_file.ReadOnly = true;
-                btn_imags_cnt.Enabled =radClarifi.Enabled = radLocal.Enabled = false;
-                _LocalWork = radLocal.Checked;
+                btn_imags_cnt.Enabled = radClarifi.Enabled = radLocal.Enabled = false;
+                _LocalWork = radLocal.Checked ? Algorithm.Local : Algorithm.Clarifai;
                 backgroundWorker1.RunWorkerAsync(textBox1.Text);
 
             }
@@ -142,7 +142,7 @@ namespace LogoDetector
                 MessageBox.Show(er.FullErrorMessage(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        Dictionary<string, int> previousLogs = new Dictionary<string, int>();
+        Dictionary<string, float> previousLogs = new Dictionary<string, float>();
         List<string> previousLogs_errors = new List<string>();
         Stat_Info Stat_info = new Stat_Info();
         void ReadPreviuseLogFile(string logfile)
@@ -155,7 +155,7 @@ namespace LogoDetector
                 if (!File.Exists(logfile)) return;
 
                 Stopwatch sw = Stopwatch.StartNew();
-                
+
                 foreach (var item in File.ReadLines(logfile))
                 {
                     if (string.IsNullOrWhiteSpace(item)) continue;
@@ -170,25 +170,25 @@ namespace LogoDetector
                         previousLogs_errors.Add(item);
                         Stat_info.Failed_logos++;
                         Calc_Groups_Counts();
-                        continue; 
+                        continue;
                     }
                     var i = item.Split(',');
                     if (string.IsNullOrWhiteSpace(i[3] + "")) continue;
                     if (previousLogs.ContainsKey(i[0] + "")) continue;
-                    int? confidence = (i[3] + "").Replace("%","").ToIntOrNull();
-                    if (!confidence.HasValue ) continue;
-                    previousLogs.Add(i[0] + "", confidence.Value );
-                    if (confidence.Value  > 50)
+                    float? confidence = (i[3] + "").Replace("%", "").ToFloatOrNull();
+                    if (!confidence.HasValue) continue;
+                    previousLogs.Add(i[0] + "", confidence.Value);
+                    if (confidence.Value > 50)
                         Stat_info.Has_Logos++;
-                    else if (confidence.Value  > 45 && confidence.Value  < 50)
+                    else if (confidence.Value > 45 && confidence.Value < 50)
                         Stat_info.Confused_Logos++;
-                    else if (confidence.Value  < 50)
+                    else if (confidence.Value < 50)
                         Stat_info.Has_noLogos++;
                 }
                 sw.Stop();
                 SetStatusInfo("Finished read previous logs in " + sw.ElapsedMilliseconds + " Milliseconds");
             }
-           
+
             finally
             {
                 Cursor = Cursors.Default;
@@ -198,14 +198,14 @@ namespace LogoDetector
         private void buttonPause_Click(object sender, EventArgs e)
         {
             processPaused = !processPaused;
-            btn_imags_cnt.Enabled =  processPaused;
+            btn_imags_cnt.Enabled = processPaused;
             buttonPause.Text = processPaused ? "Resume" : "Pause";
             if (processPaused) processStopwatch.Stop();
             else processStopwatch.Start();
         }
         StreamWriter CSV_Autofile = null;
-        string  auto_csv_file = "";
-        private int _batch_cnt = 2;
+        string auto_csv_file = "";
+      
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             //processedImages.Clear();
@@ -225,7 +225,7 @@ namespace LogoDetector
 
 
             processedImages.Clear();
-            Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, previousLogs, SearchOption.AllDirectories).Batch(_batch_cnt), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
+            Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, previousLogs, SearchOption.AllDirectories).Batch(_clarificonfig.Batch_Size ), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
             {
                 try
                 {
@@ -242,38 +242,41 @@ namespace LogoDetector
 
                     foreach (var iitem in item)
                     {
-                        var image = ImageLogoInfo.GetBitmap(iitem).Crop(120, 120);
+                        var image = ImageLogoInfo.GetBitmap(iitem).Crop();
                         Images.Add(iitem, image);
                     }
 
 
 
 
-                    if (_LocalWork)
+                    if (_LocalWork == Algorithm.Local)
                     {
                         infos = ImageLogoInfo.ProccessImages(Images);
                         infos.ForEach(x => Stat_info.Total_process_time += x.ProcessingTime);
 
                     }
-                    else
+                    else if (_LocalWork == Algorithm.Clarifai)
                     {
                         var task = _client.GetImgsPrediction(Images);
                         var Results = task.Result;
-                        //_client.GetImgsPrediction(Images).ContinueWith((t) =>
-                        // {
 
+                        if (Results.Status.Code != 10000)
+                        {
+                            SetStatusInfo("ERROR: " + Results.Status.Description);
+                            throw new Exception(Results.Status.Description + Environment.NewLine + Results.Status.Details);
+                        }
                         foreach (var output in Results.Outputs)
                         {
                             infos.Add(new ImageLogoInfo
                             {
                                 ImagePath = output.Data.Concepts[0].ImageName,
                                 Confidence = float.Parse(output.Data.Concepts[0].Value) * 100,
-                                HasLogo = output.Data.Concepts[0].Prediction == ClarifaiApiClient.Models.PredictClasses.WithLogo,
+                                AlgorithmUsed = Algorithm.Clarifai,
                                 Error = task.Exception.FullErrorMessage()
 
                             });
                         }
-                        //});
+
                     }
 
                     foreach (var info in infos)
@@ -338,15 +341,15 @@ namespace LogoDetector
         {
             buttonPause.Enabled = false;
             processPaused = false;
-            txt_auto_csv_file.ReadOnly = false ;
-             btn_imags_cnt.Enabled= radClarifi.Enabled = radLocal.Enabled = true ;
+            txt_auto_csv_file.ReadOnly = false;
+            btn_imags_cnt.Enabled = radClarifi.Enabled = radLocal.Enabled = true;
             processStopwatch.Stop();
             timerRefreshlistview_Tick(null, null);
             button1.Text = "Process";
             Calc_Groups_Counts();
             if (CSV_Autofile != null)
                 CSV_Autofile.Dispose();
-            if (e.Error != null&&!(e.Error is OperationCanceledException))
+            if (e.Error != null && !(e.Error is OperationCanceledException))
             {
                 MessageBox.Show(e.Error.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -363,9 +366,10 @@ namespace LogoDetector
                     {
                         Process.Start(fpath);
                     }
-                }else
+                }
+                else
 
-                MessageBox.Show("Process completed", "Ready", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Process completed", "Ready", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -377,32 +381,32 @@ namespace LogoDetector
 
                 var info = listviewItems[selectedIndexes[0]];
                 labelFailImage.Visible = false;
-                pictureBox1.Image =pictureBox2.Image = null;
+                pictureBox1.Image = pictureBox2.Image = null;
                 if (info == null) { }
-                else if (!string.IsNullOrWhiteSpace( info.Error ))
+                else if (!string.IsNullOrWhiteSpace(info.Error))
                 {
                     labelFailImage.Text = info.Error;
                     labelFailImage.Visible = true;
                 }
                 else
                 {
-                    Bitmap source =ImageLogoInfo. GetBitmap(info.ImagePath);
+                    Bitmap source = ImageLogoInfo.GetBitmap(info.ImagePath);
                     pictureBox1.Image = source;
                     if (info.ProcessedImage == null)
                     {
-                          ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath );
-                        pictureBox2.Image = info1.ProcessedImage ?? source.Crop(85, 85);
+                        // ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath);
+                        pictureBox2.Image = source.Crop();
                     }
                 }
 
             }
-            
+
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             listView1.SelectedIndices.Clear();
-            timerRefreshlistview_Tick(null, null) ;
+            timerRefreshlistview_Tick(null, null);
         }
 
         void SetStatusInfo(string info)
@@ -413,7 +417,7 @@ namespace LogoDetector
             }
             else
             {
-                status_info.Text = info;              
+                status_info.Text = info;
                 Refresh();
             }
         }
@@ -488,13 +492,16 @@ namespace LogoDetector
             */
         }
         ClarifaiClient _client;
-        private string _client_Id = "32XJoOO4NMLfpRlahCpN277X0eaPd-mCfajIGQlz";
-        private string _client_Secret = "xp8gqaPrvXScKp4w4L3oBmPw4lMNDph_kRgkDmVT";
+        ClarifiConfig _clarificonfig;
+
+
+
+
         private void Form1_Load(object sender, EventArgs e)
         {
-            _client = new ClarifaiClient("Wads5t98mMepkTuQFLbQvdYBPH0xIBz_7KqdhMIp", "Igqe-qov2dbcS8EQDHoI8DxRR0PiEN3y3Tj4Vu2m");
-           // _client = new ClarifaiClient("4x7XD5NmA5JUxDBk1WH23B2UlYFjLu");
-           // radClarifi.Enabled = true;
+            _clarificonfig = ClarifiConfig.CurrentConfig();
+            _client = new ClarifaiClient(_clarificonfig.Default_Client_Id, _clarificonfig.Default_Client_Secret, _clarificonfig.Default_Model_Path);
+
             _client.GenerateToken().ContinueWith((t) =>
             {
                 if (t.Exception == null)
@@ -511,7 +518,7 @@ namespace LogoDetector
 
 
             Text += " v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-           pic_haslogs.Image= imageList1.Images[0];
+            pic_haslogs.Image = imageList1.Images[0];
             pic_hasnologos.Image = imageList1.Images[1];
             pic_confusedlogos.Image = imageList1.Images[2];
             pic_failedlogos.Image = imageList1.Images[3];
@@ -524,7 +531,7 @@ namespace LogoDetector
 #endif
         }
         private int sortColumn = -1;
-        private List<ImageLogoInfo> processedImages =new List<ImageLogoInfo> ();
+        private List<ImageLogoInfo> processedImages = new List<ImageLogoInfo>();
         private List<ImageLogoInfo> listviewItems;
 
         private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -570,19 +577,20 @@ namespace LogoDetector
                 Cursor = Cursors.WaitCursor;
                 Stopwatch sw = Stopwatch.StartNew();
                 SetStatusInfo("Counting images files..");
-                foreach (var item in MyDirectory.GetFiles(textBox1.Text, imgExts, previousLogs, SearchOption.AllDirectories))
-                
-                {
+                //foreach (var item in MyDirectory.GetFiles(textBox1.Text, imgExts, previousLogs, SearchOption.AllDirectories))
 
-                    var src = @"C:\D\Ken\LogoDetector\Photos\notworking";
-                    var src_training = @"C:\D\Ken\LogoDetector\Photos\notworking\training";
-                    ImageLogoInfo.GetBitmap(item).Crop(80, 80).Save(Path.Combine(src_training,Path.GetFileNameWithoutExtension(item)+ ".jpg")) ;
-                }
+                //{
+
+                //    var src = @"C:\D\Ken\LogoDetector\Photos\notworking";
+                //    var src_training = @"C:\D\Ken\LogoDetector\Photos\notworking\training";
+                //    ImageLogoInfo.GetBitmap(item).Crop(80, 80).Save(Path.Combine(src_training, Path.GetFileNameWithoutExtension(item) + ".jpg"));
+                //}
                 var cnt = MyDirectory.GetFiles(textBox1.Text, imgExts, previousLogs, SearchOption.AllDirectories).LongCount(x => !string.IsNullOrWhiteSpace(x));
                 sw.Stop();
                 Text = sw.ElapsedMilliseconds + " ms";
                 SetStatusInfo("Number of images= " + cnt + " images");
                 MessageBox.Show("Number of images= " + cnt + " images" + Environment.NewLine + "Images supported are:" + Environment.NewLine + string.Join(" , ", imgExts) + "");
+
             }
             finally
             {
@@ -619,13 +627,13 @@ namespace LogoDetector
 
             status_info.Text = Stat_info.TotalImages + " Items";
             if (processStopwatch != null)
-                stat_time.Text = processStopwatch.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + Stat_info.Total_process_time / 1000 + " Seconds]" + " (" + Stat_info.TotalImages  + " Items, True=" + Stat_info.Has_Logos + " False=" + (Stat_info.Has_noLogos + Stat_info.Failed_logos + Stat_info.Confused_Logos) + ")";
+                stat_time.Text = processStopwatch.Elapsed.TotalSeconds + " Seconds" + " [Total Process Time: " + Stat_info.Total_process_time / 1000 + " Seconds]" + " (" + Stat_info.TotalImages + " Items, True=" + Stat_info.Has_Logos + " False=" + (Stat_info.Has_noLogos + Stat_info.Failed_logos + Stat_info.Confused_Logos) + ")";
             if (cancellationTokenSource != null && cancellationTokenSource.IsCancellationRequested)
                 status_info.Text += " (User canceled the process)";
             else if (!backgroundWorker1.IsBusy)
                 status_info.Text += " (Process completed)";
 
-            var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo && string.IsNullOrWhiteSpace( info.Error)) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage && string.IsNullOrWhiteSpace(info.Error)) || (checkBox3.Checked && info.ConfusedImage && string.IsNullOrWhiteSpace(info.Error)) || (checkBoxShowErrors.Checked && !string.IsNullOrWhiteSpace(info.Error))));
+            var items = processedImages.FindAll(info => ((checkBox1.Checked && info.HasLogo && string.IsNullOrWhiteSpace(info.Error)) || (checkBox2.Checked && !info.HasLogo && !info.ConfusedImage && string.IsNullOrWhiteSpace(info.Error)) || (checkBox3.Checked && info.ConfusedImage && string.IsNullOrWhiteSpace(info.Error)) || (checkBoxShowErrors.Checked && !string.IsNullOrWhiteSpace(info.Error))));
 
             if (sortColumn != -1 && listView1.Sorting != SortOrder.None)
                 items.Sort(new ListViewItemComparer(sortColumn, listView1.Sorting));
@@ -633,7 +641,7 @@ namespace LogoDetector
             listviewItems = items;
             listView1.VirtualListSize = listviewItems.Count;
             //buttonCopyImages.Enabled = buttonExportMatches.Enabled = listviewItems != null && listviewItems.Count > 0;
-            
+
             Calc_Groups_Counts();
 
         }
@@ -646,7 +654,7 @@ namespace LogoDetector
             }
             else
             {
-                
+
 
                 lbl_HasLogo.Text = "Images with logo (" + Stat_info.Has_Logos + ")";
                 lbl_hasnologos.Text = "Images with No logo (" + Stat_info.Has_noLogos + ")";
@@ -654,49 +662,7 @@ namespace LogoDetector
                 lbl_failedlogos.Text = "Failed images (" + Stat_info.Failed_logos + ")";
                 Refresh();
             }
-            /*
-            try
-            {
 
-          
-            lock (processedImages)
-            {
-
-
-                var g = processedImages.GroupBy(x => x.Status).Select(group => new
-                {
-                    Status = group.Key,
-                    Count = group.Count()
-                }).OrderBy(x => x.Status).ToList();
-                if (g != null)
-                {
-                    if (g.Count > 0)
-                    {
-                        var haslogo_cnt = g.FirstOrDefault(x => x.Status == "Has Logo");
-                        var hasnologo_cnt = g.FirstOrDefault(x => x.Status == "Has No Logo");
-                        var maybe_cnt = g.FirstOrDefault(x => x.Status == "Maybe");
-                        var error_cnt = g.FirstOrDefault(x => x.Status == "Error");
-
-
-                        if (haslogo_cnt != null)
-                            checkBox1.Text = "Show images with logo (" + haslogo_cnt.Count + ")";
-
-                        if (hasnologo_cnt != null)
-                            checkBox2.Text = "Show images without logo (" + hasnologo_cnt.Count + ")";
-
-                        if (maybe_cnt != null)
-                            checkBox3.Text = "Show confused images (" + maybe_cnt.Count + ")";
-
-                        if (error_cnt != null)
-                            checkBoxShowErrors.Text = "Show failed images (" + error_cnt.Count + ")";
-                    }
-                }
-            }
-            }
-            catch
-            {
-                
-            }*/
         }
 
         private void buttonCopyImages_Click(object sender, EventArgs e)
@@ -731,15 +697,16 @@ namespace LogoDetector
             catch (Exception er)
             {
                 txt_auto_csv_file.Text = Path.Combine(textBox1.Text, "Results.csv");
-              
+
             }
 
-         
+
         }
 
         private void lbl_HasLogo_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            if((((LinkLabel)sender).Tag +"") == "failed")
+            Calc_Groups_Counts();
+            if ((((LinkLabel)sender).Tag + "") == "failed")
             {
                 StringBuilder str_err_items = new StringBuilder();
                 foreach (var item in previousLogs_errors)
@@ -755,9 +722,9 @@ namespace LogoDetector
 
         private void btn_Pre_logs_Click(object sender, EventArgs e)
         {
-            if(previousLogs !=null && previousLogs.Count > 0) // clear
+            if (previousLogs != null && previousLogs.Count > 0) // clear
             {
-               if( MessageBox.Show("Are you sure you want to clear current Stats from memory","Clear Memory!", MessageBoxButtons.YesNo , MessageBoxIcon.Question)== DialogResult.Yes)
+                if (MessageBox.Show("Are you sure you want to clear current Stats from memory", "Clear Memory!", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     previousLogs.Clear();
                     previousLogs_errors.Clear();
@@ -770,8 +737,11 @@ namespace LogoDetector
             var file_csv = txt_auto_csv_file.Text;
             if (File.Exists(file_csv))
             {
-                if (MessageBox.Show(string.Format("Are you sure you want to read previous logs from this csv file.{0}{0}CSV File:{0}{1}", Environment.NewLine , file_csv), "previous logs!", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show(string.Format("Are you sure you want to read previous logs from this csv file.{0}{0}CSV File:{0}{1}", Environment.NewLine, file_csv), "previous logs!", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
+                    previousLogs.Clear();
+                    previousLogs_errors.Clear();
+                    Stat_info = new Stat_Info();
                     ReadPreviuseLogFile(file_csv);
                     Calc_Groups_Counts();
                 }
@@ -779,60 +749,189 @@ namespace LogoDetector
             }
             else
             {
-                MessageBox.Show(string.Format("This csv file does not exist{0}{0}CSV File:{0}{1}", Environment.NewLine, file_csv), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error );
+                MessageBox.Show(string.Format("This csv file does not exist{0}{0}CSV File:{0}{1}", Environment.NewLine, file_csv), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 txt_auto_csv_file.Focus();
                 txt_auto_csv_file.SelectAll();
             }
         }
-    }
 
-
-
-
-    public static class BitmapProcess
-    {
-        public static KeyValuePair<Bitmap, int> HasLogo(Bitmap source, int minShapes, int MinPixels = 30, int MaxPixels = 150)
+        private void trainHasLogoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var sourceData = new LockBitmap(source);
-            var target = new Bitmap(source.Width, source.Height, PixelFormat.Format24bppRgb);
-            var targetData = new LockBitmap(target);
-            sourceData.LockBits();
-            targetData.LockBits();
             try
             {
-                //Filter the shapes similar to logo
-                var closedPaths = sourceData.FindClosedAreas(MinPixels, MaxPixels);
-                var shapesFopund = closedPaths.Count;
-                if (closedPaths.Count >= minShapes)
+
+
+                ToolStripMenuItem i = sender as ToolStripMenuItem;
+                if (i == null) return;
+                if (listView1.SelectedIndices.Count > 0)
                 {
-                    closedPaths = closedPaths.FindShapesInCirclesBorder(minShapes);
-                    foreach (var item in closedPaths)
+                    List<Bitmap> Images = new List<Bitmap>();
+                    for (int inx = 0; inx < listView1.SelectedIndices.Count; inx++)
                     {
-                        // var cmykColors= item.ConvertAll(c => ColorSpaceHelper.RGBtoCMYK(sourceData[c.X, c.Y]));
-                        targetData.ChangeColor(item, Color.Red);
+                        var info = listviewItems[listView1.SelectedIndices[inx]];
+                        if (info == null) return;
+                        Bitmap source = ImageLogoInfo.GetBitmap(info.ImagePath);
+
+                        var Image = source.Crop();
+                        Images.Add(Image);
                     }
+
+
+                    var t = _client.TrainWithImages(_clarificonfig.Default_Concept_ID, Images, (i.Tag + "") == "1" ? true : false);
+
+                    var rr = t.ContinueWith((tt) =>
+                    {
+                        var exxx = tt.Exception;
+                        if (exxx != null)
+                            SetStatusInfo(exxx.FullErrorMessage());
+                        else if (t.Result != null)
+                        {
+
+                            SetStatusInfo("Train Status: " + t.Result.Status.Description);
+                        }
+                    });
+
                 }
-                var conf = closedPaths.Count < minShapes ? 0 : 100 - Math.Abs(closedPaths.Count - 5) * 20;
-                return new KeyValuePair<Bitmap, int>(target, conf);
             }
-            finally
+            catch (Exception er)
             {
-                sourceData.UnlockBits();
-                targetData.UnlockBits();
-                //bitmap.Save("c:\\d\\logo.png");
+                MessageBox.Show(er.FullErrorMessage(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
             }
         }
 
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                var flder = folderBrowserDialog1.SelectedPath;
+                foreach (var item in listviewItems)
+                {
+                    var fpath = Path.Combine(flder, Path.GetFileNameWithoutExtension(item.ImagePath) + ".jpg");
+                    ImageLogoInfo.GetBitmap(item.ImagePath).Crop().Save(fpath, ImageFormat.Jpeg);
+                }
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int cnt = 0;
+                frmTrainImages_Directory frm = new frmTrainImages_Directory(imgExts);
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    var flder = frm.FolderPath ;
+                   Parallel.ForEach(MyDirectory.GetFiles(flder, imgExts,previousLogs,frm.IncludeAllSub_Folders  ).Batch(_clarificonfig.Batch_Size ), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (item) =>
+                    {
+                        List<Bitmap> imgs = new List<Bitmap>();
+                        foreach (var i in item)
+                        {
+                            var img = ImageLogoInfo.GetBitmap(i).Crop();
+                            imgs.Add(img);
+                        }
+
+                        var t = _client.TrainWithImages(_clarificonfig.Default_Concept_ID, imgs, frm.HasLogo );
+
+                        var rr = t.ContinueWith((tt) =>
+                        {
+                            var exxx = tt.Exception;
+                            if (exxx != null)
+                                SetStatusInfo(exxx.FullErrorMessage());
+                            else if (t.Result != null)
+                            {
+                                cnt += item.Count();
+                                SetStatusInfo("Train Status: " + t.Result.Status.Description + " |" + cnt + " Items has been trained");
+                            }
+
+                        });
+                    });
+                    
+                }
+
+            }
+            catch (Exception er)
+            {
+
+                MessageBox.Show(er.FullErrorMessage(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var t = _client.TrainModel();
+
+                var rr = t.ContinueWith((tt) =>
+                {
+                    var exxx = tt.Exception;
+                    if (exxx != null)
+                        SetStatusInfo(exxx.FullErrorMessage());
+                    else if (t.Result != null)
+                    {
+
+                        SetStatusInfo("Model Train Status: " + t.Result.Status.Description);
+                    }
+                });
+
+            }
+            catch (Exception er)
+            {
+
+                MessageBox.Show(er.FullErrorMessage(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void toolStripStatusLabel2_Click(object sender, EventArgs e)
+        {
+            try
+            {
 
 
+                ClarifiConfig_UI frm = new ClarifiConfig_UI((ClarifiConfig)_clarificonfig.Clone());
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    _clarificonfig = frm.Clarificonfig;
+                    _client = new ClarifaiClient(_clarificonfig.Default_Client_Id, _clarificonfig.Default_Client_Secret, _clarificonfig.Default_Model_Path);
 
+                    _client.GenerateToken().ContinueWith((t) =>
+                    {
+                        if (t.Exception == null)
+                        {
+                            SetStatusInfo("New Clarifai Configs ready to use");
+                            _clarificonfig.SaveCurrentConfig();
+                        }
+                        else
+                            SetStatusInfo("Clarifai Cloud has error/s: " + t.Exception.FullErrorMessage());
+                        if (radClarifi.InvokeRequired)
+                            radClarifi.Invoke((MethodInvoker)(() => radClarifi.Enabled = t.Exception == null));
+                        else
+                            radClarifi.Enabled = t.Exception == null;
+                    }
+
+           );
+
+
+                }
+            }
+            catch (Exception er)
+            {
+
+                MessageBox.Show(er.FullErrorMessage(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
-   public  struct Stat_Info
+
+
+
+
+    public struct Stat_Info
     {
-       public  int Has_Logos;
-       public  int Has_noLogos;
-       public  int Confused_Logos;
-       public  int Failed_logos;
+        public int Has_Logos;
+        public int Has_noLogos;
+        public int Confused_Logos;
+        public int Failed_logos;
         public double Total_process_time;
         public long TotalImages
         {
@@ -842,11 +941,18 @@ namespace LogoDetector
             }
         }
     }
+    public enum Algorithm
+    {
+        Local,Clarifai
+    }
     /// <summary>
     /// This class just holds the image info after we process it.
     /// </summary>
-   public  class ImageLogoInfo
+    public class ImageLogoInfo
     {
+
+
+        public Algorithm AlgorithmUsed { get; set; } = Algorithm.Local;
         public long ProcessingTime { get; set; }
         public string ImagePath { get; set; }
         public string ImageName
@@ -859,25 +965,54 @@ namespace LogoDetector
                     return Path.GetFileName(ImagePath);
             }
         }
-        public bool HasLogo { get; set; }
+        public bool HasLogo { get
+            {
+
+                if (AlgorithmUsed == Algorithm.Local)
+                    return Confidence > 50;
+                else if (AlgorithmUsed == Algorithm.Clarifai)
+                {
+                    return Confidence >= 45;
+                }
+                else
+                    return false;
+            }
+        }
+       
+        public bool ConfusedImage
+        {
+            get
+            {
+                if (AlgorithmUsed == Algorithm.Local)
+                    return Confidence < 50 && Confidence > 45;
+                else if (AlgorithmUsed == Algorithm.Clarifai)
+                    return Confidence < 45 && Confidence > 35;
+                else
+                    return false;
+
+            }
+        }
+
         public float Confidence { get; set; }
-        public bool ConfusedImage { get { return Confidence < 50 && Confidence > 45; } }
-        public string Status { get
+        public string Status
+        {
+            get
             {
                 if (!string.IsNullOrWhiteSpace(Error))
                     return "Error";
 
                 return ConfusedImage == true ? "Maybe" : HasLogo ? "Has Logo" : "Has No Logo";
-           
+
             }
         }
         public Bitmap ProcessedImage { get; set; }
 
-        public string  Error { get;  set; }
+        public string Error { get; set; }
         public static ImageLogoInfo ProccessImage(string imgPath)
         {
             ImageLogoInfo info = new ImageLogoInfo();
             info.ImagePath = imgPath;
+            info.AlgorithmUsed = Algorithm.Local;
             var sw = Stopwatch.StartNew();
             try
             {
@@ -888,34 +1023,34 @@ namespace LogoDetector
                 {
                     var image = source.Crop(65, 65, scale);
                     var firstCheck = MyTemplateMatching.DetectLogo(image);
-                    info.HasLogo = firstCheck > 50;
+                    //info.HasLogo = firstCheck > 50;
                     info.Confidence = (int)firstCheck;
-                   
+
 
                     if (info.HasLogo) break;
                 }
             }
-            catch (Exception ex) { info.Error = ex.FullErrorMessage (); }
+            catch (Exception ex) { info.Error = ex.FullErrorMessage(); }
             sw.Stop();
             info.ProcessingTime = sw.ElapsedMilliseconds;
 
             return info;
         }
 
-        public static List<ImageLogoInfo> ProccessImages(Dictionary< string,Bitmap> imgPaths)
+        public static List<ImageLogoInfo> ProccessImages(Dictionary<string, Bitmap> imgPaths)
         {
             List<ImageLogoInfo> results = new List<ImageLogoInfo>();
             for (int i = 0; i < imgPaths.Keys.Count; i++)
-            
+
             {
                 var item = imgPaths.Keys.ElementAt(i);
-                results.Add( ProccessImage(item));
+                results.Add(ProccessImage(item));
             }
             return results;
 
         }
 
-            internal  static Bitmap GetBitmap(string imgPath)
+        internal static Bitmap GetBitmap(string imgPath)
         {
             string[] imgExts_ppm = new string[] { ".ppm", ".pgm", ".pbm" };
             Bitmap source = null;
@@ -938,9 +1073,8 @@ namespace LogoDetector
         {
             var i = new ImageLogoInfo();
             i.Confidence = Confidence;
-           
-            i.Error = Error;
-            i.HasLogo = HasLogo;
+
+            i.Error = Error;            
             i.ImagePath = ImagePath;
             if (ProcessedImage != null)
                 i.ProcessedImage = (Bitmap)ProcessedImage.Clone();

@@ -37,17 +37,23 @@ namespace ClarifaiApiClient
                 return _accessToken;
             }
         }
+        public string ModelPath { get; set; }
+
         #endregion
         #region Instantiation
-        public ClarifaiClient(string clientId, string clientSecret)
+        public ClarifaiClient(string clientId, string clientSecret,string model_path)
         {
             _clientId = clientId;
             _clientSecret = clientSecret;
+            ModelPath = model_path;
+            ClarifaiHttpClient.SetupModelPath(ModelPath);
         }
 
-        public ClarifaiClient(string accessToken)
+        public ClarifaiClient(string accessToken, string model_path)
         {
             _accessToken = accessToken;
+            ModelPath = model_path;
+            ClarifaiHttpClient.SetupModelPath(ModelPath);
         }
         #endregion
         #region Access Token Methods
@@ -87,6 +93,24 @@ namespace ClarifaiApiClient
         public async Task<Predict> GetImgsPrediction(Dictionary<string, Bitmap> Images)
         {
             Predict response = await ClarifaiHttpClient.GetImgsPrediction(AccessToken, Images);
+            return response;
+        }
+
+        public async Task<PredictOutput> TrainWithImage(string  ConceptID, Bitmap Image,bool hasLogo)
+        {
+            var response = await ClarifaiHttpClient.TrainWithImage(AccessToken, ConceptID, Image, hasLogo);
+            return response;
+        }
+
+        public async Task<PredictOutput> TrainWithImages(string ConceptID,List< Bitmap> Images, bool hasLogo)
+        {
+            var response = await ClarifaiHttpClient.TrainWithImages(AccessToken, ConceptID, Images, hasLogo);
+            return response;
+        }
+
+        public async Task<Predict> TrainModel()
+        {
+            var response = await ClarifaiHttpClient.TrainModel(AccessToken);
             return response;
         }
 
