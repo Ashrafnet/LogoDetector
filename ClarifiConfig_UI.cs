@@ -28,9 +28,9 @@ namespace LogoDetector
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (Clarificonfig.Batch_Size < 1)
+            if (Clarificonfig.Batch_Size < 1 || Clarificonfig.Batch_Size >128)
             {
-                MessageBox.Show("Batch Size can't be less than 1", "invalid value", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Batch Size can't be between 1 and 128", "invalid value", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             DialogResult = DialogResult.OK;

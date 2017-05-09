@@ -270,7 +270,7 @@ namespace LogoDetector
                             infos.Add(new ImageLogoInfo
                             {
                                 ImagePath = output.Data.Concepts[0].ImageName,
-                                Confidence = float.Parse(output.Data.Concepts[0].Value) * 100,
+                                Confidence = output.Data.Concepts[0].Value.ToPercentagFloat() ,
                                 AlgorithmUsed = Algorithm.Clarifai,
                                 Error = task.Exception.FullErrorMessage()
 
@@ -761,10 +761,13 @@ namespace LogoDetector
             {
 
 
-                ToolStripMenuItem i = sender as ToolStripMenuItem;
+                ToolStripMenuItem i = sender as ToolStripMenuItem;                
                 if (i == null) return;
+                var tag = i.Tag + "";
                 if (listView1.SelectedIndices.Count > 0)
                 {
+                   
+
                     List<Bitmap> Images = new List<Bitmap>();
                     for (int inx = 0; inx < listView1.SelectedIndices.Count; inx++)
                     {
@@ -773,13 +776,35 @@ namespace LogoDetector
                         Bitmap source = ImageLogoInfo.GetBitmap(info.ImagePath);
 
                         var Image = source.Crop();
+                        if (tag == "-1")
+                        {
+                            Dictionary<string, Bitmap> img = new Dictionary<string, Bitmap>();
+                            img.Add(info.ImagePath, Image);
+                            var results = _client.GetImgsPrediction(img).ContinueWith((tt) =>
+                            {
+                                var exxx = tt.Exception;
+                                if (exxx != null)
+                                    MessageBox.Show(exxx.FullErrorMessage(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                else if (tt.Result != null)
+                                {
+                                    var value = tt.Result.Outputs[0].Data.Concepts[0].Value;
+                                    var img_name = tt.Result.Outputs[0].Data.Concepts[0].ImageName;
+                                    MessageBox.Show($"Image name: {img_name} {Environment.NewLine } Confidance: {value.ToPercentageString()}");
+
+                                }
+                               
+                            });
+                           
+                            return;
+                        }
                         Images.Add(Image);
                     }
                     var imgfiles_cnt = Images.Count();
                     int cnt = 0;
                     Parallel.ForEach(Images.Batch(_clarificonfig.Batch_Size), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (item) =>
                     {
-                        var t = _client.TrainWithImages(_clarificonfig.Default_Concept_ID, item.ToList(), (i.Tag + "") == "1" ? true : false);
+                       
+                        var t = _client.TrainWithImages(_clarificonfig.Default_Concept_ID, item.ToList(), tag == "1" ? true : false);
 
                         var rr = t.ContinueWith((tt) =>
                         {

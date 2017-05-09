@@ -39,21 +39,31 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.trainHasLogoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.trainHasNoLogoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.button4 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.checkBoxShowErrors = new System.Windows.Forms.CheckBox();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.labelFailImage = new System.Windows.Forms.Label();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.lbl_confusedlogos = new System.Windows.Forms.LinkLabel();
+            this.btn_Pre_logs = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.status_info = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.stat_time = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.btn_imags_cnt = new System.Windows.Forms.Button();
             this.timerRefreshlistview = new System.Windows.Forms.Timer(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
@@ -63,24 +73,17 @@
             this.txt_auto_csv_file = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.lbl_HasLogo = new System.Windows.Forms.LinkLabel();
-            this.lbl_failedlogos = new System.Windows.Forms.LinkLabel();
-            this.lbl_hasnologos = new System.Windows.Forms.LinkLabel();
-            this.radLocal = new System.Windows.Forms.RadioButton();
-            this.radClarifi = new System.Windows.Forms.RadioButton();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.btn_Pre_logs = new System.Windows.Forms.Button();
             this.pic_failedlogos = new System.Windows.Forms.PictureBox();
+            this.lbl_failedlogos = new System.Windows.Forms.LinkLabel();
             this.pic_confusedlogos = new System.Windows.Forms.PictureBox();
             this.pic_hasnologos = new System.Windows.Forms.PictureBox();
+            this.lbl_hasnologos = new System.Windows.Forms.LinkLabel();
             this.pic_haslogs = new System.Windows.Forms.PictureBox();
-            this.trainHasLogoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.trainHasNoLogoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.radLocal = new System.Windows.Forms.RadioButton();
+            this.radClarifi = new System.Windows.Forms.RadioButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.reCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -89,15 +92,14 @@
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pic_failedlogos)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_confusedlogos)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_hasnologos)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_haslogs)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -181,6 +183,34 @@
             // 
             this.columnHeader4.Text = "Confidence";
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.trainHasLogoToolStripMenuItem,
+            this.trainHasNoLogoToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.reCheckToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(178, 98);
+            // 
+            // trainHasLogoToolStripMenuItem
+            // 
+            this.trainHasLogoToolStripMenuItem.Image = global::LogoDetector.Properties.Resources._1492455060_clean;
+            this.trainHasLogoToolStripMenuItem.Name = "trainHasLogoToolStripMenuItem";
+            this.trainHasLogoToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.trainHasLogoToolStripMenuItem.Tag = "1";
+            this.trainHasLogoToolStripMenuItem.Text = "Train-Has Logo";
+            this.trainHasLogoToolStripMenuItem.Click += new System.EventHandler(this.trainHasLogoToolStripMenuItem_Click);
+            // 
+            // trainHasNoLogoToolStripMenuItem
+            // 
+            this.trainHasNoLogoToolStripMenuItem.Image = global::LogoDetector.Properties.Resources._1492455058_17;
+            this.trainHasNoLogoToolStripMenuItem.Name = "trainHasNoLogoToolStripMenuItem";
+            this.trainHasNoLogoToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.trainHasNoLogoToolStripMenuItem.Tag = "0";
+            this.trainHasNoLogoToolStripMenuItem.Text = "Train- Has No Logo";
+            this.trainHasNoLogoToolStripMenuItem.Click += new System.EventHandler(this.trainHasLogoToolStripMenuItem_Click);
+            // 
             // imageList1
             // 
             this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
@@ -215,6 +245,39 @@
             this.splitContainer1.Size = new System.Drawing.Size(663, 317);
             this.splitContainer1.SplitterDistance = 322;
             this.splitContainer1.TabIndex = 6;
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(193, 3);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(122, 23);
+            this.button4.TabIndex = 11;
+            this.button4.Text = "Train The Model";
+            this.toolTip1.SetToolTip(this.button4, "After you train images you have to train the model.");
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(193, 28);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(122, 23);
+            this.button3.TabIndex = 11;
+            this.button3.Text = "Training..";
+            this.toolTip1.SetToolTip(this.button3, "Train images in bulks..");
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(193, 52);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(122, 23);
+            this.button2.TabIndex = 10;
+            this.button2.Text = "Copy..";
+            this.toolTip1.SetToolTip(this.button2, "Copy listed images to external folder..");
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click_1);
             // 
             // checkBoxShowErrors
             // 
@@ -283,6 +346,16 @@
             this.splitContainer2.SplitterDistance = 104;
             this.splitContainer2.TabIndex = 5;
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(337, 104);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 4;
+            this.pictureBox1.TabStop = false;
+            // 
             // labelFailImage
             // 
             this.labelFailImage.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
@@ -293,6 +366,15 @@
             this.labelFailImage.TabIndex = 6;
             this.labelFailImage.Text = "Fail Image";
             this.labelFailImage.Visible = false;
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBox2.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(337, 209);
+            this.pictureBox2.TabIndex = 5;
+            this.pictureBox2.TabStop = false;
             // 
             // saveFileDialog1
             // 
@@ -310,6 +392,18 @@
             this.lbl_confusedlogos.Text = "images with low confedance";
             this.toolTip1.SetToolTip(this.lbl_confusedlogos, "images with low confedance (<%50 and > %45)");
             this.lbl_confusedlogos.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lbl_HasLogo_LinkClicked);
+            // 
+            // btn_Pre_logs
+            // 
+            this.btn_Pre_logs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_Pre_logs.Image = global::LogoDetector.Properties.Resources._1492455014_67;
+            this.btn_Pre_logs.Location = new System.Drawing.Point(650, 33);
+            this.btn_Pre_logs.Name = "btn_Pre_logs";
+            this.btn_Pre_logs.Size = new System.Drawing.Size(33, 18);
+            this.btn_Pre_logs.TabIndex = 13;
+            this.toolTip1.SetToolTip(this.btn_Pre_logs, "Read Logs from csv file");
+            this.btn_Pre_logs.UseVisualStyleBackColor = true;
+            this.btn_Pre_logs.Click += new System.EventHandler(this.btn_Pre_logs_Click);
             // 
             // statusStrip1
             // 
@@ -341,6 +435,14 @@
             // 
             this.stat_time.Name = "stat_time";
             this.stat_time.Size = new System.Drawing.Size(0, 17);
+            // 
+            // toolStripStatusLabel2
+            // 
+            this.toolStripStatusLabel2.IsLink = true;
+            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(88, 17);
+            this.toolStripStatusLabel2.Text = "Clarifi Configs..";
+            this.toolStripStatusLabel2.Click += new System.EventHandler(this.toolStripStatusLabel2_Click);
             // 
             // btn_imags_cnt
             // 
@@ -433,6 +535,14 @@
             this.lbl_HasLogo.Text = "Images with logo";
             this.lbl_HasLogo.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lbl_HasLogo_LinkClicked);
             // 
+            // pic_failedlogos
+            // 
+            this.pic_failedlogos.Location = new System.Drawing.Point(18, 109);
+            this.pic_failedlogos.Name = "pic_failedlogos";
+            this.pic_failedlogos.Size = new System.Drawing.Size(24, 24);
+            this.pic_failedlogos.TabIndex = 17;
+            this.pic_failedlogos.TabStop = false;
+            // 
             // lbl_failedlogos
             // 
             this.lbl_failedlogos.AutoSize = true;
@@ -445,6 +555,22 @@
             this.lbl_failedlogos.Text = "Failed images";
             this.lbl_failedlogos.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lbl_HasLogo_LinkClicked);
             // 
+            // pic_confusedlogos
+            // 
+            this.pic_confusedlogos.Location = new System.Drawing.Point(18, 79);
+            this.pic_confusedlogos.Name = "pic_confusedlogos";
+            this.pic_confusedlogos.Size = new System.Drawing.Size(24, 24);
+            this.pic_confusedlogos.TabIndex = 15;
+            this.pic_confusedlogos.TabStop = false;
+            // 
+            // pic_hasnologos
+            // 
+            this.pic_hasnologos.Location = new System.Drawing.Point(18, 49);
+            this.pic_hasnologos.Name = "pic_hasnologos";
+            this.pic_hasnologos.Size = new System.Drawing.Size(24, 24);
+            this.pic_hasnologos.TabIndex = 13;
+            this.pic_hasnologos.TabStop = false;
+            // 
             // lbl_hasnologos
             // 
             this.lbl_hasnologos.AutoSize = true;
@@ -455,6 +581,14 @@
             this.lbl_hasnologos.TabStop = true;
             this.lbl_hasnologos.Text = "Images with no logo";
             this.lbl_hasnologos.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lbl_HasLogo_LinkClicked);
+            // 
+            // pic_haslogs
+            // 
+            this.pic_haslogs.Location = new System.Drawing.Point(18, 19);
+            this.pic_haslogs.Name = "pic_haslogs";
+            this.pic_haslogs.Size = new System.Drawing.Size(24, 24);
+            this.pic_haslogs.TabIndex = 11;
+            this.pic_haslogs.TabStop = false;
             // 
             // radLocal
             // 
@@ -481,135 +615,19 @@
             this.radClarifi.Text = "Use Clarifai";
             this.radClarifi.UseVisualStyleBackColor = true;
             // 
-            // contextMenuStrip1
+            // toolStripSeparator1
             // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.trainHasLogoToolStripMenuItem,
-            this.trainHasNoLogoToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(178, 48);
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(174, 6);
             // 
-            // button2
+            // reCheckToolStripMenuItem
             // 
-            this.button2.Location = new System.Drawing.Point(193, 52);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(122, 23);
-            this.button2.TabIndex = 10;
-            this.button2.Text = "Copy..";
-            this.toolTip1.SetToolTip(this.button2, "Copy listed images to external folder..");
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click_1);
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(193, 28);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(122, 23);
-            this.button3.TabIndex = 11;
-            this.button3.Text = "Training..";
-            this.toolTip1.SetToolTip(this.button3, "Train images in bulks..");
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
-            // 
-            // button4
-            // 
-            this.button4.Location = new System.Drawing.Point(193, 3);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(122, 23);
-            this.button4.TabIndex = 11;
-            this.button4.Text = "Train The Model";
-            this.toolTip1.SetToolTip(this.button4, "After you train images you have to train the model.");
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
-            // toolStripStatusLabel2
-            // 
-            this.toolStripStatusLabel2.IsLink = true;
-            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(88, 17);
-            this.toolStripStatusLabel2.Text = "Clarifi Configs..";
-            this.toolStripStatusLabel2.Click += new System.EventHandler(this.toolStripStatusLabel2_Click);
-            // 
-            // btn_Pre_logs
-            // 
-            this.btn_Pre_logs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btn_Pre_logs.Image = global::LogoDetector.Properties.Resources._1492455014_67;
-            this.btn_Pre_logs.Location = new System.Drawing.Point(650, 33);
-            this.btn_Pre_logs.Name = "btn_Pre_logs";
-            this.btn_Pre_logs.Size = new System.Drawing.Size(33, 18);
-            this.btn_Pre_logs.TabIndex = 13;
-            this.toolTip1.SetToolTip(this.btn_Pre_logs, "Read Logs from csv file");
-            this.btn_Pre_logs.UseVisualStyleBackColor = true;
-            this.btn_Pre_logs.Click += new System.EventHandler(this.btn_Pre_logs_Click);
-            // 
-            // pic_failedlogos
-            // 
-            this.pic_failedlogos.Location = new System.Drawing.Point(18, 109);
-            this.pic_failedlogos.Name = "pic_failedlogos";
-            this.pic_failedlogos.Size = new System.Drawing.Size(24, 24);
-            this.pic_failedlogos.TabIndex = 17;
-            this.pic_failedlogos.TabStop = false;
-            // 
-            // pic_confusedlogos
-            // 
-            this.pic_confusedlogos.Location = new System.Drawing.Point(18, 79);
-            this.pic_confusedlogos.Name = "pic_confusedlogos";
-            this.pic_confusedlogos.Size = new System.Drawing.Size(24, 24);
-            this.pic_confusedlogos.TabIndex = 15;
-            this.pic_confusedlogos.TabStop = false;
-            // 
-            // pic_hasnologos
-            // 
-            this.pic_hasnologos.Location = new System.Drawing.Point(18, 49);
-            this.pic_hasnologos.Name = "pic_hasnologos";
-            this.pic_hasnologos.Size = new System.Drawing.Size(24, 24);
-            this.pic_hasnologos.TabIndex = 13;
-            this.pic_hasnologos.TabStop = false;
-            // 
-            // pic_haslogs
-            // 
-            this.pic_haslogs.Location = new System.Drawing.Point(18, 19);
-            this.pic_haslogs.Name = "pic_haslogs";
-            this.pic_haslogs.Size = new System.Drawing.Size(24, 24);
-            this.pic_haslogs.TabIndex = 11;
-            this.pic_haslogs.TabStop = false;
-            // 
-            // trainHasLogoToolStripMenuItem
-            // 
-            this.trainHasLogoToolStripMenuItem.Image = global::LogoDetector.Properties.Resources._1492455060_clean;
-            this.trainHasLogoToolStripMenuItem.Name = "trainHasLogoToolStripMenuItem";
-            this.trainHasLogoToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-            this.trainHasLogoToolStripMenuItem.Tag = "1";
-            this.trainHasLogoToolStripMenuItem.Text = "Train-Has Logo";
-            this.trainHasLogoToolStripMenuItem.Click += new System.EventHandler(this.trainHasLogoToolStripMenuItem_Click);
-            // 
-            // trainHasNoLogoToolStripMenuItem
-            // 
-            this.trainHasNoLogoToolStripMenuItem.Image = global::LogoDetector.Properties.Resources._1492455058_17;
-            this.trainHasNoLogoToolStripMenuItem.Name = "trainHasNoLogoToolStripMenuItem";
-            this.trainHasNoLogoToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-            this.trainHasNoLogoToolStripMenuItem.Tag = "0";
-            this.trainHasNoLogoToolStripMenuItem.Text = "Train- Has No Logo";
-            this.trainHasNoLogoToolStripMenuItem.Click += new System.EventHandler(this.trainHasLogoToolStripMenuItem_Click);
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(337, 104);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 4;
-            this.pictureBox1.TabStop = false;
-            // 
-            // pictureBox2
-            // 
-            this.pictureBox2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox2.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(337, 209);
-            this.pictureBox2.TabIndex = 5;
-            this.pictureBox2.TabStop = false;
+            this.reCheckToolStripMenuItem.Image = global::LogoDetector.Properties.Resources._1492455014_67;
+            this.reCheckToolStripMenuItem.Name = "reCheckToolStripMenuItem";
+            this.reCheckToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.reCheckToolStripMenuItem.Tag = "-1";
+            this.reCheckToolStripMenuItem.Text = "Re-Check";
+            this.reCheckToolStripMenuItem.Click += new System.EventHandler(this.trainHasLogoToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -632,6 +650,7 @@
             this.Name = "Form1";
             this.Text = "Logo Detector";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.contextMenuStrip1.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
@@ -641,17 +660,16 @@
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.contextMenuStrip1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pic_failedlogos)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_confusedlogos)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_hasnologos)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_haslogs)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -710,6 +728,8 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem reCheckToolStripMenuItem;
     }
 }
 

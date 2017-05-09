@@ -39,11 +39,39 @@ namespace LogoDetector
         }
         public static double ? ToDoubleOrNull(this string strint)
         {
-            int r;
-            if (int.TryParse(strint, out r))
+            double r;
+            if (double.TryParse(strint, out r))
                 return r;
             else
                 return null;
+        }
+
+        public static string  ToPercentageString(this string strint)
+        {
+            double r;
+            if (double.TryParse(strint, out r))
+            {
+                if (r <= 1)
+                    return (Math.Round( r,5) * 100) + "%";
+                else
+                    return Math.Round(r, 5) + "%";
+            }
+            else
+                return null;
+        }
+
+        public static float ToPercentagFloat(this string strint)
+        {
+            float r;
+            if (float.TryParse(strint, out r))
+            {
+                if (r <= 1)
+                    return (float)(Math.Round((decimal)r, 5) * 100);
+                else
+                    return (float) Math.Round((decimal)r, 5) ;
+            }
+            else
+                return -1;
         }
 
         public static IEnumerable<IEnumerable<T>> Batch<T>(
