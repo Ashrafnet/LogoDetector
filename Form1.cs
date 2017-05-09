@@ -775,22 +775,29 @@ namespace LogoDetector
                         var Image = source.Crop();
                         Images.Add(Image);
                     }
-
-
-                    var t = _client.TrainWithImages(_clarificonfig.Default_Concept_ID, Images, (i.Tag + "") == "1" ? true : false);
-
-                    var rr = t.ContinueWith((tt) =>
+                    var imgfiles_cnt = Images.Count();
+                    int cnt = 0;
+                    Parallel.ForEach(Images.Batch(_clarificonfig.Batch_Size), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (item) =>
                     {
-                        var exxx = tt.Exception;
-                        if (exxx != null)
-                            SetStatusInfo(exxx.FullErrorMessage());
-                        else if (t.Result != null)
+                        var t = _client.TrainWithImages(_clarificonfig.Default_Concept_ID, item.ToList(), (i.Tag + "") == "1" ? true : false);
+
+                        var rr = t.ContinueWith((tt) =>
                         {
+                            var exxx = tt.Exception;
+                            if (exxx != null)
+                                SetStatusInfo(exxx.FullErrorMessage());
+                            else if (t.Result != null)
+                            {
 
-                            SetStatusInfo("Train Status: " + t.Result.Status.Description);
-                        }
+                               // SetStatusInfo("Train Status: " + t.Result.Status.Description);
+                                cnt += item.Count();
+                                SetStatusInfo("Train Status: " + t.Result.Status.Description + " |" + cnt + " Items has been trained of " + imgfiles_cnt);
+                                if (cnt >= imgfiles_cnt)
+                                    PerformClick_TrainModel();
+                            }
+                        });
+
                     });
-
                 }
             }
             catch (Exception er)
@@ -800,6 +807,21 @@ namespace LogoDetector
             }
         }
 
+        private void PerformClick_TrainModel()
+        {
+            if (this.InvokeRequired)
+            {
+
+                Action action = PerformClick_TrainModel;
+                this.Invoke(action);
+            }
+            else
+            {
+
+                button4.PerformClick();
+            }
+
+        }
         private void button2_Click_1(object sender, EventArgs e)
         {
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
@@ -820,18 +842,28 @@ namespace LogoDetector
                 int cnt = 0;
                 frmTrainImages_Directory frm = new frmTrainImages_Directory(imgExts);
                 if (frm.ShowDialog() == DialogResult.OK)
-                {
+                { 
+
                     var flder = frm.FolderPath ;
-                   Parallel.ForEach(MyDirectory.GetFiles(flder, imgExts,previousLogs,frm.IncludeAllSub_Folders  ).Batch(_clarificonfig.Batch_Size ), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (item) =>
+                    var imgfiles = MyDirectory.GetFiles(flder, imgExts, previousLogs, frm.IncludeAllSub_Folders);
+                    var imgfiles_cnt = imgfiles.Count();
+
+                   
+                   // var positive_auto = Path.Combine(flder, "positive_auto");
+                   // Directory.CreateDirectory(positive_auto);
+                   Parallel.ForEach(imgfiles.Batch(_clarificonfig.Batch_Size ), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (item) =>
                     {
                         List<Bitmap> imgs = new List<Bitmap>();
                         foreach (var i in item)
                         {
                             var img = ImageLogoInfo.GetBitmap(i).Crop();
+                           // var logo_img = (Bitmap)Properties.Resources.logo_clean_28.Clone();
+                           // var xxx = (Bitmap)img.WaterMarkWithImage(logo_img);
+                           // xxx.Save(Path.Combine( positive_auto,Path.GetFileNameWithoutExtension(i)+".jpg"));
                             imgs.Add(img);
                         }
 
-                        var t = _client.TrainWithImages(_clarificonfig.Default_Concept_ID, imgs, frm.HasLogo );
+                        var t = _client.TrainWithImages(_clarificonfig.Default_Concept_ID, imgs, frm.HasLogo);
 
                         var rr = t.ContinueWith((tt) =>
                         {
@@ -841,7 +873,9 @@ namespace LogoDetector
                             else if (t.Result != null)
                             {
                                 cnt += item.Count();
-                                SetStatusInfo("Train Status: " + t.Result.Status.Description + " |" + cnt + " Items has been trained");
+                                SetStatusInfo("Train Status: " + t.Result.Status.Description + " |" + cnt + " Items has been trained of " + imgfiles_cnt);
+                                if (cnt >= imgfiles_cnt)
+                                    PerformClick_TrainModel();
                             }
 
                         });

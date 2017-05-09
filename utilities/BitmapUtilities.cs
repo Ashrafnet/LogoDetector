@@ -109,6 +109,29 @@ namespace LogoDetector
             return newBitmap;
         }
 
+        public static Bitmap WaterMarkWithImage(this Bitmap bitmap,Bitmap watermark)
+        {
+            lock (watermark)
+            {
+
+
+                using (Bitmap image = (Bitmap)bitmap)
+                using (Bitmap watermarkImage = (Bitmap)watermark)
+                using (Graphics imageGraphics = Graphics.FromImage(image))
+                {
+                    watermarkImage.SetResolution(imageGraphics.DpiX, imageGraphics.DpiY);
+
+                    int x = ((image.Width - watermarkImage.Width) / 2);
+                    int y = ((image.Height - watermarkImage.Height) / 2);
+
+                    imageGraphics.DrawImage(watermarkImage, x+1, y+1, watermarkImage.Width, watermarkImage.Height);
+
+                    return (Bitmap) image.Clone();
+                    // image.Save("C:\Users\Public\Pictures\Sample Pictures\Desert_watermark.jpg");
+                }
+            }
+        }
+
         /// <summary>
         /// Finds all areas with this color
         /// </summary>

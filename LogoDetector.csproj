@@ -181,6 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CopyFiles\CopyFiles.csproj" />
+    <None Include="Resources\logo_clean_28.png" />
     <None Include="Resources\1492455014_67.png" />
     <None Include="Resources\1492455058_17.png" />
     <None Include="Resources\1492455060_clean.png" />
