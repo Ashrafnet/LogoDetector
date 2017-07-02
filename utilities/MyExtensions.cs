@@ -16,7 +16,7 @@ namespace LogoDetector
             while (er.InnerException!=null)
             {
                 er = er.InnerException;
-                err += Environment.NewLine + er.Message;
+                err += " | " + er.Message;
             }
             return err;
         }

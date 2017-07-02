@@ -1,4 +1,5 @@
 ﻿using ClarifaiApiClient;
+using Microsoft.Cognitive.CustomVision.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -133,7 +134,10 @@ namespace LogoDetector
                 buttonPause.Text = "Pause";
                 buttonPause.Enabled = txt_auto_csv_file.ReadOnly = true;
                 btn_imags_cnt.Enabled = radClarifi.Enabled = radLocal.Enabled = false;
-                _LocalWork = radLocal.Checked ? Algorithm.Local : Algorithm.Clarifai;
+                _LocalWork = radLocal.Checked ? Algorithm.Local :radClarifi.Checked? Algorithm.Clarifai: Algorithm.MicrosoftVision ;
+
+               
+
                 backgroundWorker1.RunWorkerAsync(textBox1.Text);
 
             }
@@ -205,7 +209,7 @@ namespace LogoDetector
         }
         StreamWriter CSV_Autofile = null;
         string auto_csv_file = "";
-      
+        MSAI msai = new MSAI(null, null);
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             //processedImages.Clear();
@@ -225,7 +229,8 @@ namespace LogoDetector
 
 
             processedImages.Clear();
-            Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, previousLogs, SearchOption.AllDirectories).Batch(_clarificonfig.Batch_Size ), new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationTokenSource.Token }, (item) =>
+            
+            Parallel.ForEach(MyDirectory.GetFiles(folderPath, imgExts, previousLogs, SearchOption.AllDirectories).Batch(_clarificonfig.Batch_Size ), new ParallelOptions { MaxDegreeOfParallelism = 1/*Environment.ProcessorCount*/, CancellationToken = cancellationTokenSource.Token }, (item) =>
             {
                 try
                 {
@@ -255,6 +260,38 @@ namespace LogoDetector
                         infos.ForEach(x => Stat_info.Total_process_time += x.ProcessingTime);
 
                     }
+                    else if (_LocalWork == Algorithm.MicrosoftVision)
+                    {
+
+
+                        foreach (var image in Images)
+                        {
+
+
+
+                            try
+                            {
+
+                               // SetStatusInfo($" Processing Image: {image.Key}");
+                                //var task = MSAI.MakePredictionRequest(image.Key);
+                                var bytes =image.Value.ToByteStream();
+                                var task = msai.PredictImageData(bytes,image.Key );
+                                
+                                infos.Add(task);
+                                Thread.Sleep(1000);
+
+                            }
+                            catch (Exception er)
+                            {
+                             
+                                WriteToCSV_Auto(CSV_Autofile, $"{image},,,,{er.FullErrorMessage()}");
+
+                            }
+                        }
+
+
+
+                    }
                     else if (_LocalWork == Algorithm.Clarifai)
                     {
                         var task = _client.GetImgsPrediction(Images);
@@ -270,7 +307,7 @@ namespace LogoDetector
                             infos.Add(new ImageLogoInfo
                             {
                                 ImagePath = output.Data.Concepts[0].ImageName,
-                                Confidence = output.Data.Concepts[0].Value.ToPercentagFloat() ,
+                                Confidence = output.Data.Concepts[0].Value.ToPercentagFloat(),
                                 AlgorithmUsed = Algorithm.Clarifai,
                                 Error = task.Exception.FullErrorMessage()
 
@@ -778,6 +815,13 @@ namespace LogoDetector
                         var Image = source.Crop();
                         if (tag == "-1")
                         {
+                            if(_LocalWork == Algorithm.MicrosoftVision)
+                            {
+                                var result=msai.PredictImageData(Image.ToByteStream(), info.ImagePath);
+                                MessageBox.Show($"Image name: {info.ImagePath} {Environment.NewLine } Confidance: {(result.Confidence+"").ToPercentageString()}");
+
+                                return;
+                            }
                             Dictionary<string, Bitmap> img = new Dictionary<string, Bitmap>();
                             img.Add(info.ImagePath, Image);
                             var results = _client.GetImgsPrediction(img).ContinueWith((tt) =>
@@ -1002,7 +1046,7 @@ namespace LogoDetector
     }
     public enum Algorithm
     {
-        Local,Clarifai
+        Local,Clarifai,MicrosoftVision
     }
     /// <summary>
     /// This class just holds the image info after we process it.
@@ -1033,6 +1077,8 @@ namespace LogoDetector
                 {
                     return Confidence >= 45;
                 }
+                else  if (AlgorithmUsed == Algorithm.MicrosoftVision )
+                    return Confidence > 50; 
                 else
                     return false;
             }

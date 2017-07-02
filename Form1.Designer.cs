@@ -42,6 +42,8 @@
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.trainHasLogoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trainHasNoLogoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.reCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.button4 = new System.Windows.Forms.Button();
@@ -81,8 +83,7 @@
             this.pic_haslogs = new System.Windows.Forms.PictureBox();
             this.radLocal = new System.Windows.Forms.RadioButton();
             this.radClarifi = new System.Windows.Forms.RadioButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.reCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.radMicrosoft = new System.Windows.Forms.RadioButton();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -119,7 +120,7 @@
             this.textBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystemDirectories;
             this.textBox1.Location = new System.Drawing.Point(100, 6);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(584, 20);
+            this.textBox1.Size = new System.Drawing.Size(488, 20);
             this.textBox1.TabIndex = 1;
             this.textBox1.Text = "C:\\D\\Ken\\LogoDetector\\Photos\\notworking";
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
@@ -127,7 +128,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(860, 4);
+            this.button1.Location = new System.Drawing.Point(764, 4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 2;
@@ -155,7 +156,7 @@
             this.listView1.LargeImageList = this.imageList1;
             this.listView1.Location = new System.Drawing.Point(2, 77);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(313, 237);
+            this.listView1.Size = new System.Drawing.Size(292, 237);
             this.listView1.SmallImageList = this.imageList1;
             this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
@@ -191,7 +192,7 @@
             this.toolStripSeparator1,
             this.reCheckToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(178, 98);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(178, 76);
             // 
             // trainHasLogoToolStripMenuItem
             // 
@@ -210,6 +211,20 @@
             this.trainHasNoLogoToolStripMenuItem.Tag = "0";
             this.trainHasNoLogoToolStripMenuItem.Text = "Train- Has No Logo";
             this.trainHasNoLogoToolStripMenuItem.Click += new System.EventHandler(this.trainHasLogoToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(174, 6);
+            // 
+            // reCheckToolStripMenuItem
+            // 
+            this.reCheckToolStripMenuItem.Image = global::LogoDetector.Properties.Resources._1492455014_67;
+            this.reCheckToolStripMenuItem.Name = "reCheckToolStripMenuItem";
+            this.reCheckToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+            this.reCheckToolStripMenuItem.Tag = "-1";
+            this.reCheckToolStripMenuItem.Text = "Re-Check";
+            this.reCheckToolStripMenuItem.Click += new System.EventHandler(this.trainHasLogoToolStripMenuItem_Click);
             // 
             // imageList1
             // 
@@ -242,8 +257,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(663, 317);
-            this.splitContainer1.SplitterDistance = 322;
+            this.splitContainer1.Size = new System.Drawing.Size(621, 317);
+            this.splitContainer1.SplitterDistance = 301;
             this.splitContainer1.TabIndex = 6;
             // 
             // button4
@@ -342,7 +357,7 @@
             // 
             this.splitContainer2.Panel2.Controls.Add(this.labelFailImage);
             this.splitContainer2.Panel2.Controls.Add(this.pictureBox2);
-            this.splitContainer2.Size = new System.Drawing.Size(337, 317);
+            this.splitContainer2.Size = new System.Drawing.Size(316, 317);
             this.splitContainer2.SplitterDistance = 104;
             this.splitContainer2.TabIndex = 5;
             // 
@@ -351,7 +366,7 @@
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(337, 104);
+            this.pictureBox1.Size = new System.Drawing.Size(316, 104);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 4;
             this.pictureBox1.TabStop = false;
@@ -372,7 +387,7 @@
             this.pictureBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox2.Location = new System.Drawing.Point(0, 0);
             this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(337, 209);
+            this.pictureBox2.Size = new System.Drawing.Size(316, 209);
             this.pictureBox2.TabIndex = 5;
             this.pictureBox2.TabStop = false;
             // 
@@ -397,9 +412,9 @@
             // 
             this.btn_Pre_logs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_Pre_logs.Image = global::LogoDetector.Properties.Resources._1492455014_67;
-            this.btn_Pre_logs.Location = new System.Drawing.Point(650, 33);
+            this.btn_Pre_logs.Location = new System.Drawing.Point(555, 33);
             this.btn_Pre_logs.Name = "btn_Pre_logs";
-            this.btn_Pre_logs.Size = new System.Drawing.Size(33, 18);
+            this.btn_Pre_logs.Size = new System.Drawing.Size(32, 18);
             this.btn_Pre_logs.TabIndex = 13;
             this.toolTip1.SetToolTip(this.btn_Pre_logs, "Read Logs from csv file");
             this.btn_Pre_logs.UseVisualStyleBackColor = true;
@@ -414,7 +429,7 @@
             this.toolStripStatusLabel2});
             this.statusStrip1.Location = new System.Drawing.Point(0, 380);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(947, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(905, 22);
             this.statusStrip1.TabIndex = 7;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -447,7 +462,7 @@
             // btn_imags_cnt
             // 
             this.btn_imags_cnt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btn_imags_cnt.Location = new System.Drawing.Point(690, 4);
+            this.btn_imags_cnt.Location = new System.Drawing.Point(594, 4);
             this.btn_imags_cnt.Name = "btn_imags_cnt";
             this.btn_imags_cnt.Size = new System.Drawing.Size(87, 23);
             this.btn_imags_cnt.TabIndex = 2;
@@ -471,7 +486,7 @@
             // 
             this.buttonPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonPause.Enabled = false;
-            this.buttonPause.Location = new System.Drawing.Point(781, 4);
+            this.buttonPause.Location = new System.Drawing.Point(685, 4);
             this.buttonPause.Name = "buttonPause";
             this.buttonPause.Size = new System.Drawing.Size(75, 23);
             this.buttonPause.TabIndex = 8;
@@ -501,7 +516,7 @@
             this.txt_auto_csv_file.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystem;
             this.txt_auto_csv_file.Location = new System.Drawing.Point(100, 32);
             this.txt_auto_csv_file.Name = "txt_auto_csv_file";
-            this.txt_auto_csv_file.Size = new System.Drawing.Size(584, 20);
+            this.txt_auto_csv_file.Size = new System.Drawing.Size(488, 20);
             this.txt_auto_csv_file.TabIndex = 1;
             this.txt_auto_csv_file.Text = "C:\\D\\Ken\\LogoDetector\\PDF_Images_Results_04102017.csv";
             // 
@@ -595,7 +610,7 @@
             this.radLocal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.radLocal.AutoSize = true;
             this.radLocal.Checked = true;
-            this.radLocal.Location = new System.Drawing.Point(690, 35);
+            this.radLocal.Location = new System.Drawing.Point(593, 35);
             this.radLocal.Name = "radLocal";
             this.radLocal.Size = new System.Drawing.Size(118, 17);
             this.radLocal.TabIndex = 14;
@@ -608,32 +623,30 @@
             this.radClarifi.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.radClarifi.AutoSize = true;
             this.radClarifi.Enabled = false;
-            this.radClarifi.Location = new System.Drawing.Point(814, 34);
+            this.radClarifi.Location = new System.Drawing.Point(717, 35);
             this.radClarifi.Name = "radClarifi";
             this.radClarifi.Size = new System.Drawing.Size(79, 17);
             this.radClarifi.TabIndex = 14;
             this.radClarifi.Text = "Use Clarifai";
             this.radClarifi.UseVisualStyleBackColor = true;
             // 
-            // toolStripSeparator1
+            // radMicrosoft
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(174, 6);
-            // 
-            // reCheckToolStripMenuItem
-            // 
-            this.reCheckToolStripMenuItem.Image = global::LogoDetector.Properties.Resources._1492455014_67;
-            this.reCheckToolStripMenuItem.Name = "reCheckToolStripMenuItem";
-            this.reCheckToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-            this.reCheckToolStripMenuItem.Tag = "-1";
-            this.reCheckToolStripMenuItem.Text = "Re-Check";
-            this.reCheckToolStripMenuItem.Click += new System.EventHandler(this.trainHasLogoToolStripMenuItem_Click);
+            this.radMicrosoft.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.radMicrosoft.AutoSize = true;
+            this.radMicrosoft.Location = new System.Drawing.Point(802, 35);
+            this.radMicrosoft.Name = "radMicrosoft";
+            this.radMicrosoft.Size = new System.Drawing.Size(99, 17);
+            this.radMicrosoft.TabIndex = 14;
+            this.radMicrosoft.Text = "Microsoft Vision";
+            this.radMicrosoft.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(947, 402);
+            this.ClientSize = new System.Drawing.Size(905, 402);
+            this.Controls.Add(this.radMicrosoft);
             this.Controls.Add(this.radClarifi);
             this.Controls.Add(this.radLocal);
             this.Controls.Add(this.btn_Pre_logs);
@@ -730,6 +743,7 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem reCheckToolStripMenuItem;
+        private System.Windows.Forms.RadioButton radMicrosoft;
     }
 }
 

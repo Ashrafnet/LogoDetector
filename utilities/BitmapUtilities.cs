@@ -95,6 +95,10 @@ namespace LogoDetector
         /// </summary>
         public static Bitmap Crop(this Bitmap bitmap, int Width=65, int Height=65, float scale = 1)
         {
+            if(Width ==65 && Height == 65 && bitmap.Width>1000)
+            {
+                Width = bitmap.Width*10/100;
+            }
             var x = Math.Max(0, bitmap.Width - Width);
             var y = Math.Max(0, bitmap.Height - Height);
             Width = Math.Min(Width, bitmap.Width);
@@ -109,6 +113,25 @@ namespace LogoDetector
             return newBitmap;
         }
 
+        public static Stream ToByteStream(this Bitmap source)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                source.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+                Stream stream = new MemoryStream(ms.ToArray());
+
+                return stream;
+            }
+
+            //MemoryStream ms = new System.IO.MemoryStream();
+            //source.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+            //return ms;
+
+            //FileStream fileStream = new FileStream(imageFilePath, FileMode.Open, FileAccess.Read);
+            //BinaryReader binaryReader = new BinaryReader(fileStream);
+            //return binaryReader.ReadBytes((int)fileStream.Length);
+
+        }
         public static Bitmap WaterMarkWithImage(this Bitmap bitmap,Bitmap watermark)
         {
             lock (watermark)
