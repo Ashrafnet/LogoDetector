@@ -180,20 +180,23 @@ namespace WindowsFormsApplication1
         void startSearch()
         {
             StreamWriter _wtire_csv = null;
+            StreamWriter _wtire_csv_errors = null;
             try
             {
-
+                
 
                 Dictionary<string, Tuple<VectorOfKeyPoint, Mat>> items = new Dictionary<string, Tuple<VectorOfKeyPoint, Mat>>();
-                Tuple<VectorOfKeyPoint, Mat> image_base_descriptors = null;
                 string strLine1 = "path1,path2,Similar,Error";
                 string _csvFile_File_Name = _csvFile.File_Name + ".log";
                 if (File.Exists(_csvFile_File_Name))
                     File.Delete(_csvFile_File_Name);
                  _wtire_csv = File.AppendText(_csvFile_File_Name);
                 _wtire_csv.WriteLine(strLine1);
-                
-                Parallel.ForEach(_csvFile.Records, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (item, loopState) =>
+
+                _wtire_csv_errors = File.AppendText(_csvFile.File_Name+".errors");
+                _wtire_csv_errors.WriteLine("path1,path2,Error");
+
+                Parallel.ForEach(_csvFile.Records, new ParallelOptions { MaxDegreeOfParallelism = 1 }, (item, loopState) =>
                 {
                     
                     if (!_Isrunning)
@@ -219,15 +222,28 @@ namespace WindowsFormsApplication1
                             if (!items.ContainsKey(imageBase))
                             {
 
-                                image_base_descriptors = DrawMatches.GetImageDescriptors(imageBase);
-                                items.Add(imageBase, image_base_descriptors);
+                               var image_descriptors = DrawMatches.GetImageDescriptors(imageBase);
+                                if (image_descriptors == null)
+                                {
+                                    _wtire_csv_errors.WriteLine(strLine);
+                                    _wtire_csv_errors.Flush();
+                                    return;
+                                }
+                                items.Add(imageBase, image_descriptors);
+
                             }
 
                             if (!items.ContainsKey(image))
                             {
 
-                                image_base_descriptors = DrawMatches.GetImageDescriptors(image);
-                                items.Add(image, image_base_descriptors);
+                                var image_descriptors = DrawMatches.GetImageDescriptors(image);
+                                if (image_descriptors == null)
+                                {
+                                    _wtire_csv_errors.WriteLine(strLine);
+                                    _wtire_csv_errors.Flush();
+                                    return;
+                                }
+                                items.Add(image, image_descriptors);
                             }
 
                         }
@@ -246,9 +262,7 @@ namespace WindowsFormsApplication1
                         lock (this )
                         {
                             strLine += result ? "Yes," : "No,";
-
-                            _wtire_csv.WriteLine(strLine);
-                           
+                            _wtire_csv.WriteLine(strLine);                           
                             _wtire_csv.Flush();
                         }
                     }

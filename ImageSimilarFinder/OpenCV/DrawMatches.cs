@@ -11,6 +11,7 @@ using Emgu.CV.Features2D;
 using Emgu.CV.Flann;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
+using System.Runtime.ExceptionServices;
 
 namespace FeatureMatchingExample
 {
@@ -107,22 +108,33 @@ namespace FeatureMatchingExample
 
         }
 
-        public static  Tuple<VectorOfKeyPoint, Mat> GetImageDescriptors(string  mImage)
+        [HandleProcessCorruptedStateExceptionsAttribute]
+        public static Tuple<VectorOfKeyPoint, Mat> GetImageDescriptors(string mImage)
         {
-           var mKeyPoints = new VectorOfKeyPoint();
-            using (Mat modelImage = CvInvoke.Imread(mImage, ImreadModes.Grayscale))
-            using (UMat uMImage = modelImage.GetUMat(AccessType.Read))
+            try
             {
-                KAZE featureDetector = new KAZE();
-
-                //extract features from the object image
-                Mat mDescriptors = new Mat();
-                featureDetector.DetectAndCompute(uMImage, null, mKeyPoints, mDescriptors, false);
 
 
-                return Tuple.Create(mKeyPoints, mDescriptors);
+                var mKeyPoints = new VectorOfKeyPoint();
+                using (Mat modelImage = CvInvoke.Imread(mImage, ImreadModes.Grayscale))
+                using (UMat uMImage = modelImage.GetUMat(AccessType.Read))
+                {
+                    KAZE featureDetector = new KAZE();
+
+                    //extract features from the object image
+                    Mat mDescriptors = new Mat();
+                    featureDetector.DetectAndCompute(uMImage, null, mKeyPoints, mDescriptors, false);
 
 
+                    return Tuple.Create(mKeyPoints, mDescriptors);
+
+
+                }
+            }
+            catch (Exception er)
+            {
+
+                return null;
             }
         }
         public static bool CheckSimilarty(Tuple<VectorOfKeyPoint, Mat> modelImage, Tuple<VectorOfKeyPoint, Mat> observedImage)
