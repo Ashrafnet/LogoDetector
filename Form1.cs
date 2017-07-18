@@ -199,6 +199,7 @@ namespace LogoDetector
             }
         }
         bool processPaused;
+        bool _previewenabeled = false;
         private void buttonPause_Click(object sender, EventArgs e)
         {
             processPaused = !processPaused;
@@ -318,7 +319,7 @@ namespace LogoDetector
 
                     foreach (var info in infos)
                     {
-
+                        if(_previewenabeled)
                         processedImages.Add(info);
                         WriteToCSV_Auto(CSV_Autofile, info.ImagePath + "," + (info.ConfusedImage == true ? "Maybe" : info.HasLogo + "") + "," + info.ProcessingTime + "ms," + info.Confidence + "%" + "," + info.Error);
 
@@ -1023,6 +1024,24 @@ namespace LogoDetector
 
                 MessageBox.Show(er.FullErrorMessage(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void checkBox4_CheckedChanged(object sender, EventArgs e)
+        {
+            _previewenabeled = checkBox4.Checked;
+            splitContainer1.Visible = _previewenabeled;
+        }
+        public static decimal  _crop_width_percentage = 10;
+        public static decimal  _crop_heigh_percentage = 10;
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            _crop_width_percentage = numericUpDown1.Value;
+        }
+
+        private void numericUpDown2_ValueChanged(object sender, EventArgs e)
+        {
+            _crop_heigh_percentage = numericUpDown2.Value;
+
         }
     }
 

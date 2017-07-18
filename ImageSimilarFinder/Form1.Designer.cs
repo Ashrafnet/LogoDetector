@@ -65,7 +65,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(585, 20);
             this.textBox1.TabIndex = 0;
-            this.textBox1.Text = "C:\\D\\asd.csv";
+            this.textBox1.Text = "C:\\D\\results.csv";
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // label1
@@ -147,8 +147,8 @@
             // status_info
             // 
             this.status_info.Name = "status_info";
-            this.status_info.Size = new System.Drawing.Size(173, 17);
-            this.status_info.Text = "Set image path and folder path.";
+            this.status_info.Size = new System.Drawing.Size(96, 17);
+            this.status_info.Text = "Set CSV file path.";
             // 
             // pictureBox1
             // 

@@ -84,6 +84,12 @@
             this.radLocal = new System.Windows.Forms.RadioButton();
             this.radClarifi = new System.Windows.Forms.RadioButton();
             this.radMicrosoft = new System.Windows.Forms.RadioButton();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -101,6 +107,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.pic_confusedlogos)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_hasnologos)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_haslogs)).BeginInit();
+            this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -260,6 +269,7 @@
             this.splitContainer1.Size = new System.Drawing.Size(621, 317);
             this.splitContainer1.SplitterDistance = 301;
             this.splitContainer1.TabIndex = 6;
+            this.splitContainer1.Visible = false;
             // 
             // button4
             // 
@@ -524,12 +534,14 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupBox1.Controls.Add(this.groupBox2);
             this.groupBox1.Controls.Add(this.lbl_HasLogo);
             this.groupBox1.Controls.Add(this.pic_failedlogos);
             this.groupBox1.Controls.Add(this.lbl_failedlogos);
             this.groupBox1.Controls.Add(this.pic_confusedlogos);
             this.groupBox1.Controls.Add(this.lbl_confusedlogos);
             this.groupBox1.Controls.Add(this.pic_hasnologos);
+            this.groupBox1.Controls.Add(this.checkBox4);
             this.groupBox1.Controls.Add(this.lbl_hasnologos);
             this.groupBox1.Controls.Add(this.pic_haslogs);
             this.groupBox1.Location = new System.Drawing.Point(15, 58);
@@ -641,6 +653,91 @@
             this.radMicrosoft.Text = "Microsoft Vision";
             this.radMicrosoft.UseVisualStyleBackColor = true;
             // 
+            // checkBox4
+            // 
+            this.checkBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Location = new System.Drawing.Point(18, 204);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(99, 17);
+            this.checkBox4.TabIndex = 9;
+            this.checkBox4.Text = "Enable Preview";
+            this.toolTip1.SetToolTip(this.checkBox4, "This may consume a lot of memoery, use this just for test porposes.");
+            this.checkBox4.UseVisualStyleBackColor = true;
+            this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupBox2.Controls.Add(this.numericUpDown2);
+            this.groupBox2.Controls.Add(this.numericUpDown1);
+            this.groupBox2.Controls.Add(this.label3);
+            this.groupBox2.Controls.Add(this.label2);
+            this.groupBox2.Location = new System.Drawing.Point(18, 227);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(200, 81);
+            this.groupBox2.TabIndex = 19;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Crop Settings";
+            // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.DecimalPlaces = 1;
+            this.numericUpDown1.Location = new System.Drawing.Point(33, 19);
+            this.numericUpDown1.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(66, 20);
+            this.numericUpDown1.TabIndex = 0;
+            this.numericUpDown1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numericUpDown1.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
+            // 
+            // numericUpDown2
+            // 
+            this.numericUpDown2.DecimalPlaces = 1;
+            this.numericUpDown2.Location = new System.Drawing.Point(33, 45);
+            this.numericUpDown2.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDown2.Name = "numericUpDown2";
+            this.numericUpDown2.Size = new System.Drawing.Size(66, 20);
+            this.numericUpDown2.TabIndex = 0;
+            this.numericUpDown2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numericUpDown2.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.numericUpDown2.ValueChanged += new System.EventHandler(this.numericUpDown2_ValueChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(105, 21);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(62, 13);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "% of Width";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(105, 47);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(61, 13);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "% of Heigh";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -683,6 +780,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.pic_confusedlogos)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_hasnologos)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pic_haslogs)).EndInit();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -744,6 +845,12 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem reCheckToolStripMenuItem;
         private System.Windows.Forms.RadioButton radMicrosoft;
+        private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.NumericUpDown numericUpDown2;
+        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label2;
     }
 }
 

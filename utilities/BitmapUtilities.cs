@@ -95,9 +95,26 @@ namespace LogoDetector
         /// </summary>
         public static Bitmap Crop(this Bitmap bitmap, int Width=65, int Height=65, float scale = 1)
         {
-            if(Width ==65 && Height == 65 && bitmap.Width>1000)
+
+            if (Width == 65 && Height == 65 )//if default values)
             {
-                Width = bitmap.Width*10/100;
+                //Jimil words:
+                //crop 11 % of width and 9% of height for landscape images
+                // Crop 9 % of width and 11 % of height for portrait images
+               // if (bitmap.Width > bitmap.Height) // landscape image
+              //  {
+                     Width =(int) Math.Floor( bitmap.Width * Form1._crop_width_percentage / 100m);
+                    Height = (int)Math.Floor(bitmap.Height * Form1._crop_heigh_percentage / 100);
+                //}
+                //else
+                //{
+                //    Width = bitmap.Width * 9 / 100;
+                //    Height = bitmap.Height * 11 / 100;
+                //}
+                if(Width==0 || Height == 0)
+                {
+                    return bitmap;
+                }
             }
             var x = Math.Max(0, bitmap.Width - Width);
             var y = Math.Max(0, bitmap.Height - Height);

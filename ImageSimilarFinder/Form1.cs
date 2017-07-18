@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -25,7 +26,9 @@ namespace WindowsFormsApplication1
 
         private void Form1_Load(object sender, EventArgs e)
         {
+#if  DEBUG==false
             textBox1.Text = "";
+#endif
             textBox1.Focus();
             try
             {
@@ -36,9 +39,21 @@ namespace WindowsFormsApplication1
 
             }
 
+          //  testt();
 
         }
+        void testt()
+        {
+            var imageBase = @"C:\D\Ken\LogoDetector\App\Resources\logo_clean_28.png";
+            var image = @"C:\Users\Ashraf\AppData\Roaming\Skype\My Skype Received Files\Issues\Original\cropped.jpg";
+            var image_base_descriptors = DrawMatches.GetImageDescriptors(imageBase);
+            var image_2_descriptors = DrawMatches.GetImageDescriptors(image);
 
+
+            Mat similarity;
+            var result = CheckSimilarty(imageBase, image, image_base_descriptors, image_2_descriptors, out similarity);
+
+        }
       
         ////float compare2images_2(string image1, string image2, Func<string, ulong[]> HashFunction)
         ////{
@@ -113,6 +128,7 @@ namespace WindowsFormsApplication1
 
                  _csvFile = new ElencySolutions.CsvHelper.CsvFile();
                 _csvFile.Populate(textBox1.Text, _csv_has_headers);
+                Stopwatch sw = Stopwatch.StartNew();
                 task = Task.Run(() =>
                   {
 
@@ -122,10 +138,10 @@ namespace WindowsFormsApplication1
                       startSearch();
                   }).ContinueWith((t) =>
                   {
-                      
+                      sw.Stop();
                       _Isrunning = false;
                       SetButtonText( "Search",true );
-                      SetStatusInfo("Done");
+                      SetStatusInfo("Done in: " + sw.Elapsed.TotalSeconds + " Seconds.");
 
                   });
             }
@@ -163,90 +179,121 @@ namespace WindowsFormsApplication1
         bool _preview_similarity = false;
         void startSearch()
         {
-            Dictionary<string, Tuple<VectorOfKeyPoint, Mat>> items = new Dictionary<string, Tuple<VectorOfKeyPoint, Mat>>();
-            Tuple<VectorOfKeyPoint, Mat> image_base_descriptors = null;
-            if (_csvFile.Headers.Count > 0)
+            StreamWriter _wtire_csv = null;
+            try
             {
-                _csvFile.Headers.Add("Similar");
-                _csvFile.Headers.Add("Error");
-            }
 
-            foreach (var item in _csvFile.Records)
-            {
-                if (!_Isrunning) break;
-                item.Fields.Add("N/A"); item.Fields.Add("");
-                var imageBase = item.Fields[0];
-                var image = item.Fields[1];
-                if (string.IsNullOrWhiteSpace(imageBase) || string.IsNullOrWhiteSpace(image)) continue;
-                ListViewItem i  = new ListViewItem(imageBase);
-                try
+
+                Dictionary<string, Tuple<VectorOfKeyPoint, Mat>> items = new Dictionary<string, Tuple<VectorOfKeyPoint, Mat>>();
+                Tuple<VectorOfKeyPoint, Mat> image_base_descriptors = null;
+                string strLine1 = "path1,path2,Similar,Error";
+                string _csvFile_File_Name = _csvFile.File_Name + ".log";
+                if (File.Exists(_csvFile_File_Name))
+                    File.Delete(_csvFile_File_Name);
+                 _wtire_csv = File.AppendText(_csvFile_File_Name);
+                _wtire_csv.WriteLine(strLine1);
+                
+                Parallel.ForEach(_csvFile.Records, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (item, loopState) =>
                 {
-
-                    if (!File.Exists(imageBase)) throw new FileNotFoundException("File does not exist!", imageBase);
-                    if (!File.Exists(image)) throw new FileNotFoundException("File does not exist!", image);
-
-                    if (!items.ContainsKey(imageBase))
+                    
+                    if (!_Isrunning)
                     {
-
-                        image_base_descriptors = DrawMatches.GetImageDescriptors(imageBase);
-                        items.Add(item.Fields[0], image_base_descriptors);
+                        loopState.Stop();
+                        return;
                     }
 
 
-
-
-                    i.Tag = image;
-
-                    Mat similarity;
-                    var result = CheckSimilarty(imageBase, image, items[imageBase], DrawMatches.GetImageDescriptors(image), out similarity);
-                    i.SubItems.Add(result + "");
-                    i.SubItems.Add(image);
-                    i.ImageIndex = result ? 0 : 1;
-                    item.Fields[2] = result ? "Yes" : "No";
-                    if (similarity != null)
-                        i.Tag = new Bitmap((Bitmap)similarity.Bitmap.Clone());
-
-                    using (ElencySolutions.CsvHelper.CsvWriter csv = new ElencySolutions.CsvHelper.CsvWriter())
+                    var imageBase = item.Fields[0];
+                    var image = item.Fields[1];
+                  var  strLine = $"{imageBase},{image},";
+                    if (string.IsNullOrWhiteSpace(imageBase) || string.IsNullOrWhiteSpace(image)) return;
+                    ListViewItem i = new ListViewItem(imageBase);
+                    try
                     {
-                        csv.WriteCsv(_csvFile, _csvFile.File_Name);
 
+                        if (!File.Exists(imageBase)) throw new FileNotFoundException("File does not exist!", imageBase);
+                        if (!File.Exists(image)) throw new FileNotFoundException("File does not exist!", image);
+
+                        lock (items)
+                        {
+                            if (!items.ContainsKey(imageBase))
+                            {
+
+                                image_base_descriptors = DrawMatches.GetImageDescriptors(imageBase);
+                                items.Add(imageBase, image_base_descriptors);
+                            }
+
+                            if (!items.ContainsKey(image))
+                            {
+
+                                image_base_descriptors = DrawMatches.GetImageDescriptors(image);
+                                items.Add(image, image_base_descriptors);
+                            }
+
+                        }
+
+                        i.Tag = image;
+
+                        Mat similarity;
+                        var result = CheckSimilarty(imageBase, image, items[imageBase], items[image], out similarity);
+                        i.SubItems.Add(result + "");
+                        i.SubItems.Add(image);
+                        i.ImageIndex = result ? 0 : 1;
+
+                        if (similarity != null)
+                            i.Tag = new Bitmap((Bitmap)similarity.Bitmap.Clone());
+
+                        lock (this )
+                        {
+                            strLine += result ? "Yes," : "No,";
+
+                            _wtire_csv.WriteLine(strLine);
+                           
+                            _wtire_csv.Flush();
+                        }
+                    }
+
+                    catch (Exception er)
+                    {
+                        if (strLine.Count(a => a == ',') <= 2)
+                            strLine += "N/A,";
+                        strLine += er.Message;
+                        _wtire_csv.WriteLine(strLine);
+                        _wtire_csv.Flush();
+
+                        i.ImageIndex = 3;
+                        i.ForeColor = Color.Red;
+
+                        if (i.SubItems.Count <= 1)
+                            i.SubItems.Add("Eror");
+                        if (i.SubItems.Count <= 2)
+                            i.SubItems.Add(image);
+                        if (i.SubItems.Count <= 3)
+                            i.SubItems.Add(er.Message);
+                    }
+                    finally
+                    {
+                        AddItem(i);
 
                     }
-                }
-                catch (Exception er)
-                {
-                    if (item.Fields.Count <= 3)
-                        item.Fields.Add("");
-                    item.Fields[3] = er.Message;
-                    i.ImageIndex = 3;
-                    i.ForeColor = Color.Red;
 
-                    i.SubItems.Add("N/A");
-                    i.SubItems.Add(image);
-                    i.SubItems.Add(er.Message);
-                }
-                finally
-                {
-                    AddItem(i);
-                }
+                });
 
-
+                
             }
-
-
-            
-          
-
-
-            if (InvokeRequired)
+            finally
             {
-                Invoke(new Action(() =>
+                _wtire_csv.Close();
+                if (InvokeRequired)
                 {
+                    Invoke(new Action(() =>
+                    {
+                        listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+                    }));
+                }
+                else
                     listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-                }));
             }
-            else
-                listView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 
         }
 
