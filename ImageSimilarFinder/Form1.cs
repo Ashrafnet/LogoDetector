@@ -194,7 +194,10 @@ namespace WindowsFormsApplication1
                  _wtire_csv = File.AppendText(_csvFile_File_Name);
                 _wtire_csv.WriteLine(strLine1);
 
-                _wtire_csv_errors = File.AppendText(_csvFile.File_Name+".errors");
+                var _csvFile_errors = _csvFile.File_Name + ".errors";
+                if (File.Exists(_csvFile_errors))
+                    File.Delete(_csvFile_errors);
+                _wtire_csv_errors = File.AppendText(_csvFile_errors );
                 _wtire_csv_errors.WriteLine("path1,path2,Error");
 
                 Parallel.ForEach(_csvFile.Records, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (item, loopState) =>
