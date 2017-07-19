@@ -141,7 +141,7 @@ namespace WindowsFormsApplication1
                       sw.Stop();
                       _Isrunning = false;
                       SetButtonText( "Search",true );
-                      SetStatusInfo("Done in: " + sw.Elapsed.TotalSeconds + " Seconds.");
+                      SetStatusInfo("Done in: " + sw.Elapsed.TotalSeconds + " Seconds. | Images processed: " + _images_processed_cnt + " , Images with errors: " + _images_errors_cnt);
 
                   });
             }
@@ -177,6 +177,7 @@ namespace WindowsFormsApplication1
         }
 
         bool _preview_similarity = false;
+        int _images_processed_cnt = 0, _images_errors_cnt = 0;
         void startSearch()
         {
             StreamWriter _wtire_csv = null;
@@ -196,7 +197,7 @@ namespace WindowsFormsApplication1
                 _wtire_csv_errors = File.AppendText(_csvFile.File_Name+".errors");
                 _wtire_csv_errors.WriteLine("path1,path2,Error");
 
-                Parallel.ForEach(_csvFile.Records, new ParallelOptions { MaxDegreeOfParallelism = 1 }, (item, loopState) =>
+                Parallel.ForEach(_csvFile.Records, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, (item, loopState) =>
                 {
                     
                     if (!_Isrunning)
@@ -225,6 +226,7 @@ namespace WindowsFormsApplication1
                                var image_descriptors = DrawMatches.GetImageDescriptors(imageBase);
                                 if (image_descriptors == null)
                                 {
+                                    
                                     _wtire_csv_errors.WriteLine(strLine);
                                     _wtire_csv_errors.Flush();
                                     return;
@@ -239,6 +241,7 @@ namespace WindowsFormsApplication1
                                 var image_descriptors = DrawMatches.GetImageDescriptors(image);
                                 if (image_descriptors == null)
                                 {
+                                    _images_errors_cnt++;
                                     _wtire_csv_errors.WriteLine(strLine);
                                     _wtire_csv_errors.Flush();
                                     return;
@@ -265,6 +268,7 @@ namespace WindowsFormsApplication1
                             _wtire_csv.WriteLine(strLine);                           
                             _wtire_csv.Flush();
                         }
+                        _images_processed_cnt++;
                     }
 
                     catch (Exception er)
@@ -287,6 +291,7 @@ namespace WindowsFormsApplication1
                     }
                     finally
                     {
+                        SetStatusInfo("Working... | Images processed: " + _images_processed_cnt + " Images with errors: " + _images_errors_cnt);
                         AddItem(i);
 
                     }
