@@ -32,6 +32,7 @@ namespace WindowsFormsApplication1
             textBox1.Focus();
             try
             {
+                Text += " v" + Application.ProductVersion;
                 Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetEntryAssembly().Location);
             }
             catch (Exception er)
@@ -184,8 +185,8 @@ namespace WindowsFormsApplication1
             StreamWriter _wtire_csv_errors = null;
             try
             {
-                
 
+                _images_processed_cnt = 0; _images_errors_cnt = 0;
                 Dictionary<string, Tuple<VectorOfKeyPoint, Mat>> items = new Dictionary<string, Tuple<VectorOfKeyPoint, Mat>>();
                 string strLine1 = "path1,path2,Similar,Error";
                 string _csvFile_File_Name = _csvFile.File_Name + ".log";
@@ -388,6 +389,13 @@ namespace WindowsFormsApplication1
             }
         }
         bool _csv_has_headers = true;
+
+        private void toolStripStatusLabel2_Click(object sender, EventArgs e)
+        {
+            ReviewImageSimilarity f = new ImageSimilarFinder.ReviewImageSimilarity();
+            f.Show(this);
+        }
+
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
             _csv_has_headers = checkBox2.Checked;

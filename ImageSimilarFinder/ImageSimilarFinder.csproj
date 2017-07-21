@@ -38,6 +38,10 @@
     <ApplicationIcon>1498846908_thefreeforty_picture.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Dapper, Version=1.50.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dapper.1.50.2\lib\net451\Dapper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Emgu.CV.UI, Version=3.2.0.2682, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\Emgu.CV.UI.dll</HintPath>
@@ -78,6 +82,12 @@
     <Compile Include="OpenCV\DrawMatches.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReviewImageSimilarity.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReviewImageSimilarity.Designer.cs">
+      <DependentUpon>ReviewImageSimilarity.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -94,6 +104,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="ReviewImageSimilarity.resx">
+      <DependentUpon>ReviewImageSimilarity.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -109,6 +123,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="1498846908_thefreeforty_picture.ico" />
+    <None Include="Resources\if_Error_381599.png" />
+    <None Include="Resources\if_pdf_272699.png" />
+    <None Include="Resources\if_file-pdf_285666.png" />
+    <None Include="Resources\if_Asset_37_2186469.png" />
+    <None Include="Resources\if_icon-70-document-file-pdf_315274.png" />
+    <None Include="Resources\OK.png" />
+    <None Include="Resources\if_view-refresh_15329.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
