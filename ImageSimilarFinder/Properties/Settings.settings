@@ -5,5 +5,8 @@
     <Setting Name="ConnectionString" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Data Source=(localdb)\ProjectsV13;Initial Catalog=SimilarImages;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False</Value>
     </Setting>
+    <Setting Name="ManaulReview_SqlTableName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ManaulReview_DataSet_20170719</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

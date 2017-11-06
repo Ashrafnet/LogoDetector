@@ -33,5 +33,14 @@ namespace ImageSimilarFinder.Properties {
                 return ((string)(this["ConnectionString"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("ManaulReview_DataSet_20170719")]
+        public string ManaulReview_SqlTableName {
+            get {
+                return ((string)(this["ManaulReview_SqlTableName"]));
+            }
+        }
     }
 }

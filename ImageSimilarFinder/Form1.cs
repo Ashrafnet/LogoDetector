@@ -148,6 +148,7 @@ namespace WindowsFormsApplication1
             }
             else
                 MessageBox.Show("please set a valid image path and folder path.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
         }
 
         private void SetButtonText(string strText,bool IsEnabled)

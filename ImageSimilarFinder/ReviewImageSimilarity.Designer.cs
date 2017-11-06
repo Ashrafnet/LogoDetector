@@ -84,10 +84,12 @@
             this.listView1.ContextMenuStrip = this.contextMenuStrip1;
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.FullRowSelect = true;
+            this.listView1.HideSelection = false;
             this.listView1.LargeImageList = this.imageList1;
             this.listView1.Location = new System.Drawing.Point(0, 0);
+            this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(269, 389);
+            this.listView1.Size = new System.Drawing.Size(249, 481);
             this.listView1.SmallImageList = this.imageList1;
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
@@ -168,8 +170,8 @@
             this.splitContainer1.Panel2.Controls.Add(this.label6);
             this.splitContainer1.Panel2.Controls.Add(this.label5);
             this.splitContainer1.Panel2.Controls.Add(this.label4);
-            this.splitContainer1.Size = new System.Drawing.Size(901, 389);
-            this.splitContainer1.SplitterDistance = 423;
+            this.splitContainer1.Size = new System.Drawing.Size(1075, 481);
+            this.splitContainer1.SplitterDistance = 552;
             this.splitContainer1.TabIndex = 1;
             // 
             // splitContainer2
@@ -194,16 +196,18 @@
             this.splitContainer2.Panel2.Controls.Add(this.txtControlNumber);
             this.splitContainer2.Panel2.Controls.Add(this.txtQc_Date);
             this.splitContainer2.Panel2.Controls.Add(this.label2);
-            this.splitContainer2.Size = new System.Drawing.Size(423, 389);
-            this.splitContainer2.SplitterDistance = 269;
+            this.splitContainer2.Size = new System.Drawing.Size(552, 481);
+            this.splitContainer2.SplitterDistance = 249;
             this.splitContainer2.TabIndex = 9;
             // 
             // pictureBox1
             // 
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pictureBox1.Location = new System.Drawing.Point(2, 3);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(117, 122);
+            this.pictureBox1.Size = new System.Drawing.Size(294, 261);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
@@ -213,17 +217,18 @@
             // 
             this.chk_uncheckeditems.Checked = true;
             this.chk_uncheckeditems.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chk_uncheckeditems.Location = new System.Drawing.Point(5, 326);
+            this.chk_uncheckeditems.Location = new System.Drawing.Point(7, 422);
             this.chk_uncheckeditems.Name = "chk_uncheckeditems";
             this.chk_uncheckeditems.Size = new System.Drawing.Size(104, 42);
             this.chk_uncheckeditems.TabIndex = 8;
             this.chk_uncheckeditems.Text = "Only load un-reviewed items";
             this.chk_uncheckeditems.UseVisualStyleBackColor = true;
+            this.chk_uncheckeditems.CheckedChanged += new System.EventHandler(this.chk_uncheckeditems_CheckedChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(2, 180);
+            this.label1.Location = new System.Drawing.Point(3, 320);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(41, 13);
             this.label1.TabIndex = 2;
@@ -231,7 +236,7 @@
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(5, 299);
+            this.numericUpDown1.Location = new System.Drawing.Point(209, 451);
             this.numericUpDown1.Name = "numericUpDown1";
             this.numericUpDown1.Size = new System.Drawing.Size(70, 20);
             this.numericUpDown1.TabIndex = 7;
@@ -241,11 +246,12 @@
             0,
             0,
             0});
+            this.numericUpDown1.Visible = false;
             this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
             // 
             // txtQC_BY
             // 
-            this.txtQC_BY.Location = new System.Drawing.Point(5, 196);
+            this.txtQC_BY.Location = new System.Drawing.Point(6, 336);
             this.txtQC_BY.Name = "txtQC_BY";
             this.txtQC_BY.ReadOnly = true;
             this.txtQC_BY.Size = new System.Drawing.Size(100, 20);
@@ -254,16 +260,17 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(7, 283);
+            this.label9.Location = new System.Drawing.Point(211, 435);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(84, 13);
             this.label9.TabIndex = 6;
             this.label9.Text = "Items per Page:";
+            this.label9.Visible = false;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(2, 229);
+            this.label3.Location = new System.Drawing.Point(3, 369);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(52, 13);
             this.label3.TabIndex = 2;
@@ -271,7 +278,7 @@
             // 
             // txtControlNumber
             // 
-            this.txtControlNumber.Location = new System.Drawing.Point(5, 157);
+            this.txtControlNumber.Location = new System.Drawing.Point(6, 297);
             this.txtControlNumber.Name = "txtControlNumber";
             this.txtControlNumber.ReadOnly = true;
             this.txtControlNumber.Size = new System.Drawing.Size(100, 20);
@@ -279,7 +286,7 @@
             // 
             // txtQc_Date
             // 
-            this.txtQc_Date.Location = new System.Drawing.Point(5, 245);
+            this.txtQc_Date.Location = new System.Drawing.Point(6, 385);
             this.txtQc_Date.Name = "txtQc_Date";
             this.txtQc_Date.ReadOnly = true;
             this.txtQc_Date.Size = new System.Drawing.Size(100, 20);
@@ -288,7 +295,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(2, 141);
+            this.label2.Location = new System.Drawing.Point(3, 281);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(121, 13);
             this.label2.TabIndex = 4;
@@ -303,43 +310,48 @@
             this.panel1.BackColor = System.Drawing.SystemColors.Control;
             this.panel1.Location = new System.Drawing.Point(3, 42);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(468, 290);
+            this.panel1.Size = new System.Drawing.Size(513, 385);
             this.panel1.TabIndex = 18;
             // 
             // btn_next
             // 
-            this.btn_next.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_next.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_next.Enabled = false;
-            this.btn_next.Location = new System.Drawing.Point(82, 337);
+            this.btn_next.Location = new System.Drawing.Point(322, 455);
             this.btn_next.Name = "btn_next";
             this.btn_next.Size = new System.Drawing.Size(57, 23);
             this.btn_next.TabIndex = 17;
             this.btn_next.Text = "Next";
             this.btn_next.UseVisualStyleBackColor = true;
+            this.btn_next.Visible = false;
             this.btn_next.Click += new System.EventHandler(this.btn_next_Click);
             // 
             // btn_back
             // 
-            this.btn_back.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_back.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_back.Enabled = false;
-            this.btn_back.Location = new System.Drawing.Point(19, 337);
+            this.btn_back.Location = new System.Drawing.Point(259, 455);
             this.btn_back.Name = "btn_back";
             this.btn_back.Size = new System.Drawing.Size(57, 23);
             this.btn_back.TabIndex = 17;
             this.btn_back.Text = "Back";
             this.btn_back.UseVisualStyleBackColor = true;
+            this.btn_back.Visible = false;
             this.btn_back.Click += new System.EventHandler(this.btn_back_Click);
             // 
             // btn_save
             // 
-            this.btn_save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btn_save.Location = new System.Drawing.Point(309, 339);
+            this.btn_save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_save.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
+            this.btn_save.ForeColor = System.Drawing.Color.DarkGreen;
+            this.btn_save.Image = global::ImageSimilarFinder.Properties.Resources.OK;
+            this.btn_save.Location = new System.Drawing.Point(8, 435);
             this.btn_save.Name = "btn_save";
-            this.btn_save.Size = new System.Drawing.Size(152, 23);
+            this.btn_save.Size = new System.Drawing.Size(152, 34);
             this.btn_save.TabIndex = 16;
             this.btn_save.Text = "Save and Next";
+            this.btn_save.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btn_save.UseVisualStyleBackColor = true;
-            this.btn_save.Visible = false;
             this.btn_save.Click += new System.EventHandler(this.btn_save_Click);
             // 
             // label11
@@ -347,18 +359,17 @@
             this.label11.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label11.BackColor = System.Drawing.Color.Gray;
-            this.label11.Location = new System.Drawing.Point(15, 335);
+            this.label11.Location = new System.Drawing.Point(9, 430);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(446, 1);
+            this.label11.Size = new System.Drawing.Size(505, 2);
             this.label11.TabIndex = 15;
             // 
             // label12
             // 
-            this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(16, 363);
+            this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label12.Location = new System.Drawing.Point(348, 435);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(62, 13);
+            this.label12.Size = new System.Drawing.Size(159, 37);
             this.label12.TabIndex = 2;
             this.label12.Text = "Page 1 of 1";
             // 
@@ -367,15 +378,15 @@
             this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.label8.Location = new System.Drawing.Point(15, 37);
+            this.label8.Location = new System.Drawing.Point(7, 37);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(446, 2);
+            this.label8.Size = new System.Drawing.Size(503, 2);
             this.label8.TabIndex = 5;
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(362, 22);
+            this.label7.Location = new System.Drawing.Point(498, 22);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(70, 13);
             this.label7.TabIndex = 4;
@@ -384,7 +395,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(265, 22);
+            this.label6.Location = new System.Drawing.Point(401, 22);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(59, 13);
             this.label6.TabIndex = 4;
@@ -393,7 +404,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(183, 22);
+            this.label5.Location = new System.Drawing.Point(319, 22);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(59, 13);
             this.label5.TabIndex = 4;
@@ -412,11 +423,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(901, 389);
+            this.ClientSize = new System.Drawing.Size(1075, 481);
             this.Controls.Add(this.splitContainer1);
             this.Name = "ReviewImageSimilarity";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Review Image Similarity";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.ReviewImageSimilarity_Load);
             this.contextMenuStrip1.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);

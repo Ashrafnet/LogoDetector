@@ -28,6 +28,11 @@ namespace LogoDetector
             {
                 var data = GetBitmapData(Resources.template_logo, item, c => c.R == 0 ? (byte)0 : (byte)1);
                 LogoTemplates.Add(new TemplateLogoInfo(data));
+                data = GetBitmapData(Resources.logo_costar_40, item, c => c.R == 0 ? (byte)0 : (byte)1);
+                LogoTemplates.Add(new TemplateLogoInfo(data));
+
+                //data = GetBitmapData(Resources.logo_costar_word, item, c => c.R == 0 ? (byte)0 : (byte)1);
+                //LogoTemplates.Add(new TemplateLogoInfo(data));
             }
         }
         /// <summary>
@@ -150,7 +155,7 @@ namespace LogoDetector
             }
             return counter;
         }
-        static byte RGBtoYUV(Color rgb)
+       public static byte RGBtoYUV(Color rgb)
         {
             double y = rgb.R * .299000 + rgb.G * .587000 + rgb.B * .114000;
             //double u = rgb.R * -.168736 + rgb.G * -.331264 + rgb.B * .500000 + 128;
@@ -268,6 +273,12 @@ namespace LogoDetector
                 data[item.X, item.Y] = Border;
             return data;
         } 
+    }
+
+  public  enum LogoType
+    {
+        MainLogo,
+        CostarLogo
     }
 
 }

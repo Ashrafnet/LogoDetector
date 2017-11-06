@@ -63,6 +63,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ppm_reader\CutReader.cs">
+      <Link>ppm_reader\CutReader.cs</Link>
+    </Compile>
+    <Compile Include="..\ppm_reader\DicomReader.cs">
+      <Link>ppm_reader\DicomReader.cs</Link>
+    </Compile>
+    <Compile Include="..\ppm_reader\PcxReader.cs">
+      <Link>ppm_reader\PcxReader.cs</Link>
+    </Compile>
+    <Compile Include="..\ppm_reader\Picture.cs">
+      <Link>ppm_reader\Picture.cs</Link>
+    </Compile>
+    <Compile Include="..\ppm_reader\PnmReader.cs">
+      <Link>ppm_reader\PnmReader.cs</Link>
+    </Compile>
+    <Compile Include="..\ppm_reader\RasReader.cs">
+      <Link>ppm_reader\RasReader.cs</Link>
+    </Compile>
+    <Compile Include="..\ppm_reader\SgiReader.cs">
+      <Link>ppm_reader\SgiReader.cs</Link>
+    </Compile>
+    <Compile Include="..\ppm_reader\TgaReader.cs">
+      <Link>ppm_reader\TgaReader.cs</Link>
+    </Compile>
+    <Compile Include="..\ppm_reader\XpmReader.cs">
+      <Link>ppm_reader\XpmReader.cs</Link>
+    </Compile>
     <Compile Include="CSV\CsvFile.cs" />
     <Compile Include="CSV\CsvReader.cs" />
     <Compile Include="CSV\CsvWriter.cs" />

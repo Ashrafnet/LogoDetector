@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -34,6 +35,30 @@ namespace LogoDetector
             }
             return oldbmp;
         }
+        public static Bitmap RemoveColorChannel(this Bitmap oldbmp,bool _remove_color_r, bool _remove_color_g,bool _remove_color_b)
+        {
+            if (!_remove_color_r && !_remove_color_g && !_remove_color_b)
+                return oldbmp;
+
+            var img = (Bitmap)oldbmp.Clone();
+            for (int i = 0; i < img.Width; i++)
+            {
+                for (int x = 0; x < img.Height; x++)
+                {
+                    Color oc = img.GetPixel(i, x);
+
+
+                    //set red image pixel
+                    img.SetPixel(i, x, Color.FromArgb(oc.A,
+                        _remove_color_r ? 0 : oc.R,
+                        _remove_color_g ? 0 : oc.G,
+                        _remove_color_b ? 0 : oc.B));
+
+                }
+            }
+            return img;
+        }
+
         /// <summary>
         /// Is number1 close to this number2 ?
         /// </summary>
@@ -93,7 +118,7 @@ namespace LogoDetector
         /// <summary>
         /// Resize the image
         /// </summary>
-        public static Bitmap Crop(this Bitmap bitmap, int Width=65, int Height=65, float scale = 1)
+        public static Bitmap Crop(this Bitmap bitmap, int Width=65, int Height=65, float scale = 1,bool Run_Orginal=true )
         {
 
             if (Width == 65 && Height == 65 )//if default values)
@@ -101,17 +126,33 @@ namespace LogoDetector
                 //Jimil words:
                 //crop 11 % of width and 9% of height for landscape images
                 // Crop 9 % of width and 11 % of height for portrait images
-               // if (bitmap.Width > bitmap.Height) // landscape image
-              //  {
-                     Width =(int) Math.Floor( bitmap.Width * Form1._crop_width_percentage / 100m);
-                    Height = (int)Math.Floor(bitmap.Height * Form1._crop_heigh_percentage / 100);
-                //}
-                //else
-                //{
-                //    Width = bitmap.Width * 9 / 100;
-                //    Height = bitmap.Height * 11 / 100;
-                //}
-                if(Width==0 || Height == 0)
+                if (bitmap.Width > bitmap.Height) // landscape image
+                {
+                    if (Run_Orginal)
+                    {
+                        Width = (int)Math.Floor(bitmap.Width * _CropSettings._crop_width_percentage_landscap_Orginal / 100m);
+                        Height = (int)Math.Floor(bitmap.Height * _CropSettings._crop_heigh_percentage_landscap__Orginal / 100);
+                    }
+                    else
+                    {
+                        Width = (int)Math.Floor(bitmap.Width * _CropSettings._crop_width_percentage_landscap__Legacy / 100m);
+                        Height = (int)Math.Floor(bitmap.Height * _CropSettings._crop_heigh_percentage_landscap__Legacy / 100);
+                    }
+                }
+                else
+                {
+                    if (Run_Orginal)
+                    {
+                        Height = (int)Math.Floor(bitmap.Height * _CropSettings._crop_heigh_percentage_portrait_Orginal / 100m);
+                        Width = (int)Math.Floor(bitmap.Width * _CropSettings._crop_width_percentage_portrait_Orginal / 100);
+                    }
+                    else
+                    {
+                        Height = (int)Math.Floor(bitmap.Height * _CropSettings._crop_heigh_percentage_portrait_Legacy / 100m);
+                        Width = (int)Math.Floor(bitmap.Width * _CropSettings._crop_width_percentage_portrait_Legacy / 100);
+                    }
+                }
+                if (Width==0 || Height == 0)
                 {
                     return bitmap;
                 }
@@ -127,9 +168,44 @@ namespace LogoDetector
                 newBitmap = Crop(newBitmap,Width,Height);
                // newBitmap.Save("d:\\dsdsad.png");
             }
+            if (newBitmap.Width > 65 && newBitmap.Height > 65)
+                newBitmap = ResizeImage(newBitmap, 65, 65);
+
+            // newBitmap= newBitmap.RemoveColorChannel();
             return newBitmap;
         }
 
+        /// <summary>
+        /// Resize the image to the specified width and height.
+        /// </summary>
+        /// <param name="image">The image to resize.</param>
+        /// <param name="width">The width to resize to.</param>
+        /// <param name="height">The height to resize to.</param>
+        /// <returns>The resized image.</returns>
+        public static Bitmap ResizeImage(Image image, int width, int height)
+        {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
+        }
         public static Stream ToByteStream(this Bitmap source)
         {
             using (MemoryStream ms = new MemoryStream())

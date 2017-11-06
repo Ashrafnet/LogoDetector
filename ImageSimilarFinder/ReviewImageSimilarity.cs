@@ -1,34 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Dapper;
 using System.Data.SqlClient;
 using System.Data.Common;
 using System.IO;
-using Emgu.CV;
+using System.Runtime.InteropServices;
 
 namespace ImageSimilarFinder
 {
     public partial class ReviewImageSimilarity : Form
     {
         public static Func<DbConnection> ConnectionFactory = () => new SqlConnection(ConnectionString.GetConnectionString());
-       static  string  _table_name = "[ManaulReview_DataSet_20170719]";
-        string _sql_listOrg_images = "select [ID],[Costar_controlnumber],[costarpath],[xceligentpath],[Similar],[Manual_QC_Similar],[Manual_Comments],[Manual_QC_By],[DateLogged_QC] from [ManaulReview_DataSet_20170719]";
+      // static  string  _table_name = "[ManaulReview_DataSet_20170719]";
+        public static string _table_name { get {
+
+                Properties.Settings.Default.Reload();
+              var t=  Properties.Settings.Default.ManaulReview_SqlTableName;
+                if (string.IsNullOrWhiteSpace(t))
+                    t = "ManaulReview_DataSet_20170719";
+
+                return t;
+            }
+        }
+        string _sql_listOrg_images = $"select [ID],[Cropped],[logo],[Costar_controlnumber],[costarpath],[xceligentpath],[Similar],[Manual_QC_Similar],[Manual_Comments],[Manual_QC_By],[DateLogged_QC] from {_table_name}";
         string _sql_listCostar_images = $@"select [costarpath],
                                             count(0) total,
                                             (select count(0) from {_table_name} where x.[costarpath]=[costarpath] and [DateLogged_QC] is not null) processed
                                              from {_table_name} x
                                                %where%-- where [DateLogged_QC] is null
-                                                 group by[costarpath]";
+                                                 group by[costarpath]
+                                                 order by [costarpath]";
 
         string _sql_update_comment = $@"update {_table_name} set [Manual_Comments]=@Manual_Comments , [DateLogged_QC]=getdate() ,[Manual_QC_By]=@Manual_QC_By where [id]=@id ";
-        string _sql_update_match = $@"update {_table_name} set [Manual_QC_Similar]=@Manual_QC_Similar , [DateLogged_QC]=getdate() ,[Manual_QC_By]=@Manual_QC_By where [id]=@id ";
+        string _sql_update_match = $@"update {_table_name} set  [Manual_QC_Similar]=@Manual_QC_Similar , [DateLogged_QC]=getdate() ,[Manual_QC_By]=@Manual_QC_By where [id]=@id ";
+        string _sql_update_match_crooped = $@"update {_table_name} set [Cropped]=@Cropped, [DateLogged_QC]=getdate() ,[Manual_QC_By]=@Manual_QC_By where [id]=@id ";
+        string _sql_update_match_logo = $@"update {_table_name} set [logo]=@Logo , [DateLogged_QC]=getdate() ,[Manual_QC_By]=@Manual_QC_By where [id]=@id ";
 
         public ReviewImageSimilarity()
         {
@@ -40,7 +49,7 @@ namespace ImageSimilarFinder
             try
             {
                 Text += " v" + Application.ProductVersion;
-                Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetEntryAssembly().Location);
+                Icon =Program. GetExecutableIcon();// Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetEntryAssembly().Location);
             }
             catch (Exception er)
             {
@@ -49,7 +58,7 @@ namespace ImageSimilarFinder
             LoadMainItems();
 
         }
-
+      
         void LoadMainItems()
 
         {
@@ -116,12 +125,12 @@ namespace ImageSimilarFinder
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (listView1.SelectedIndices.Count <= 0) return;
-
+            pictureBox1.Image= loadImage(listView1.SelectedItems[0].Tag+"").Item1;
             GetNextResults(1);
 
             if (results == null || results.Count < 1)
             {
-                pictureBox1.Image = null;
+               // pictureBox1.Image = null;
                 txtControlNumber.Text =
                 txtQc_Date.Text =
                 txtQC_BY.Text = "";
@@ -150,24 +159,22 @@ namespace ImageSimilarFinder
                 sql += " and [DateLogged_QC] is null";
             var items = ExecuteQuery_list(sql, new { costarpath });
             _items_max = items.Count();
-            _page_mx = (int)Math.Ceiling((double)_items_max / _page_size);
-            results = items.Skip((_page - 1) * _page_size)
-                   .Take(_page_size).ToList();
+           // _page_mx = (int)Math.Ceiling((double)_items_max / _page_size);
+            results = items.ToList();// items.Skip((_page - 1) * _page_size)
+                                    //.Take(_page_size).ToList();
           
             SuspendLayout();
-            var p1 = new Point(18, 42);
-            var p2 = new Point(185, 92);
-            var p3 = new Point(267, 92);
-            var p4 = new Point(364, 74);
-            var p5 = new Point(15, 169);
+            var p1 = new Point(7, 2);
+            var p2 = new Point(340, 192);
+            var p3 = new Point(400, 192);
+            var p4 = new Point(480, 174);
+            var p5 = new Point(7, 310);
             var p_width = panel1.Width;
+            var _p_y = 320;
             _items_cnt = results.Count;
             foreach (var item in results)
             {
-                if (!item.DateLogged_QC.HasValue) {
-                    sql = _sql_update_match + " and DateLogged_QC is null";
-                    ExecuteQuery(sql, new { Manual_QC_Similar = false, Manual_QC_By = Environment.UserDomainName, ID = item.ID });
-                }
+               
                 // 
                 // pic1
                 // 
@@ -175,7 +182,7 @@ namespace ImageSimilarFinder
                 var imageloader = loadImage(item.xceligentpath);
                
                 pic1.Location = p1;
-                pic1.Size = new Size(143, 122);
+                pic1.Size = new Size(320, 300);
                 if (imageloader.Item2 == "error")
                 {
                     ToolTip t = new ToolTip();
@@ -206,7 +213,7 @@ namespace ImageSimilarFinder
                         t.SetToolTip(pic1, "Image Path: " + Environment.NewLine + item.xceligentpath);
 
                 }
-                p1.Y = p1.Y + 140;
+                p1.Y = p1.Y + _p_y;
                 
                 pic1.Image = imageloader.Item1;
                 
@@ -223,23 +230,55 @@ namespace ImageSimilarFinder
                 chk_app1.TabIndex = 6;
                 chk_app1.Text = "Match";
                 chk_app1.UseVisualStyleBackColor = true;
-                p2.Y = p2.Y + 142;
-                chk_app1.Checked = (item.Similar + "").ToLower().Trim() == "Yes" ? true : false;
+                p2.Y = p2.Y + _p_y;
+                chk_app1.Checked = (item.Similar + "").ToLower().Trim() == "yes" || (item.Similar + "").ToLower().Trim() == "true"  || (item.Similar + "").ToLower().Trim() == "1" ? true : false;
 
                 // 
                 // chk_qc
                 // 
                 var chk_qc = new CheckBox();
-                chk_qc.Tag = item.ID;
+                chk_qc.Tag = item;
                 chk_qc.AutoSize = true;
                 chk_qc.Location = p3;// new System.Drawing.Point(267, 92);
                 chk_qc.Size = new System.Drawing.Size(55, 17);
                 chk_qc.TabIndex = 6;
                 chk_qc.Text = "Match";
                 chk_qc.UseVisualStyleBackColor = true;
-                p3.Y = p3.Y + 142;
+                p3.Y = p3.Y + _p_y;
                 chk_qc.Checked = item.Manual_QC_Similar.HasValue  ? item.Manual_QC_Similar.Value  : false;
                 chk_qc.CheckedChanged += Chk_qc_CheckedChanged;
+
+                // 
+                // chk_qc [Cropped]
+                // 
+                var chk_Cropped = new CheckBox();
+                chk_Cropped.Tag = item;
+                chk_Cropped.AutoSize = true;
+                chk_Cropped.Location =new Point( chk_qc.Location.X , chk_qc.Location.Y + 23) ;// new System.Drawing.Point(267, 92);
+                chk_Cropped.Size = new System.Drawing.Size(55, 17);
+                chk_Cropped.TabIndex = 6;
+                chk_Cropped.Text = "Cropped";
+                
+                chk_Cropped.UseVisualStyleBackColor = true;
+               // p3.Y = p3.Y + _p_y;
+                chk_Cropped.Checked = item.Cropped.HasValue  ? item.Cropped.Value  : false;
+                chk_Cropped.CheckedChanged += Chk_Cropped_CheckedChanged;
+
+                // 
+                // chk_qc [Logo]
+                // 
+                var chk_Logo = new CheckBox();
+                chk_Logo.Tag = item;
+                chk_Logo.AutoSize = true;
+                chk_Logo.Location = new Point(chk_Cropped.Location.X, chk_Cropped.Location.Y + 23);// new System.Drawing.Point(267, 92);
+                chk_Logo.Size = new System.Drawing.Size(55, 17);
+                chk_Logo.TabIndex = 6;
+                chk_Logo.Text = "Has Logo";
+                chk_Logo.UseVisualStyleBackColor = true;
+               // p3.Y = p3.Y + _p_y;
+                chk_Logo.Checked = item.Logo.HasValue ? item.Logo.Value : false;
+                chk_Logo.CheckedChanged += Chk_Logo_CheckedChanged;
+
 
                 // 
                 // txtComment1
@@ -249,10 +288,10 @@ namespace ImageSimilarFinder
                 txtComment.Tag = item;
                 txtComment.Location = p4;// new System.Drawing.Point(364, 74);
                 txtComment.Multiline = true;
-                txtComment.Size = new System.Drawing.Size(p_width - 372, 49);//596  - 224
+                txtComment.Size = new System.Drawing.Size(p_width - 500, 40);//596  - 224
                 txtComment.TabIndex = 5;
                 txtComment.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top ;
-                p4.Y = p4.Y + 142;
+                p4.Y = p4.Y + _p_y;
                 txtComment.Text = item.Manual_Comments;
                 if (item.DateLogged_QC .HasValue || !string.IsNullOrWhiteSpace(item.Manual_QC_By ))
                 {
@@ -276,7 +315,7 @@ namespace ImageSimilarFinder
                 lblLine.Location = p5;// new System.Drawing.Point(15, 169);
                 lblLine.Size = new System.Drawing.Size(p_width - 20, 1);
                 lblLine.Anchor = AnchorStyles.Left | AnchorStyles.Right| AnchorStyles.Top ;
-                p5.Y = p5.Y + 142;
+                p5.Y = p5.Y + _p_y;
 
 
 
@@ -285,6 +324,8 @@ namespace ImageSimilarFinder
                 panel1.Controls.Add(pic1);
                 panel1.Controls.Add(chk_app1);
                 panel1.Controls.Add(chk_qc);
+                panel1.Controls.Add(chk_Cropped);
+                panel1.Controls.Add(chk_Logo);
                 panel1.Controls.Add(txtComment);
                 panel1.Controls.Add(lblLine);
 
@@ -297,8 +338,26 @@ namespace ImageSimilarFinder
             CheckBox chk = (CheckBox)sender;
             if (chk == null) return;
            // chk.CheckState 
-            var id = chk.Tag + "";
-            ExecuteQuery(_sql_update_match, new { Manual_QC_Similar = chk.Checked , Manual_QC_By = Environment.UserDomainName, ID = id });
+            var item =(reviewEntity) chk.Tag ;
+            ExecuteQuery(_sql_update_match, new {  Manual_QC_Similar = chk.Checked , Manual_QC_By = CurrentUserName(), ID = item.ID  });
+
+        }
+        private void Chk_Cropped_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox chk = (CheckBox)sender;
+            if (chk == null) return;
+            // chk.CheckState 
+            var item = (reviewEntity)chk.Tag;
+            ExecuteQuery(_sql_update_match_crooped, new { Cropped = chk.Checked, Manual_QC_By = CurrentUserName(), ID = item.ID });
+
+        }
+          private void Chk_Logo_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox chk = (CheckBox)sender;
+            if (chk == null) return;
+           // chk.CheckState 
+            var item =(reviewEntity) chk.Tag ;
+            ExecuteQuery(_sql_update_match_logo, new { Logo= chk.Checked , Manual_QC_By = CurrentUserName(), ID = item.ID  });
 
         }
 
@@ -311,14 +370,21 @@ namespace ImageSimilarFinder
             var item = (reviewEntity) txt.Tag ;
             if ((item.Manual_Comments + "").Trim() == txt.Text.Trim())
                 return;
-            ExecuteQuery(_sql_update_comment, new { Manual_Comments=txt.Text , Manual_QC_By =Environment.UserDomainName ,ID= item.ID  });
+            ExecuteQuery(_sql_update_comment, new { Manual_Comments=txt.Text , Manual_QC_By = CurrentUserName(), ID= item.ID  });
         }
 
+        string CurrentUserName()
+        {
+           return  System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+        }
         void updateUI_buttons()
         {
+           // btn_save.Enabled = _items_cnt > 0;
             btn_back.Enabled = _page > 1;
             btn_next.Enabled = _page_mx > _page;
             label12.Text = $"Page {_page} of {_page_mx} ({_items_cnt} items of { _items_max})";
+
+        
         }
         Tuple<Bitmap, string> loadImage(string imagepath)
         {
@@ -326,7 +392,17 @@ namespace ImageSimilarFinder
             if (!File.Exists(imagepath)) return Tuple.Create(Properties.Resources.img_error, "error");
             if ((Path.GetExtension(imagepath) + "").Trim().ToLower() == ".pdf")
                 return Tuple.Create(Properties.Resources.pdf2, "pdf");
-            return Tuple.Create(new Bitmap((Bitmap)new Mat(imagepath).Bitmap.Clone()), "bitmap");
+
+            string[] imgExts_ppm = new string[] { ".ppm", ".pgm", ".pbm" };
+            Bitmap source = null;
+
+            if (imgExts_ppm.Contains((Path.GetExtension(imagepath) + "").ToLower()))            
+                source = DmitryBrant.ImageFormats.Picture.Load(imagepath);                          
+            else
+                source = (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imagepath)));
+            return Tuple.Create( source, "bitmap");
+
+          //  return Tuple.Create(new Bitmap((Bitmap)new Mat(imagepath).Bitmap.Clone()), "bitmap");
 
         }
 
@@ -371,13 +447,59 @@ namespace ImageSimilarFinder
 
         private void btn_save_Click(object sender, EventArgs e)
         {
-            if(_page >= _page_mx) // No Next just save
+            foreach (var control in panel1.Controls)
             {
-                return;
+                var c = control is CheckBox;
+                if (!c) continue;
+
+                CheckBox chk = (CheckBox)control;
+                if (!chk.Enabled) continue;
+                var item = (reviewEntity)chk.Tag;
+                if (item == null) continue;
+
+                if (!item.DateLogged_QC.HasValue)
+                {
+                   var sql = _sql_update_match + " and DateLogged_QC is null";
+                    ExecuteQuery(sql, new {Logo =false , Cropped=false ,  Manual_QC_Similar = false, Manual_QC_By = CurrentUserName(), ID = item.ID });
+                }
             }
-            _page++;
-       
-            GetNextResults(_page);
+
+
+            if (listView1.SelectedItems.Count > 0)//we need to update listview values
+            {
+                var lvi = listView1.SelectedItems[0];
+                var costarpath = lvi.Tag + "";
+
+                var sql = _sql_listCostar_images;
+                sql = sql.Replace("%where%", "  where [costarpath] =@costarpath");
+                var results = ExecuteQuery_list(sql, new { costarpath = costarpath });
+                if (results == null || results.Count() < 1) return;
+                var item = results.FirstOrDefault();
+                if (item == null) return;
+
+                lvi.SubItems[1].Text = item.total + "";
+                lvi.SubItems[2].Text = item.processed + "";
+
+                if (item.total == item.processed)//full
+                    lvi.ImageIndex = 0;
+                else if (item.total > item.processed && item.processed > 0)
+                    lvi.ImageIndex = 1;
+                else
+                    lvi.ImageIndex = 2;
+
+            }
+
+            var _sel_no = 0;
+            if (listView1.SelectedItems == null || listView1.SelectedItems.Count < 1) // not selected
+                _sel_no = 0;
+            else
+                _sel_no = listView1.SelectedItems[0].Index+1;
+
+            if (_sel_no >= listView1.Items.Count) return;
+            listView1.Items[_sel_no].Selected = true;
+      
+
+
             updateUI_buttons();
         }
 
@@ -397,6 +519,14 @@ namespace ImageSimilarFinder
             hideProcessedItemsToolStripMenuItem.Checked = _hideProcessedItems;
             LoadMainItems();
         }
+
+        private void chk_uncheckeditems_CheckedChanged(object sender, EventArgs e)
+        {
+            GetNextResults(1);
+            updateUI_buttons();
+        }
+
+      
     }
 
     internal class reviewEntity
@@ -427,6 +557,8 @@ namespace ImageSimilarFinder
         public string Manual_Comments { get; set; }
         public string Manual_QC_By { get; set; }
         public DateTime? DateLogged_QC { get; set; }
+        public bool? Cropped { get;  set; }
+        public bool? Logo { get; set; }
     }
 
     public static class ConnectionString

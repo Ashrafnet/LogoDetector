@@ -151,6 +151,12 @@
     <Compile Include="frmTrainImages_Directory.Designer.cs">
       <DependentUpon>frmTrainImages_Directory.cs</DependentUpon>
     </Compile>
+    <Compile Include="Imageviewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Imageviewer.designer.cs">
+      <DependentUpon>Imageviewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="ListViewItemComparer.cs" />
     <Compile Include="MSAI.cs" />
     <Compile Include="MyDirectory.cs" />
@@ -184,6 +190,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmTrainImages_Directory.resx">
       <DependentUpon>frmTrainImages_Directory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Imageviewer.resx">
+      <DependentUpon>Imageviewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -245,6 +254,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CopyFiles\CopyFiles.csproj" />
+    <None Include="Resources\logo_costar_word.bmp" />
+    <None Include="Resources\logo_costar_40.bmp" />
+    <None Include="Resources\logo_costar.png" />
     <None Include="Resources\logo_clean_28.png" />
     <None Include="Resources\1492455014_67.png" />
     <None Include="Resources\1492455058_17.png" />

@@ -36,3 +36,9 @@ count(0) total,
    -- where [DateLogged_QC] is not null
      group by[costarpath]
 	
+	select [costarpath],
+                                            count(0) total,
+                                            (select count(0) from [ManaulReview_DataSet_20170719] where x.[costarpath]=[costarpath] and [DateLogged_QC] is not null) processed
+                                             from [ManaulReview_DataSet_20170719] x
+                                              
+                                                 group by[costarpath]

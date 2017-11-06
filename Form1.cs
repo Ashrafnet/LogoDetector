@@ -419,7 +419,7 @@ namespace LogoDetector
 
                 var info = listviewItems[selectedIndexes[0]];
                 labelFailImage.Visible = false;
-                pictureBox1.Image = pictureBox2.Image = null;
+                pictureBox1.Image = pic_logo_2.Image= pictureBox2.Image = null;
                 if (info == null) { }
                 else if (!string.IsNullOrWhiteSpace(info.Error))
                 {
@@ -433,7 +433,8 @@ namespace LogoDetector
                     if (info.ProcessedImage == null)
                     {
                         // ImageLogoInfo info1 = ImageLogoInfo.ProccessImage(info.ImagePath);
-                        pictureBox2.Image = source.Crop();
+                        pictureBox2.Image = source.Crop().RemoveColorChannel(_CropSettings._remove_color_r, _CropSettings._remove_color_g, _CropSettings._remove_color_b);
+                        pic_logo_2.Image = source.Crop(65,65,1,false ).RemoveColorChannel(_CropSettings._remove_color_r, _CropSettings._remove_color_g, _CropSettings._remove_color_b);
                     }
                 }
 
@@ -804,16 +805,35 @@ namespace LogoDetector
                 var tag = i.Tag + "";
                 if (listView1.SelectedIndices.Count > 0)
                 {
-                   
+                    if (_LocalWork == Algorithm.Local)
+                    {
+                        for (int inx = 0; inx < listView1.SelectedIndices.Count; inx++)
+                        {
+                            var info = listviewItems[listView1.SelectedIndices[inx]];
+                            if (info == null) return;
 
-                    List<Bitmap> Images = new List<Bitmap>();
+                            var local_info = ImageLogoInfo.ProccessImage(info.ImagePath);
+                          //  local_info.Confidence = 90;
+                            listviewItems.First(a => a.ImagePath == info.ImagePath).Confidence = local_info.Confidence;
+                            
+
+
+
+                        }
+                        listView1.Refresh();
+                        return;
+                    }
+                        List<Bitmap> Images = new List<Bitmap>();
                     for (int inx = 0; inx < listView1.SelectedIndices.Count; inx++)
                     {
                         var info = listviewItems[listView1.SelectedIndices[inx]];
                         if (info == null) return;
+                     
+
                         Bitmap source = ImageLogoInfo.GetBitmap(info.ImagePath);
 
                         var Image = source.Crop();
+                       
                         if (tag == "-1")
                         {
                             if(_LocalWork == Algorithm.MicrosoftVision)
@@ -1031,22 +1051,155 @@ namespace LogoDetector
             _previewenabeled = checkBox4.Checked;
             splitContainer1.Visible = _previewenabeled;
         }
-        public static decimal  _crop_width_percentage = 10;
-        public static decimal  _crop_heigh_percentage = 10;
+       
+
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            _crop_width_percentage = numericUpDown1.Value;
+            _CropSettings._crop_width_percentage_portrait_Orginal = numericUpDown1.Value;
         }
 
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
         {
-            _crop_heigh_percentage = numericUpDown2.Value;
+            _CropSettings._crop_heigh_percentage_portrait_Orginal = numericUpDown2.Value;
+
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+
+                var img = (Image)((PictureBox)sender).Image.Clone();
+                Imageviewer i = new Imageviewer(new Bitmap(img));
+                i.WindowState = FormWindowState.Maximized;
+                i.ShowDialog();
+            }
+            catch (Exception errr)
+            {
+
+
+            }
+        }
+
+        private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            trainHasLogoToolStripMenuItem.Enabled = trainHasNoLogoToolStripMenuItem.Enabled= _LocalWork == Algorithm.Clarifai;
+        }
+
+        private void chk_r_CheckedChanged(object sender, EventArgs e)
+        {
+           _CropSettings. _remove_color_r = chk_r.Checked;
+            ToolStripMenuItem i = new ToolStripMenuItem();
+            trainHasLogoToolStripMenuItem_Click(i, e);
+            listView1_SelectedIndexChanged(sender, e);
+                }
+
+        private void chk_g_CheckedChanged(object sender, EventArgs e)
+        {
+            _CropSettings. _remove_color_g = chk_g.Checked;
+            ToolStripMenuItem i = new ToolStripMenuItem();
+            trainHasLogoToolStripMenuItem_Click(i, e);
+            listView1_SelectedIndexChanged(sender, e);
+        }
+
+        private void chk_b_CheckedChanged(object sender, EventArgs e)
+        {
+            _CropSettings. _remove_color_b = chk_b.Checked;
+            ToolStripMenuItem i = new ToolStripMenuItem();
+            trainHasLogoToolStripMenuItem_Click(i, e); listView1_SelectedIndexChanged(sender, e);
+        }
+        bool _insideCheckEvent = false;
+        private void checkBox5_CheckedChanged(object sender, EventArgs e)
+        {
+            panel1.Visible = checkBox5.Checked;
+            _CropSettings.Run_Orginal = checkBox5.Checked;
+            if (_insideCheckEvent) return;
+            _insideCheckEvent = true;
+           
+            if (!checkBox6.Checked)
+                checkBox6.CheckState  =  CheckState.Checked;
+            _insideCheckEvent = false;
+        }
+
+        private void checkBox6_CheckedChanged(object sender, EventArgs e)
+        {
+            panel2.Visible = checkBox6.Checked;
+            _CropSettings.Run_Legacy = checkBox6.Checked;
+
+            if (_insideCheckEvent) return;
+            _insideCheckEvent = true;
+           
+            if (!checkBox5.Checked)
+                checkBox5.CheckState = CheckState.Checked;
+            _insideCheckEvent = false;
+
+        }
+
+        private void checkBox7_CheckedChanged(object sender, EventArgs e)
+        {
+            _CropSettings.Remove_CHannel_color_Enabled = checkBox7.Checked;
+        }
+
+        private void numericUpDown4_ValueChanged(object sender, EventArgs e)
+        {
+            _CropSettings._crop_width_percentage_landscap_Orginal = numericUpDown4.Value;
+
+        }
+
+        private void numericUpDown3_ValueChanged(object sender, EventArgs e)
+        {
+            _CropSettings._crop_heigh_percentage_landscap__Orginal = numericUpDown3.Value;
+
+        }
+
+        private void numericUpDown5_ValueChanged(object sender, EventArgs e)
+        {
+            _CropSettings._crop_width_percentage_portrait_Legacy = numericUpDown5.Value;
+
+        }
+
+        private void numericUpDown8_ValueChanged(object sender, EventArgs e)
+        {
+            _CropSettings._crop_heigh_percentage_portrait_Legacy = numericUpDown8.Value;
+
+        }
+
+        private void numericUpDown7_ValueChanged(object sender, EventArgs e)
+        {
+            _CropSettings._crop_width_percentage_landscap__Legacy = numericUpDown7.Value;
+
+        }
+
+        private void numericUpDown6_ValueChanged(object sender, EventArgs e)
+        {
+            _CropSettings._crop_heigh_percentage_landscap__Legacy = numericUpDown6.Value;
 
         }
     }
 
 
+    static public   class _CropSettings
+    {
+        public static bool Run_Orginal = true ;
+        public static bool Run_Legacy = true ;
 
+        
+        public static decimal _crop_width_percentage_portrait_Orginal = 10;
+        public static decimal _crop_heigh_percentage_portrait_Orginal = 10;
+        public static decimal _crop_width_percentage_landscap_Orginal = 10;
+        public static decimal _crop_heigh_percentage_landscap__Orginal = 10;
+
+        public static decimal _crop_width_percentage_portrait_Legacy = 15;
+        public static decimal _crop_heigh_percentage_portrait_Legacy = 10;
+        public static decimal _crop_width_percentage_landscap__Legacy = 15;
+        public static decimal _crop_heigh_percentage_landscap__Legacy = 10;
+
+        public static bool _remove_color_r = false;
+        public static bool _remove_color_g = false;
+        public static bool _remove_color_b = false;
+
+        public static bool Remove_CHannel_color_Enabled { get; set; } = true;
+    }
 
     public struct Stat_Info
     {
@@ -1143,15 +1296,92 @@ namespace LogoDetector
                 Bitmap source = GetBitmap(imgPath);
                 var min = Math.Min(source.Width, source.Height);
                 var scales = min > 500 ? new float[] { 1 } : (min > 400 ? new float[] { 1, 1.5f } : new float[] { 1, 1.5f, 2f });
+
                 foreach (var scale in scales)
                 {
-                    var image = source.Crop(65, 65, scale);
-                    var firstCheck = MyTemplateMatching.DetectLogo(image);
-                    //info.HasLogo = firstCheck > 50;
-                    info.Confidence = (int)firstCheck;
+                    Bitmap Croped_image = null;
+                   
+                    if (_CropSettings.Run_Orginal)
+                    {
+                        Croped_image = source.Crop(65, 65, scale, true);
 
 
-                    if (info.HasLogo) break;
+                        var image = Croped_image.RemoveColorChannel(false, false, false);
+                        var firstCheck = MyTemplateMatching.DetectLogo(image);
+                        info.Confidence = (int)firstCheck;
+                        if (info.HasLogo) break;
+                        if (_CropSettings.Remove_CHannel_color_Enabled)
+                        {
+                            image = Croped_image.RemoveColorChannel(true, false, false);
+                            firstCheck = MyTemplateMatching.DetectLogo(image);
+                            info.Confidence = (int)firstCheck;
+                            if (info.HasLogo) break;
+
+                            image = Croped_image.RemoveColorChannel(true, true, false);
+                            firstCheck = MyTemplateMatching.DetectLogo(image);
+                            info.Confidence = (int)firstCheck;
+                            if (info.HasLogo) break;
+
+
+
+                            image = Croped_image.RemoveColorChannel(false, true, true);
+                            firstCheck = MyTemplateMatching.DetectLogo(image);
+                            info.Confidence = (int)firstCheck;
+                            if (info.HasLogo) break;
+
+                            image = Croped_image.RemoveColorChannel(false, false, true);
+                            firstCheck = MyTemplateMatching.DetectLogo(image);
+                            info.Confidence = (int)firstCheck;
+                            if (info.HasLogo) break;
+
+                            image = Croped_image.RemoveColorChannel(true, false, true);
+                            firstCheck = MyTemplateMatching.DetectLogo(image);
+                            info.Confidence = (int)firstCheck;
+                            if (info.HasLogo) break;
+                        }
+
+                    }
+
+                    if (_CropSettings.Run_Legacy)
+                    {
+                        Croped_image = source.Crop(65, 65, scale, false );
+
+
+                        var image = Croped_image.RemoveColorChannel(false, false, false);
+                        var firstCheck = MyTemplateMatching.DetectLogo(image);
+                        info.Confidence = (int)firstCheck;
+                        if (info.HasLogo) break;
+                        if (_CropSettings.Remove_CHannel_color_Enabled)
+                        {
+                            image = Croped_image.RemoveColorChannel(true, false, false);
+                            firstCheck = MyTemplateMatching.DetectLogo(image);
+                            info.Confidence = (int)firstCheck;
+                            if (info.HasLogo) break;
+
+                            image = Croped_image.RemoveColorChannel(true, true, false);
+                            firstCheck = MyTemplateMatching.DetectLogo(image);
+                            info.Confidence = (int)firstCheck;
+                            if (info.HasLogo) break;
+
+
+
+                            image = Croped_image.RemoveColorChannel(false, true, true);
+                            firstCheck = MyTemplateMatching.DetectLogo(image);
+                            info.Confidence = (int)firstCheck;
+                            if (info.HasLogo) break;
+
+                            image = Croped_image.RemoveColorChannel(false, false, true);
+                            firstCheck = MyTemplateMatching.DetectLogo(image);
+                            info.Confidence = (int)firstCheck;
+                            if (info.HasLogo) break;
+
+                            image = Croped_image.RemoveColorChannel(true, false, true);
+                            firstCheck = MyTemplateMatching.DetectLogo(image);
+                            info.Confidence = (int)firstCheck;
+                            if (info.HasLogo) break;
+                        }
+                    }
+
                 }
             }
             catch (Exception ex) { info.Error = ex.FullErrorMessage(); }
