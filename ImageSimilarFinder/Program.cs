@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WindowsFormsApplication1;
 
 namespace ImageSimilarFinder
 {
@@ -22,8 +23,8 @@ namespace ImageSimilarFinder
             Application.SetCompatibleTextRenderingDefault(false);
             Application.ThreadException += Application_ThreadException;
           
-               //        Application.Run(new Form1());
-            Application.Run(new ImageSimilarFinder.ReviewImageSimilarity());
+                       Application.Run(new Form1());
+           // Application.Run(new ImageSimilarFinder.ReviewImageSimilarity());
 
 
         }

@@ -9,6 +9,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -21,12 +23,66 @@ namespace WindowsFormsApplication1
     {
         public Form1()
         {
+           // findMatches(@"C:\Users\Ashraf\AppData\Roaming\Skype\My Skype Received Files\Issues\Cropped\9614468.jpg");
             InitializeComponent();
         }
 
+        void findMatches(string imagePath)
+        {
+            var img = ResizeImage(Image.FromFile(imagePath), 500, 500);
+           // img.Save("test.png", System.Drawing.Imaging.ImageFormat.Jpeg);
+            var dd = DrawMatches.GetImageDescriptors(img);
+
+            var img1 = loadImage(imagePath );
+           // img1.Save("test1.png", System.Drawing.Imaging.ImageFormat.Jpeg);
+            var dd1 = DrawMatches.GetImageDescriptors((Bitmap)img1);
+
+            Mat similarity;
+            var result = CheckSimilarty("test.png", "test1.png", dd, dd1, out similarity);
+
+
+        }
+
+        public Bitmap ResizeImage_(Bitmap img, int width, int height)
+        {
+            using (Bitmap b = new Bitmap(width, height))
+            {
+                using (Graphics g = Graphics.FromImage(b))
+                {
+                    g.DrawImage(img, 0, 0, width, height);
+                }
+
+                return (Bitmap)b.Clone();
+            }
+        }
+
+        public static Bitmap ResizeImage(Image image, int width, int height)
+        {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
-#if  DEBUG==false
+#if DEBUG == false
             textBox1.Text = "";
 #endif
             textBox1.Focus();
@@ -43,18 +99,7 @@ namespace WindowsFormsApplication1
           //  testt();
 
         }
-        void testt()
-        {
-            var imageBase = @"C:\D\Ken\LogoDetector\App\Resources\logo_clean_28.png";
-            var image = @"C:\Users\Ashraf\AppData\Roaming\Skype\My Skype Received Files\Issues\Original\cropped.jpg";
-            var image_base_descriptors = DrawMatches.GetImageDescriptors(imageBase);
-            var image_2_descriptors = DrawMatches.GetImageDescriptors(image);
-
-
-            Mat similarity;
-            var result = CheckSimilarty(imageBase, image, image_base_descriptors, image_2_descriptors, out similarity);
-
-        }
+    
       
         ////float compare2images_2(string image1, string image2, Func<string, ulong[]> HashFunction)
         ////{
@@ -75,21 +120,42 @@ namespace WindowsFormsApplication1
         string[] imgExts_ = new string[] { "*.jpeg", "*.jpg", "*.png", "*.BMP", "*.GIF", "*.TIFF", "*.Exif", "*.WMF", "*.EMF" };
 
 
-        Bitmap loadImage(string imagepath)
+        Bitmap loadImage(string imagepath )
         {
             if (string.IsNullOrWhiteSpace(imagepath)) return null;
             if (!File.Exists(imagepath)) return null;
-            return new Bitmap((Bitmap)new Mat(imagepath).Bitmap.Clone());
-
-
-            if (imgExts.Contains((Path.GetExtension(imagepath) + "").ToLower()))
+            var btm= new Bitmap((Bitmap)new Mat(imagepath).Bitmap.Clone());
+            if (_resizeHugeImage && btm.Width > 700)
             {
-                if (File.Exists(imagepath))
-                    return (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imagepath)));
+              //  
+                //calculate the ratio
+                double dbl = (double)btm.Width / (double)btm.Height;
+                int boxHeight = 600;
+                //set height of image to boxHeight and check if resulting width is less than boxWidth, 
+                //else set width of image to boxWidth and calculate new height
+                if ((int)((double)boxHeight * dbl) <= boxHeight)
+                {
+                    btm = ResizeImage_(btm, (int)((double)boxHeight * dbl), boxHeight);
+                   
+                }
                 else
-                    return null;
+                {
+                    btm = ResizeImage_(btm, boxHeight, (int)((double)boxHeight / dbl));
+                   
+                }
+
             }
-            return null;
+            return btm;
+
+
+            //if (imgExts.Contains((Path.GetExtension(imagepath) + "").ToLower()))
+            //{
+            //    if (File.Exists(imagepath))
+            //        return (Bitmap)Bitmap.FromStream(new MemoryStream(File.ReadAllBytes(imagepath)));
+            //    else
+            //        return null;
+            //}
+            //return null;
 
         }
         void SetStatusInfo(string info)
@@ -222,13 +288,19 @@ namespace WindowsFormsApplication1
 
                         if (!File.Exists(imageBase)) throw new FileNotFoundException("File does not exist!", imageBase);
                         if (!File.Exists(image)) throw new FileNotFoundException("File does not exist!", image);
+                        lock (this)
+                        {
+                           
+                            _wtire_csv.WriteLine(strLine);
+                            _wtire_csv.Flush();
+                        }
 
                         lock (items)
                         {
                             if (!items.ContainsKey(imageBase))
                             {
-
-                               var image_descriptors = DrawMatches.GetImageDescriptors(imageBase);
+                                
+                               var image_descriptors = DrawMatches.GetImageDescriptors(loadImage(imageBase ));
                                 if (image_descriptors == null)
                                 {
                                     
@@ -243,7 +315,7 @@ namespace WindowsFormsApplication1
                             if (!items.ContainsKey(image))
                             {
 
-                                var image_descriptors = DrawMatches.GetImageDescriptors(image);
+                                var image_descriptors = DrawMatches.GetImageDescriptors(loadImage(image ));
                                 if (image_descriptors == null)
                                 {
                                     _images_errors_cnt++;
@@ -267,13 +339,9 @@ namespace WindowsFormsApplication1
                         if (similarity != null)
                             i.Tag = new Bitmap((Bitmap)similarity.Bitmap.Clone());
 
-                        lock (this )
-                        {
-                            strLine += result ? "Yes," : "No,";
-                            _wtire_csv.WriteLine(strLine);                           
-                            _wtire_csv.Flush();
-                        }
+                      
                         _images_processed_cnt++;
+                       // GC.Collect();
                     }
 
                     catch (Exception er)
@@ -308,6 +376,7 @@ namespace WindowsFormsApplication1
             finally
             {
                 _wtire_csv.Close();
+                _wtire_csv_errors.Close();
                 if (InvokeRequired)
                 {
                     Invoke(new Action(() =>
@@ -348,7 +417,7 @@ namespace WindowsFormsApplication1
 
           
             if (listView1.SelectedItems == null || listView1.SelectedItems.Count < 1) return;
-                pictureBox1.Image = loadImage(listView1.SelectedItems[0].Text  + "");
+                pictureBox1.Image = loadImage(listView1.SelectedItems[0].Text  + "" );
 
                 if (listView1.SelectedItems[0].Tag is Bitmap)
                 {
@@ -390,17 +459,46 @@ namespace WindowsFormsApplication1
             }
         }
         bool _csv_has_headers = true;
-
+        bool _resizeHugeImage = true;
         private void toolStripStatusLabel2_Click(object sender, EventArgs e)
         {
             ReviewImageSimilarity f = new ImageSimilarFinder.ReviewImageSimilarity();
             f.Show(this);
         }
 
+        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            _resizeHugeImage = checkBox3.Checked;
+        }
+
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
             _csv_has_headers = checkBox2.Checked;
 
+        }
+
+        Dictionary<string, List<string>> ProcessText(string strText)
+        {
+            Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
+            foreach (var item in strText.Split('\n'))
+            {
+
+                if (string.IsNullOrWhiteSpace(item)) continue;
+                if (item=="\r") continue;
+                var number = System.Text.RegularExpressions.Regex.Match(item, @"\d+").Value;
+                var text = ExtractTextWithoutNumber(item);
+                if (result.ContainsKey(number))
+                    result[number].Add(text);
+                else
+                    result.Add(number, new List<string>() { text });
+
+            }
+            return result;
+        }
+
+        public string ExtractTextWithoutNumber(string original)
+        {
+            return new string(original.Where(c => !Char.IsDigit(c)).ToArray());
         }
     }
 }

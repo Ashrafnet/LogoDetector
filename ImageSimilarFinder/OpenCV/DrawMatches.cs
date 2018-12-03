@@ -109,26 +109,35 @@ namespace FeatureMatchingExample
         }
 
         [HandleProcessCorruptedStateExceptionsAttribute]
-        public static Tuple<VectorOfKeyPoint, Mat> GetImageDescriptors(string mImage)
+        public static Tuple<VectorOfKeyPoint, Mat> GetImageDescriptors(Bitmap mImage)
         {
             try
             {
 
 
                 var mKeyPoints = new VectorOfKeyPoint();
-                using (Mat modelImage = CvInvoke.Imread(mImage, ImreadModes.Grayscale))
-                using (UMat uMImage = modelImage.GetUMat(AccessType.Read))
+                // Image<Bgr, Byte> img = new Image<Bgr, Byte>(new Bitmap("")); //where bmp is a Bitmap
+
+                Mat modelImage = new Mat();
+                
+                    using (Image<Gray, byte> img = new Image<Gray, byte>(mImage))
                 {
-                    KAZE featureDetector = new KAZE();
+                    modelImage = img.Mat;
 
-                    //extract features from the object image
-                    Mat mDescriptors = new Mat();
-                    featureDetector.DetectAndCompute(uMImage, null, mKeyPoints, mDescriptors, false);
+                    // using (Mat modelImage = CvInvoke.Imread(mImage, ImreadModes.Grayscale))
+                    using (UMat uMImage = modelImage.GetUMat(AccessType.Read))
+                    {
+                        KAZE featureDetector = new KAZE();
+
+                        //extract features from the object image
+                        Mat mDescriptors = new Mat();
+                        featureDetector.DetectAndCompute(uMImage, null, mKeyPoints, mDescriptors, false);
+
+                        modelImage.Dispose();
+                        return Tuple.Create(mKeyPoints, mDescriptors);
 
 
-                    return Tuple.Create(mKeyPoints, mDescriptors);
-
-
+                    }
                 }
             }
             catch (Exception er)

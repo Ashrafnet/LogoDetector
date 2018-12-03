@@ -35,13 +35,11 @@
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.hideProcessedItemsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.chk_uncheckeditems = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
@@ -53,8 +51,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btn_next = new System.Windows.Forms.Button();
-            this.btn_back = new System.Windows.Forms.Button();
-            this.btn_save = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
@@ -62,6 +58,10 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.btn_back = new System.Windows.Forms.Button();
+            this.btn_save = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -71,8 +71,8 @@
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // listView1
@@ -117,14 +117,6 @@
             this.hideProcessedItemsToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(188, 54);
-            // 
-            // refreshToolStripMenuItem
-            // 
-            this.refreshToolStripMenuItem.Image = global::ImageSimilarFinder.Properties.Resources.if_view_refresh_15329;
-            this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
-            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
-            this.refreshToolStripMenuItem.Text = "Refresh";
-            this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
@@ -199,19 +191,6 @@
             this.splitContainer2.Size = new System.Drawing.Size(552, 481);
             this.splitContainer2.SplitterDistance = 249;
             this.splitContainer2.TabIndex = 9;
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox1.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pictureBox1.Location = new System.Drawing.Point(2, 3);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(294, 261);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 1;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // chk_uncheckeditems
             // 
@@ -317,42 +296,19 @@
             // 
             this.btn_next.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btn_next.Enabled = false;
-            this.btn_next.Location = new System.Drawing.Point(322, 455);
+            this.btn_next.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
+            this.btn_next.ForeColor = System.Drawing.Color.Blue;
+            this.btn_next.Image = global::ImageSimilarFinder.Properties.Resources.if_57_62714;
+            this.btn_next.Location = new System.Drawing.Point(182, 436);
             this.btn_next.Name = "btn_next";
-            this.btn_next.Size = new System.Drawing.Size(57, 23);
+            this.btn_next.Size = new System.Drawing.Size(80, 28);
             this.btn_next.TabIndex = 17;
             this.btn_next.Text = "Next";
+            this.btn_next.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.btn_next.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
             this.btn_next.UseVisualStyleBackColor = true;
             this.btn_next.Visible = false;
             this.btn_next.Click += new System.EventHandler(this.btn_next_Click);
-            // 
-            // btn_back
-            // 
-            this.btn_back.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btn_back.Enabled = false;
-            this.btn_back.Location = new System.Drawing.Point(259, 455);
-            this.btn_back.Name = "btn_back";
-            this.btn_back.Size = new System.Drawing.Size(57, 23);
-            this.btn_back.TabIndex = 17;
-            this.btn_back.Text = "Back";
-            this.btn_back.UseVisualStyleBackColor = true;
-            this.btn_back.Visible = false;
-            this.btn_back.Click += new System.EventHandler(this.btn_back_Click);
-            // 
-            // btn_save
-            // 
-            this.btn_save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btn_save.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
-            this.btn_save.ForeColor = System.Drawing.Color.DarkGreen;
-            this.btn_save.Image = global::ImageSimilarFinder.Properties.Resources.OK;
-            this.btn_save.Location = new System.Drawing.Point(8, 435);
-            this.btn_save.Name = "btn_save";
-            this.btn_save.Size = new System.Drawing.Size(152, 34);
-            this.btn_save.TabIndex = 16;
-            this.btn_save.Text = "Save and Next";
-            this.btn_save.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.btn_save.UseVisualStyleBackColor = true;
-            this.btn_save.Click += new System.EventHandler(this.btn_save_Click);
             // 
             // label11
             // 
@@ -419,6 +375,61 @@
             this.label4.TabIndex = 4;
             this.label4.Text = "Xceligent Image";
             // 
+            // refreshToolStripMenuItem
+            // 
+            this.refreshToolStripMenuItem.Image = global::ImageSimilarFinder.Properties.Resources.if_view_refresh_15329;
+            this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
+            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
+            this.refreshToolStripMenuItem.Text = "Refresh";
+            this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox1.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pictureBox1.Location = new System.Drawing.Point(2, 3);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(294, 261);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 1;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            // 
+            // btn_back
+            // 
+            this.btn_back.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_back.Enabled = false;
+            this.btn_back.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
+            this.btn_back.ForeColor = System.Drawing.Color.Blue;
+            this.btn_back.Image = global::ImageSimilarFinder.Properties.Resources.if_56_62713;
+            this.btn_back.Location = new System.Drawing.Point(10, 436);
+            this.btn_back.Name = "btn_back";
+            this.btn_back.Size = new System.Drawing.Size(80, 28);
+            this.btn_back.TabIndex = 17;
+            this.btn_back.Text = "Back";
+            this.btn_back.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btn_back.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.btn_back.UseVisualStyleBackColor = true;
+            this.btn_back.Visible = false;
+            this.btn_back.Click += new System.EventHandler(this.btn_back_Click);
+            // 
+            // btn_save
+            // 
+            this.btn_save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_save.Font = new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold);
+            this.btn_save.ForeColor = System.Drawing.Color.DarkGreen;
+            this.btn_save.Image = global::ImageSimilarFinder.Properties.Resources.UpgradeReport_Success;
+            this.btn_save.Location = new System.Drawing.Point(96, 436);
+            this.btn_save.Name = "btn_save";
+            this.btn_save.Size = new System.Drawing.Size(80, 28);
+            this.btn_save.TabIndex = 16;
+            this.btn_save.Text = "Save";
+            this.btn_save.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.btn_save.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.btn_save.UseVisualStyleBackColor = true;
+            this.btn_save.Click += new System.EventHandler(this.btn_save_Click);
+            // 
             // ReviewImageSimilarity
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -441,8 +452,8 @@
             this.splitContainer2.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }

@@ -66,6 +66,7 @@ namespace ImageSimilarFinder
            sql = sql.Replace("%where%", "");
             var results= ExecuteQuery_list(sql);
             listView1.Items.Clear();
+            listView1.SuspendLayout();
             foreach (var item in results)
             {
                 if(_hideProcessedItems && item.total == item.processed)
@@ -84,7 +85,9 @@ namespace ImageSimilarFinder
                 else
                     lvi.ImageIndex = 2;
                 listView1.Items.Add(lvi);
+              
             }
+            listView1.ResumeLayout();
             if (listView1.Items != null && listView1.Items.Count > 0)
                 listView1.Items[0].Selected = true;
 
@@ -246,7 +249,7 @@ namespace ImageSimilarFinder
                 chk_qc.UseVisualStyleBackColor = true;
                 p3.Y = p3.Y + _p_y;
                 chk_qc.Checked = item.Manual_QC_Similar.HasValue  ? item.Manual_QC_Similar.Value  : false;
-                chk_qc.CheckedChanged += Chk_qc_CheckedChanged;
+             //   chk_qc.CheckedChanged += Chk_qc_CheckedChanged;
 
                 // 
                 // chk_qc [Cropped]
@@ -262,7 +265,7 @@ namespace ImageSimilarFinder
                 chk_Cropped.UseVisualStyleBackColor = true;
                // p3.Y = p3.Y + _p_y;
                 chk_Cropped.Checked = item.Cropped.HasValue  ? item.Cropped.Value  : false;
-                chk_Cropped.CheckedChanged += Chk_Cropped_CheckedChanged;
+              //  chk_Cropped.CheckedChanged += Chk_Cropped_CheckedChanged;
 
                 // 
                 // chk_qc [Logo]
@@ -277,14 +280,14 @@ namespace ImageSimilarFinder
                 chk_Logo.UseVisualStyleBackColor = true;
                // p3.Y = p3.Y + _p_y;
                 chk_Logo.Checked = item.Logo.HasValue ? item.Logo.Value : false;
-                chk_Logo.CheckedChanged += Chk_Logo_CheckedChanged;
+             //   chk_Logo.CheckedChanged += Chk_Logo_CheckedChanged;
 
 
                 // 
                 // txtComment1
                 // 
                 var txtComment = new TextBox();
-                txtComment.Leave += TxtComment_Leave;
+              //  txtComment.Leave += TxtComment_Leave;
                 txtComment.Tag = item;
                 txtComment.Location = p4;// new System.Drawing.Point(364, 74);
                 txtComment.Multiline = true;

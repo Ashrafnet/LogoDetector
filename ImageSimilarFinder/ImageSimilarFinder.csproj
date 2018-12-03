@@ -150,6 +150,14 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="1498846908_thefreeforty_picture.ico" />
+    <None Include="Resources\if_57_62714.png" />
+    <None Include="Resources\if_56_62713.png" />
+    <None Include="Resources\warning.png" />
+    <None Include="Resources\UpgradeReport_Success.png" />
+    <None Include="Resources\UpgradeReport_Error.png" />
+    <None Include="Resources\Properties.png" />
+    <None Include="Resources\info.png" />
+    <None Include="Resources\error.png" />
     <None Include="Resources\if_Error_381599.png" />
     <None Include="Resources\if_pdf_272699.png" />
     <None Include="Resources\if_file-pdf_285666.png" />
